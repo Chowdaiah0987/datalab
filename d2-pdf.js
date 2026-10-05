@@ -1,152 +1,439 @@
-/* Attractive A4 PDF export for D2 content. Requires jsPDF and parseD2(). */
-const PDF_MARGIN = 20;
-const PDF_TEAL = [13, 124, 134];
-const PDF_INK = [18, 32, 47];
-const PDF_GREY = [91, 107, 123];
-
-function pdfSafe(text) {
-  return String(text ?? "")
-    .replace(/[‘’‚]/g, "'").replace(/[“”„]/g, '"')
-    .replace(/[–—−]/g, "-").replace(/…/g, "...")
-    .replace(/→/g, "->").replace(/←/g, "<-")
-    .replace(/[•●▪]/g, "*").replace(/[✓✔]/g, "v")
-    .replace(/\u00a0/g, " ").replace(/\t/g, "    ")
-    .replace(/[^\x00-\xff]/g, "?");
+/* Parses D2 Markdown-like content and safely renders attractive HTML. */
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
-function stripInline(text) {
-  return String(text ?? "")
-    .replace(/\*\*(.+?)\*\*/g, "$1").replace(/__(.+?)__/g, "$1")
-    .replace(/(?<!\*)\*([^*\n]+)\*(?!\*)/g, "$1")
-    .replace(/(?<!_)_([^_\n]+)_(?!_)/g, "$1")
-    .replace(/`([^`\n]+)`/g, "$1");
+function formatInlineHtml(value) {
+  // Escape first so user content cannot inject HTML. Inline patterns add only fixed tags.
+  let html = escapeHtml(String(value ?? ""));
+  html = html.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
+  html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+  html = html.replace(/__(.+?)__/g, "<strong>$1</strong>");
+  html = html.replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, "$1<em>$2</em>");
+  html = html.replace(/(^|[^_])_([^_\n]+)_(?!_)/g, "$1<em>$2</em>");
+  return html;
 }
 
-function pdfFileName({ label, title }) {
-  const name = `${label || "Experiment"} ${title || "Description"} D2`
-    .replace(/[^A-Za-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
-  return `${name || "Experiment_D2"}.pdf`;
+function highlightCode(code) {
+  // Tokenize raw source first, then escape each token independently. Never run
+  // syntax-highlighting regexes over generated HTML (that corrupts span tags).
+  const source = String(code ?? "");
+  const tokenPattern = /(#.*$|\/\/.*$)|("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)|(\b(?:import|from|return|def|class|if|elif|else|for|while|in|and|or|not|try|except|with|as|lambda|True|False|None|pass|break|continue|raise|yield|await|async|const|let|var|function|new|throw|catch|finally|public|static|void|int|float|String|boolean)\b)|(\b\d+(?:\.\d+)?\b)|\b([A-Za-z_$][A-Za-z0-9_$]*)\b(?=\s*\()/gm;
+  let result = "";
+  let lastIndex = 0;
+  for (const match of source.matchAll(tokenPattern)) {
+    const index = match.index;
+    result += escapeHtml(source.slice(lastIndex, index));
+    const token = match[0];
+    let className = "";
+    if (match[1]) className = "tok-comment";
+    else if (match[2]) className = "tok-string";
+    else if (match[3]) className = "tok-keyword";
+    else if (match[4]) className = "tok-number";
+    else if (match[5]) className = "tok-function";
+    result += className ? `<span class="${className}">${escapeHtml(token)}</span>` : escapeHtml(token);
+    lastIndex = index + token.length;
+  }
+  result += escapeHtml(source.slice(lastIndex));
+  return result;
 }
 
-function buildD2Pdf({ label, title, heading, content }) {
-  if (!window.jspdf?.jsPDF) throw new Error("jsPDF is not loaded.");
-  if (typeof parseD2 !== "function") throw new Error("parseD2() is unavailable.");
+function parseD2(rawText = "") {
+  const lines = String(rawText ?? "").replace(/\r\n?/g, "\n").split("\n");
+  const blocks = [];
+  let index = 0;
 
-  const doc = new window.jspdf.jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const pageHeight = doc.internal.pageSize.getHeight();
-  const width = pageWidth - PDF_MARGIN * 2;
-  const bottomLimit = pageHeight - PDF_MARGIN - 7;
-  let y = PDF_MARGIN;
+  // Common lab-report labels are promoted to real section headings even
+  // when the source description does not use Markdown # syntax.
+  const sectionNames = /^(?:aim|objective|objectives|purpose|syntax|general syntax|topics?|key points?|notes?|theory|introduction|description|requirements|procedure|algorithm|explanation|program|program solution|solution|sample program|example|examples|output|sample output|expected output|result|conclusion|installation|steps involved|working principle|advantages|applications|observation|observations|summary)\s*:?[ \t]*$/i;
+  const isSectionHeading = (line) => sectionNames.test(line.trim());
+  const isListLine = (line) => /^(?:[-*+]\s+|\d+\s*[.)]\s*|[A-Za-z]\s*[.)]\s*)\S/i.test(line.trim());
+  const isCodeLikeLine = (line) => {
+    const t = line.trim();
+    return /^(?:import\s+|from\s+|print\s*\(|return\s+|def\s+|class\s+|for\s+.+\s+in\s+|if\s+.+:)/.test(t) ||
+      /^[A-Za-z_$][A-Za-z0-9_$.]*\s*=\s*\S/.test(t) ||
+      /^[A-Za-z_$][A-Za-z0-9_$.]*\([^)]*\)\s*;?$/.test(t) ||
+      /^(?:pd|np|df|series|dates|data|datetime|date_range)\.[A-Za-z_$][A-Za-z0-9_$]*\(/.test(t);
+  };
+  const isSpecialLine = (line) => {
+    const t = line.trim();
+    return /^```/.test(t) || /^#{1,6}\s+/.test(t) ||
+      isSectionHeading(t) || isListLine(t) || /^\s*[-*_]{3,}\s*$/.test(t);
+  };
 
-  doc.setProperties({ title: pdfSafe(`${label || "Experiment"}: ${title || "Description"} - ${heading || "D2"}`) });
+  while (index < lines.length) {
+    const current = lines[index];
+    const trimmed = current.trim();
 
-  function ensureSpace(height) {
-    if (y + height > bottomLimit) { doc.addPage(); y = PDF_MARGIN; }
-  }
-  function setFont(family, style, size, color) {
-    doc.setFont(family, style); doc.setFontSize(size); doc.setTextColor(...color);
-  }
-  function writeLines(lines, x, leading) {
-    lines.forEach((line) => { ensureSpace(leading); y += leading; doc.text(line || " ", x, y - leading * 0.25); });
-  }
-  function wrap(text, maxWidth) { return doc.splitTextToSize(String(text || " "), maxWidth); }
+    if (!trimmed) { index += 1; continue; }
 
-  // Header
-  setFont("helvetica", "bold", 10, PDF_TEAL);
-  writeLines([pdfSafe(label || "EXPERIMENT")], PDF_MARGIN, 5);
-  setFont("helvetica", "bold", 20, PDF_INK);
-  writeLines(wrap(pdfSafe(title || "Untitled Experiment"), width), PDF_MARGIN, 8.5);
-  y += 3;
-  setFont("helvetica", "bold", 13, PDF_TEAL);
-  writeLines(wrap(pdfSafe(heading || "Detailed Description"), width), PDF_MARGIN, 6.5);
-  y += 2;
-  ensureSpace(8);
-  doc.setDrawColor(...PDF_TEAL); doc.setLineWidth(0.7);
-  doc.line(PDF_MARGIN, y, pageWidth - PDF_MARGIN, y);
-  y += 6;
-
-  parseD2(content).forEach((block) => {
-    if (block.type === "heading") {
-      y += 2; ensureSpace(14);
-      setFont("helvetica", "bold", 12, PDF_TEAL);
-      writeLines(wrap(pdfSafe(block.text), width), PDF_MARGIN, 6.2);
-      y += 1.5;
-    } else if (block.type === "text") {
-      setFont("helvetica", "normal", 10.5, PDF_INK);
-      block.text.split("\n").forEach((line) => {
-        if (!line.trim()) { y += 2; return; }
-        writeLines(wrap(pdfSafe(stripInline(line)), width), PDF_MARGIN, 5.4);
-      });
-      y += 2.5;
-    } else if (block.type === "list") {
-      block.items.forEach((item) => {
-        const lines = wrap(pdfSafe(stripInline(item.text)), width - 10);
-        setFont("helvetica", "bold", 10.5, PDF_TEAL);
-        ensureSpace(5.4);
-        doc.text(pdfSafe(item.marker || "*"), PDF_MARGIN, y + 3.9);
-        setFont("helvetica", "normal", 10.5, PDF_INK);
-        writeLines(lines, PDF_MARGIN + 9, 5.4);
-        y += 1;
-      });
-      y += 2;
-    } else if (block.type === "code") {
-      y += 2;
-      if (block.label) {
-        ensureSpace(5);
-        setFont("helvetica", "bold", 8, PDF_GREY);
-        writeLines([pdfSafe(block.label).toUpperCase()], PDF_MARGIN, 4);
-      }
-      setFont("courier", "normal", 8.5, [30, 41, 59]);
-      const charWidth = doc.getTextWidth("0");
-      const maxChars = Math.max(20, Math.floor((width - 6) / charWidth));
+    if (/^```/.test(trimmed)) {
+      const language = trimmed.replace(/^```\s*([A-Za-z0-9_+#.-]+)?.*$/, "$1") || "code";
       const codeLines = [];
-      String(block.text ?? "").split("\n").forEach((raw) => {
-        const safe = pdfSafe(raw);
-        const match = safe.match(/^ */);
-        const indent = " ".repeat(Math.min(match ? match[0].length : 0, 16));
-        if (!safe.length) { codeLines.push(""); return; }
-        let remaining = safe;
-        codeLines.push(remaining.slice(0, maxChars));
-        remaining = remaining.slice(maxChars);
-        while (remaining.length) {
-          const chunkSize = Math.max(1, maxChars - indent.length);
-          codeLines.push(indent + remaining.slice(0, chunkSize));
-          remaining = remaining.slice(chunkSize);
+      index += 1;
+      while (index < lines.length && !/^```\s*$/.test(lines[index].trim())) {
+        codeLines.push(lines[index]);
+        index += 1;
+      }
+      if (index < lines.length) index += 1;
+      blocks.push({ type: "code", label: language, text: codeLines.join("\n") });
+      continue;
+    }
+
+    if (/^\s*[-*_]{3,}\s*$/.test(trimmed)) {
+      blocks.push({ type: "divider" });
+      index += 1;
+      continue;
+    }
+
+    if (/^#{1,6}\s+/.test(trimmed)) {
+      blocks.push({ type: "heading", text: trimmed.replace(/^#{1,6}\s+/, "").trim() });
+      index += 1;
+      continue;
+    }
+
+    if (isSectionHeading(trimmed)) {
+      blocks.push({ type: "heading", text: trimmed.replace(/:\s*$/, "") });
+      index += 1;
+      continue;
+    }
+
+    if (isCodeLikeLine(trimmed)) {
+      const codeLines = [];
+      while (index < lines.length && lines[index].trim() && isCodeLikeLine(lines[index])) {
+        codeLines.push(lines[index]);
+        index += 1;
+      }
+      blocks.push({ type: "code", label: "python", text: codeLines.join("\n") });
+      continue;
+    }
+
+    if (isListLine(trimmed)) {
+      const items = [];
+      while (index < lines.length) {
+        const itemLine = lines[index].trim();
+        const match = itemLine.match(/^([-*+]\s+|\d+\s*[.)]\s*|[A-Za-z]\s*[.)]\s*)(.+)$/);
+        if (!match) break;
+        let marker = match[1].trim().replace(/[.)]\s*$/, "").trim();
+        if (/^[A-Za-z]$/.test(marker)) marker = marker.toLowerCase();
+        items.push({ marker: marker || "•", text: match[2].trim() });
+        index += 1;
+      }
+      if (items.length) { blocks.push({ type: "list", items }); continue; }
+    }
+
+    const paragraphLines = [];
+    while (index < lines.length) {
+      const next = lines[index].trim();
+      if (!next || isSpecialLine(next)) break;
+      paragraphLines.push(lines[index]);
+      index += 1;
+    }
+    const paragraph = paragraphLines.join("\n").trim();
+    if (paragraph) blocks.push({ type: "text", text: paragraph });
+    else index += 1;
+  }
+
+  return groupProgramAndOutput(blocks);
+}
+
+/*
+ * Keep a complete solution together even when the source description has
+ * several mini-headings and fenced snippets. The headings become comments
+ * inside one code panel; Output remains its own separate dark panel.
+ */
+function groupProgramAndOutput(blocks) {
+  const result = [];
+  const isHeading = (block, names) => block?.type === "heading" && names.test(block.text.trim());
+  const outputHeading = /^(?:sample\s+)?(?:expected\s+)?output\s*:?$/i;
+  const endOfProgram = /^(?:sample\s+)?(?:expected\s+)?output\s*:?$|^(?:result|conclusion)\s*:?$/i;
+  const majorHeading = /^(?:aim|objective|objectives|purpose|syntax|general syntax|topics?|key points?|notes?|theory|introduction|description|requirements|procedure|algorithm|explanation|program|program solution|solution|sample program|example|examples|output|sample output|expected output|result|conclusion|installation|steps involved|working principle|advantages|applications|observation|observations|summary)\s*:?$/i;
+
+  for (let i = 0; i < blocks.length; i++) {
+    const block = blocks[i];
+
+    if (isHeading(block, /^(?:program solution|solution|sample program)\s*:?$/i)) {
+      result.push(block);
+      const codeParts = [];
+      let j = i + 1;
+
+      while (j < blocks.length && !isHeading(blocks[j], endOfProgram)) {
+        const current = blocks[j];
+        if (current.type === "heading") {
+          // Subsection labels are retained as comments without splitting the code panel.
+          codeParts.push(`# ${current.text.trim()}`);
+        } else if (current.type === "code") {
+          if (codeParts.length && codeParts[codeParts.length - 1] !== "") codeParts.push("");
+          codeParts.push(String(current.text ?? "").replace(/\s+$/, ""));
+        } else if (current.type === "text") {
+          const text = String(current.text ?? "").trim();
+          if (text) {
+            const lines = text.split("\n");
+            // Keep code-like lines as code; turn explanatory lines into comments.
+            codeParts.push(...lines.map((line) => /^[\s]*(?:import\s|from\s|print\s*\(|[A-Za-z_][\w.]*\s*=|[)\]}]|[\w.]+\s*\()/.test(line) ? line : `# ${line}`));
+          }
+        } else if (current.type === "list") {
+          current.items.forEach((item) => codeParts.push(`# ${item.marker} ${item.text}`));
         }
+        j++;
+      }
+
+      const combined = codeParts.join("\n").replace(/^\n+|\n+$/g, "");
+      if (combined) result.push({ type: "code", label: "python", text: combined });
+      i = j - 1;
+      continue;
+    }
+
+    if (isHeading(block, outputHeading)) {
+      result.push(block);
+      const outputParts = [];
+      let j = i + 1;
+      while (j < blocks.length && !(blocks[j].type === "heading" && majorHeading.test(blocks[j].text.trim()))) {
+        const current = blocks[j];
+        if (current.type === "code" || current.type === "text") {
+          if (current.text) outputParts.push(String(current.text).trim());
+        } else if (current.type === "list") {
+          current.items.forEach((item) => outputParts.push(`${item.marker} ${item.text}`));
+        }
+        j++;
+      }
+      const outputText = outputParts.filter(Boolean).join("\n");
+      if (outputText) result.push({ type: "code", label: "OUTPUT", text: outputText });
+      i = j - 1;
+      continue;
+    }
+
+    result.push(block);
+  }
+
+  return result;
+}
+
+function renderD2Content(rawText = "") {
+  const root = document.createElement("div");
+  root.className = "detail__d2 d2-rich";
+  const blocks = parseD2(rawText);
+  let firstTextBlock = true;
+
+  blocks.forEach((block) => {
+    if (block.type === "heading") {
+      const heading = document.createElement("h3");
+      heading.className = "d2-heading";
+      heading.textContent = block.text;
+      root.appendChild(heading);
+      firstTextBlock = false;
+      return;
+    }
+
+    if (block.type === "text") {
+      const paragraph = document.createElement("p");
+      paragraph.className = firstTextBlock ? "d2-lead" : "d2-paragraph";
+      paragraph.innerHTML = formatInlineHtml(block.text);
+      root.appendChild(paragraph);
+      firstTextBlock = false;
+      return;
+    }
+
+    if (block.type === "list") {
+      const list = document.createElement("ul");
+      list.className = "d2-list";
+      block.items.forEach((item) => {
+        const li = document.createElement("li");
+        const marker = document.createElement("span");
+        marker.className = "d2-marker";
+        marker.textContent = item.marker;
+        marker.setAttribute("aria-hidden", "true");
+        const content = document.createElement("span");
+        content.innerHTML = formatInlineHtml(item.text);
+        li.append(marker, content);
+        list.appendChild(li);
       });
-      codeLines.forEach((line) => {
-        ensureSpace(4.5);
-        doc.setFillColor(241, 245, 249);
-        doc.rect(PDF_MARGIN, y, width, 4.5, "F");
-        setFont("courier", "normal", 8.5, [30, 41, 59]);
-        doc.text(line || " ", PDF_MARGIN + 3, y + 3.2);
-        y += 4.5;
+      root.appendChild(list);
+      firstTextBlock = false;
+      return;
+    }
+
+    if (block.type === "divider") {
+      const divider = document.createElement("hr");
+      divider.className = "d2-divider";
+      root.appendChild(divider);
+      firstTextBlock = false;
+      return;
+    }
+
+    if (block.type === "code") {
+      const wrapper = document.createElement("div");
+      wrapper.className = "code-block";
+      const bar = document.createElement("div");
+      bar.className = "code-block__bar";
+      const label = document.createElement("span");
+      label.className = "code-block__label";
+      label.textContent = block.label || "code";
+
+      const copy = document.createElement("button");
+      copy.className = "code-block__copy";
+      copy.type = "button";
+      copy.textContent = "Copy code";
+      copy.setAttribute("aria-label", "Copy code block");
+
+      bar.append(label, copy);
+
+      copy.addEventListener("click", async () => {
+        try {
+          if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(block.text);
+          } else {
+            const area = document.createElement("textarea");
+            area.value = block.text;
+            area.style.position = "fixed";
+            area.style.opacity = "0";
+            document.body.appendChild(area);
+            area.select();
+            const copied = document.execCommand("copy");
+            area.remove();
+            if (!copied) throw new Error("Copy command failed");
+          }
+          copy.textContent = "Copied!";
+        } catch (error) {
+          copy.textContent = "Copy failed";
+        }
+        window.setTimeout(() => { copy.textContent = "Copy code"; }, 1400);
       });
-      y += 3;
+
+      const pre = document.createElement("pre");
+      const code = document.createElement("code");
+      code.innerHTML = highlightCode(block.text);
+      pre.appendChild(code);
+      wrapper.append(bar, pre);
+      root.appendChild(wrapper);
+      firstTextBlock = false;
     }
   });
 
-  // Footer with page count
-  const totalPages = doc.getNumberOfPages();
-  for (let page = 1; page <= totalPages; page++) {
-    doc.setPage(page);
-    setFont("helvetica", "normal", 8, PDF_GREY);
-    doc.setDrawColor(220, 228, 235);
-    doc.setLineWidth(0.25);
-    doc.line(PDF_MARGIN, pageHeight - 15, pageWidth - PDF_MARGIN, pageHeight - 15);
-    doc.text(`${title || "Experiment"}`, PDF_MARGIN, pageHeight - 10);
-    doc.text(`Page ${page} of ${totalPages}`, pageWidth - PDF_MARGIN, pageHeight - 10, { align: "right" });
+  if (!root.childElementCount) {
+    const empty = document.createElement("div");
+    empty.className = "detail__d2--empty";
+    empty.textContent = "No detailed description has been added yet.";
+    root.appendChild(empty);
   }
-  return doc;
+  return root;
 }
 
-function downloadD2Pdf(options) {
-  const userError = (message) => Object.assign(new Error(message), { isPdfMessage: true });
-  if (!options?.content || !String(options.content).trim()) {
-    throw userError("There is no long description to download for this experiment.");
+function slugify(value) {
+  return String(value || "experiment")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60) || "experiment";
+}
+
+function downloadD2Pdf({ label = "", title = "", heading = "", content = "" } = {}) {
+  if (!window.jspdf || !window.jspdf.jsPDF) {
+    const error = new Error("PDF library is unavailable. Please refresh the page and try again.");
+    error.isPdfMessage = true;
+    throw error;
   }
-  if (!window.jspdf?.jsPDF) throw userError("jsPDF could not be loaded. Check the script tag and refresh.");
-  if (typeof parseD2 !== "function") throw userError("d2-format.js is missing or did not load correctly.");
-  buildD2Pdf(options).save(pdfFileName(options));
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: "pt", format: "a4" });
+  const margin = 48;
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const innerWidth = pageWidth - margin * 2;
+  const blocks = parseD2(content || "");
+
+  let y = 52;
+  const advance = (amount) => {
+    y += amount;
+    if (y > pageHeight - 60) {
+      doc.addPage();
+      y = 52;
+    }
+  };
+
+  doc.setFillColor(248, 250, 252);
+  doc.rect(0, 0, pageWidth, pageHeight, "F");
+  doc.setTextColor(17, 24, 39);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(20);
+  doc.text(String(title || heading || "DS Lab Report"), margin, y);
+  advance(26);
+
+  if (label) {
+    doc.setTextColor(100, 116, 139);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text(String(label).toUpperCase(), margin, y);
+    advance(16);
+  }
+
+  if (heading) {
+    doc.setTextColor(15, 23, 42);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.text(String(heading), margin, y);
+    advance(20);
+  }
+
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(15, 23, 42);
+  doc.setFontSize(11);
+
+  blocks.forEach((block) => {
+    if (block.type === "heading") {
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+      const lines = doc.splitTextToSize(String(block.text || ""), innerWidth);
+      doc.text(lines, margin, y);
+      advance(lines.length * 14 + 12);
+      return;
+    }
+
+    if (block.type === "text") {
+      const text = String(block.text || "").trim();
+      if (!text) return;
+      const lines = doc.splitTextToSize(text, innerWidth);
+      doc.text(lines, margin, y);
+      advance(lines.length * 13 + 8);
+      return;
+    }
+
+    if (block.type === "list") {
+      doc.setFont("helvetica", "normal");
+      block.items.forEach((item) => {
+        const bullet = `${item.marker || "•"}. ${item.text || ""}`.trim();
+        const lines = doc.splitTextToSize(bullet, innerWidth - 12);
+        doc.text(lines, margin + 12, y);
+        advance(lines.length * 13 + 4);
+      });
+      return;
+    }
+
+    if (block.type === "code") {
+      const text = String(block.text || "").trim();
+      if (!text) return;
+      const codeLines = doc.splitTextToSize(text, innerWidth - 12);
+      const label = String(block.label || "code").toUpperCase();
+      const boxHeight = codeLines.length * 12 + 22;
+      doc.setFillColor(15, 23, 42);
+      doc.roundedRect(margin, y - 8, innerWidth, boxHeight, 4, 4, "F");
+      doc.setTextColor(255, 255, 255);
+      doc.setFont("courier", "bold");
+      doc.setFontSize(9);
+      doc.text(label, margin + 10, y + 6);
+      doc.setTextColor(245, 247, 249);
+      doc.setFont("courier", "normal");
+      doc.setFontSize(9);
+      doc.text(codeLines, margin + 10, y + 20);
+      advance(boxHeight + 12);
+    }
+  });
+
+  const fileName = `${slugify(title || heading || label || "experiment")}.pdf`;
+  doc.save(fileName);
 }

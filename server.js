@@ -22,6 +22,17 @@ class HttpError extends Error {
 const { Schema } = mongoose;
 
 // Sub-experiments keep the id the website creates (for example "6A")
+const d2TopicSchema = new Schema({
+  id: { type: String, default: "" },
+  heading: { type: String, default: "" },
+  type: { type: String, default: "text", enum: ["text", "code"] },
+  content: { type: String, default: "" },
+  language: { type: String, default: "python" },
+  code: { type: String, default: "" },
+  sampleOutput: { type: String, default: "" },
+  order: { type: Number, default: 1 },
+}, { _id: false });
+
 const subExperimentSchema = new Schema({
   id: { type: String, required: true },
   letter: { type: String, required: true },
@@ -29,6 +40,7 @@ const subExperimentSchema = new Schema({
   shortDescription: { type: String, required: true },
   d2Heading: { type: String, default: "" },
   d2Content: { type: String, default: "" },
+  d2Topics: { type: [d2TopicSchema], default: [] },
   cover: { type: String, default: "" },
   video: { type: String, default: "" },
   githubUrl: { type: String, default: "" },
@@ -41,6 +53,7 @@ const experimentSchema = new Schema({
   shortDescription: { type: String, required: true },
   d2Heading: { type: String, default: "" },
   d2Content: { type: String, default: "" },
+  d2Topics: { type: [d2TopicSchema], default: [] },
   cover: { type: String, required: true },
   video: { type: String, default: "" },
   githubUrl: { type: String, default: "" },
@@ -112,19 +125,87 @@ function optionalImage(value) {
   return image;
 }
 
+function normalizeD2Topic(topic, index = 0) {
+  const safe = topic && typeof topic === "object" ? topic : {};
+  const type = safe.type === "code" ? "code" : "text";
+  return {
+    id: String(safe.id || `topic-${index + 1}`),
+    heading: String(safe.heading || ""),
+    type,
+    content: type === "text" ? String(safe.content ?? safe.text ?? "") : "",
+    language: String(safe.language || "python"),
+    code: String(safe.code ?? ""),
+    sampleOutput: String(safe.sampleOutput ?? ""),
+    order: Number.isFinite(Number(safe.order)) ? Number(safe.order) : index + 1,
+  };
+}
+
+function normalizeD2Topics(rawTopics, legacyText = "") {
+  const list = Array.isArray(rawTopics) ? rawTopics : [];
+  if (list.length) {
+    return list
+      .map((topic, index) => normalizeD2Topic(topic, index))
+      .sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
+  }
+
+  const plainText = text(legacyText);
+  if (!plainText) return [];
+  return [{
+    id: "legacy-topic-1",
+    heading: "Details",
+    type: "text",
+    content: plainText,
+    language: "python",
+    code: "",
+    sampleOutput: "",
+    order: 1,
+  }];
+}
+
+function serializeD2Topics(topics) {
+  const list = Array.isArray(topics) ? topics : [];
+  if (!list.length) return "";
+  return list
+    .slice()
+    .sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0))
+    .map((topic) => {
+      const heading = topic.heading ? `## ${topic.heading}\n` : "";
+      if (topic.type === "code") {
+        const code = topic.code ? `\n${topic.code}` : "";
+        const sample = topic.sampleOutput ? `\n\nSample Output:\n${topic.sampleOutput}` : "";
+        return `${heading}${code}${sample}`;
+      }
+      return `${heading}${topic.content || ""}`;
+    })
+    .join("\n\n")
+    .trim();
+}
+
+function formatD2Data(d2Heading, rawTopics, legacyText) {
+  const topics = normalizeD2Topics(rawTopics, legacyText);
+  return {
+    d2Heading: text(d2Heading),
+    d2Content: serializeD2Topics(topics),
+    d2Topics: topics,
+  };
+}
+
 function parseSubExperiment(sub, number, usedLetters) {
   const letter = text(sub && sub.letter).toUpperCase();
   if (!/^[A-Z0-9]{1,3}$/.test(letter)) throw new HttpError(400, "Sub-experiment letters must be 1-3 letters or digits.");
   if (usedLetters.has(letter)) throw new HttpError(400, `Sub-experiment ${letter} is used twice.`);
   usedLetters.add(letter);
 
+  const d2 = formatD2Data(sub.d2Heading, sub.d2Topics, sub.d2Content);
+
   return {
     id: `${number}${letter}`,
     letter,
     title: requireText(sub.title, `Sub-experiment ${letter} needs a name.`),
     shortDescription: requireText(sub.shortDescription ?? sub.description, `Sub-experiment ${letter} needs a short description.`),
-    d2Heading: text(sub.d2Heading),
-    d2Content: typeof sub.d2Content === "string" ? sub.d2Content : "", // kept exactly as typed
+    d2Heading: d2.d2Heading,
+    d2Content: d2.d2Content,
+    d2Topics: d2.d2Topics,
     cover: optionalImage(sub.cover),
     video: text(sub.video),
     githubUrl: optionalGithub(sub.githubUrl),
@@ -136,12 +217,14 @@ function parseExperiment(body = {}) {
   const number = requireText(body.number, "Experiment number is required.");
   const subs = Array.isArray(body.subExperiments) ? body.subExperiments : [];
   const usedLetters = new Set();
+  const d2 = formatD2Data(body.d2Heading, body.d2Topics, body.d2Content);
   return {
     number,
     title: requireText(body.title, "Experiment name is required."),
     shortDescription: requireText(body.shortDescription ?? body.description, "A short description (D1) is required."),
-    d2Heading: text(body.d2Heading),
-    d2Content: typeof body.d2Content === "string" ? body.d2Content : "",
+    d2Heading: d2.d2Heading,
+    d2Content: d2.d2Content,
+    d2Topics: d2.d2Topics,
     cover: requireText(optionalImage(body.cover), "A cover image is required."),
     video: text(body.video),
     githubUrl: optionalGithub(body.githubUrl),
@@ -175,9 +258,19 @@ async function deleteVideoFile(id) {
 const app = express();
 const wrap = (handler) => (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
 
-if (process.env.CORS_ORIGIN) {
-  app.use(cors({ origin: process.env.CORS_ORIGIN.split(",").map((origin) => origin.trim()) }));
-}
+const configuredCorsOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(",").map((origin) => origin.trim()).filter(Boolean)
+  : null;
+app.use(cors({
+  origin(origin, callback) {
+    const isLocalDevelopmentOrigin = /^http:\/\/(?:localhost|127\.0\.0\.1):\d+$/.test(origin || "");
+    const isAllowed = !origin ||
+      (configuredCorsOrigins
+        ? configuredCorsOrigins.includes("*") || configuredCorsOrigins.includes(origin)
+        : isLocalDevelopmentOrigin);
+    callback(null, isAllowed);
+  },
+}));
 app.use(express.json({ limit: "30mb" })); // covers are stored as compressed image data
 
 // ----- Experiments -----

@@ -1,9 +1,14 @@
 // Shared by index.html and experiment.html
 
-// Address of the backend. "/api" works when this site is opened through the Node server
-// (http://localhost:3000). Only change it if the HTML files are served from somewhere else,
-// e.g. "http://localhost:3000/api" for VS Code Live Server (and set CORS_ORIGIN in .env).
-const API_BASE = "/api";
+// Same-origin is preferred in production. A local static server (such as VS Code
+// Live Server) needs to call the Node backend on its default port instead.
+const configuredApiBase = window.DS_LAB_API_BASE ||
+  document.querySelector('meta[name="ds-lab-api-base"]')?.content.trim();
+const isLocalStaticServer = ["localhost", "127.0.0.1"].includes(window.location.hostname) &&
+  /^55\d{2}$/.test(window.location.port);
+const API_BASE = String(configuredApiBase || (isLocalStaticServer
+  ? "http://localhost:3000/api"
+  : "/api")).replace(/\/+$/, "");
 
 const EXPERIMENTS_KEY = "dsLabExperiments";
 const PROFILE_KEY = "dsLabProfile";
@@ -50,6 +55,7 @@ function normalizeSubExperiment(sub, parentNumber) {
     shortDescription: sub.shortDescription ?? sub.description ?? "",
     d2Heading: sub.d2Heading || "",
     d2Content: sub.d2Content || "",
+    d2Topics: normalizeD2Topics(sub.d2Topics, sub.d2Content || ""),
     cover: sub.cover || "",
     video: sub.video || "",
     githubUrl: sub.githubUrl || "",
@@ -57,8 +63,78 @@ function normalizeSubExperiment(sub, parentNumber) {
   };
 }
 
+function normalizeD2Topic(topic, index = 0) {
+  if (!topic || typeof topic !== "object") {
+    return {
+      id: `topic-${index + 1}`,
+      heading: "",
+      type: "text",
+      content: "",
+      language: "python",
+      code: "",
+      sampleOutput: "",
+      order: index + 1,
+    };
+  }
+
+  const type = topic.type === "code" ? "code" : "text";
+  return {
+    id: String(topic.id || `topic-${index + 1}`),
+    heading: String(topic.heading || topic.title || ""),
+    type,
+    content: type === "text" ? String(topic.content ?? topic.text ?? "") : "",
+    language: String(topic.language || "python"),
+    code: String(topic.code ?? ""),
+    sampleOutput: String(topic.sampleOutput ?? ""),
+    order: Number.isFinite(Number(topic.order)) ? Number(topic.order) : index + 1,
+  };
+}
+
+function normalizeD2Topics(rawTopics, legacyText = "") {
+  const list = Array.isArray(rawTopics) ? rawTopics : [];
+  if (list.length) {
+    return list
+      .map((topic, index) => normalizeD2Topic(topic, index))
+      .sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
+  }
+
+  const plainText = String(legacyText ?? "").trim();
+  if (!plainText) return [];
+  return [{
+    id: "legacy-topic-1",
+    heading: "Details",
+    type: "text",
+    content: plainText,
+    language: "python",
+    code: "",
+    sampleOutput: "",
+    order: 1,
+  }];
+}
+
+function serializeD2Topics(topics) {
+  const list = Array.isArray(topics) ? topics : [];
+  if (!list.length) return "";
+  return list
+    .slice()
+    .sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0))
+    .map((topic) => {
+      const heading = topic.heading ? `## ${topic.heading}\n` : "";
+      if (topic.type === "code") {
+        const code = topic.code ? `\n${topic.code}` : "";
+        const sample = topic.sampleOutput ? `\n\nSample Output:\n${topic.sampleOutput}` : "";
+        return `${heading}${code}${sample}`;
+      }
+      return `${heading}${topic.content || ""}`;
+    })
+    .join("\n\n")
+    .trim();
+}
+
 function normalizeExperiment(item) {
   const number = String(item.number ?? "");
+  const d2Topics = normalizeD2Topics(item.d2Topics, item.d2Content ?? item.longDescription ?? item.d2 ?? "");
+  const d2Content = serializeD2Topics(d2Topics);
   return {
     ...item,
     id: String(item.id || item._id || ""),
@@ -66,7 +142,8 @@ function normalizeExperiment(item) {
     title: item.title || "",
     shortDescription: item.shortDescription ?? item.description ?? "",
     d2Heading: item.d2Heading || "",
-    d2Content: item.d2Content ?? item.longDescription ?? item.d2 ?? "",
+    d2Content,
+    d2Topics,
     cover: item.cover ?? item.coverImage ?? "",
     video: item.video || "",
     githubUrl: item.githubUrl ?? item.githubLink ?? "",

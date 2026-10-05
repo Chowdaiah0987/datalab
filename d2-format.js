@@ -274,11 +274,14 @@ function renderD2Content(rawText = "") {
       const label = document.createElement("span");
       label.className = "code-block__label";
       label.textContent = block.label || "code";
+
       const copy = document.createElement("button");
       copy.className = "code-block__copy";
       copy.type = "button";
       copy.textContent = "Copy code";
       copy.setAttribute("aria-label", "Copy code block");
+      bar.append(label, copy);
+
       copy.addEventListener("click", async () => {
         try {
           if (navigator.clipboard && window.isSecureContext) {
@@ -300,7 +303,7 @@ function renderD2Content(rawText = "") {
         }
         window.setTimeout(() => { copy.textContent = "Copy code"; }, 1400);
       });
-      bar.append(label, copy);
+
       const pre = document.createElement("pre");
       const code = document.createElement("code");
       code.innerHTML = highlightCode(block.text);
