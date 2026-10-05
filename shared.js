@@ -78,9 +78,10 @@ function normalizeD2Topic(topic, index = 0) {
   }
 
   const type = topic.type === "code" ? "code" : "text";
+  const heading = String(topic.heading || topic.title || "");
   return {
     id: String(topic.id || `topic-${index + 1}`),
-    heading: String(topic.heading || topic.title || ""),
+    heading: topic.id === "legacy-topic-1" && heading.trim().toLowerCase() === "details" ? "" : heading,
     type,
     content: type === "text" ? String(topic.content ?? topic.text ?? "") : "",
     language: String(topic.language || "python"),
@@ -102,7 +103,7 @@ function normalizeD2Topics(rawTopics, legacyText = "") {
   if (!plainText) return [];
   return [{
     id: "legacy-topic-1",
-    heading: "Details",
+    heading: "",
     type: "text",
     content: plainText,
     language: "python",
@@ -119,13 +120,14 @@ function serializeD2Topics(topics) {
     .slice()
     .sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0))
     .map((topic) => {
-      const heading = topic.heading ? `## ${topic.heading}\n` : "";
+      const heading = topic.heading ? `## ${topic.heading}` : "";
       if (topic.type === "code") {
-        const code = topic.code ? `\n${topic.code}` : "";
-        const sample = topic.sampleOutput ? `\n\nSample Output:\n${topic.sampleOutput}` : "";
-        return `${heading}${code}${sample}`;
+        const language = String(topic.language || "python").replace(/[^A-Za-z0-9_+#.-]/g, "") || "python";
+        const code = topic.code ? `\`\`\`${language}\n${topic.code}\n\`\`\`` : "";
+        const sample = topic.sampleOutput ? `\`\`\`OUTPUT\n${topic.sampleOutput}\n\`\`\`` : "";
+        return [heading, code, sample].filter(Boolean).join("\n\n");
       }
-      return `${heading}${topic.content || ""}`;
+      return [heading, topic.content || ""].filter(Boolean).join("\n");
     })
     .join("\n\n")
     .trim();

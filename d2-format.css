@@ -200,6 +200,10 @@
 .d2-list li > span:last-child p { margin: 0; }
 .d2-rich > .code-block { margin: 2px 0 8px; }
 .d2-rich .inline-code { white-space: normal; }
+.d2-topic-section--headed > .d2-heading { margin-bottom: 0; }
+.d2-topic-section__content { gap: 0 !important; }
+.d2-topic-section__content > .d2-heading { margin-bottom: 0; }
+.d2-topic-section__content > .d2-list { margin-left: 45px; }
 @media (min-width: 900px) {
   .detail__d2.d2-rich { gap: 17px; }
   .d2-lead { padding: 20px 24px; }

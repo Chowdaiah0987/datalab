@@ -148,7 +148,7 @@ function showPdfMessage(panel, row, message) {
 }
 
 // One layout for both main experiments and sub-experiments
-function renderPage({ label, title, video, githubUrl, d2Heading, d2Content, nav }) {
+function renderPage({ label, title, video, githubUrl, d2Heading, d2Content, d2Topics, nav }) {
   const sidebar = el("aside", "detail__left");
   const header = el("div", "detail__head");
   header.append(el("p", "detail__label", label), el("h1", "", title));
@@ -165,10 +165,18 @@ function renderPage({ label, title, video, githubUrl, d2Heading, d2Content, nav 
 
   const panel = el("section", "detail__panel");
   const headingText = d2Heading || "Long Description";
-  panel.appendChild(createD2Header(headingText, { label, title, heading: headingText, content: d2Content }, panel));
+  panel.appendChild(createD2Header(headingText, {
+    label,
+    title,
+    heading: headingText,
+    content: d2Content,
+    topics: d2Topics
+  }, panel));
   // renderD2Content (d2-format.js) shows headings, lists and code blocks; all text is kept
-  panel.appendChild(d2Content
-    ? renderD2Content(d2Content)
+  panel.appendChild(Array.isArray(d2Topics) && d2Topics.length
+    ? renderD2Topics(d2Topics)
+    : d2Content
+      ? renderD2Content(d2Content)
     : el("div", "detail__d2 detail__d2--empty", "No detailed description has been added yet."));
 
   const layout = el("div", "detail__layout");
@@ -222,6 +230,7 @@ async function showDetails() {
     githubUrl: source.githubUrl,
     d2Heading: source.d2Heading,
     d2Content: source.d2Content,
+    d2Topics: source.d2Topics,
     nav: createSubNav(experiment, sub ? sub.letter : null),
   });
 }

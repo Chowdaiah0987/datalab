@@ -44,7 +44,20 @@ function highlightCode(code) {
 }
 
 function parseD2(rawText = "") {
-  const lines = String(rawText ?? "").replace(/\r\n?/g, "\n").split("\n");
+  const sourceLines = String(rawText ?? "").replace(/\r\n?/g, "\n").split("\n");
+  const lines = [];
+  let insideFence = false;
+  sourceLines.forEach((line) => {
+    if (/^\s*```/.test(line)) {
+      insideFence = !insideFence;
+      lines.push(line);
+      return;
+    }
+    const splitLine = insideFence
+      ? line
+      : line.replace(/\s+(?=(?:\d+[A-Za-z]?\.\d+(?:\.\d+)*|[A-Za-z]\d+(?:\.\d+)+)\s*[.)—–:-]?\s+)/g, "\n");
+    lines.push(...splitLine.split("\n"));
+  });
   const blocks = [];
   let index = 0;
 
@@ -52,7 +65,8 @@ function parseD2(rawText = "") {
   // when the source description does not use Markdown # syntax.
   const sectionNames = /^(?:aim|objective|objectives|purpose|syntax|general syntax|topics?|key points?|notes?|theory|introduction|description|requirements|procedure|algorithm|explanation|program|program solution|solution|sample program|example|examples|output|sample output|expected output|result|conclusion|installation|steps involved|working principle|advantages|applications|observation|observations|summary)\s*:?[ \t]*$/i;
   const isSectionHeading = (line) => sectionNames.test(line.trim());
-  const isListLine = (line) => /^(?:[-*+]\s+|\d+\s*[.)]\s*|[A-Za-z]\s*[.)]\s*)\S/i.test(line.trim());
+  const isNestedNumberedLine = (line) => /^(?:\d+[A-Za-z]?(?:\.\d+)+|[A-Za-z]\d+(?:\.\d+)+)\s*[.)—–:-]?\s+\S/i.test(line.trim());
+  const isListLine = (line) => /^(?:[-*+]\s+|\d+\s*[.)]\s*|[A-Za-z]\s*[.)]\s*)\S/i.test(line.trim()) || isNestedNumberedLine(line);
   const isCodeLikeLine = (line) => {
     const t = line.trim();
     return /^(?:import\s+|from\s+|print\s*\(|return\s+|def\s+|class\s+|for\s+.+\s+in\s+|if\s+.+:)/.test(t) ||
@@ -117,9 +131,10 @@ function parseD2(rawText = "") {
       const items = [];
       while (index < lines.length) {
         const itemLine = lines[index].trim();
-        const match = itemLine.match(/^([-*+]\s+|\d+\s*[.)]\s*|[A-Za-z]\s*[.)]\s*)(.+)$/);
+        const nestedMatch = itemLine.match(/^((?:\d+[A-Za-z]?(?:\.\d+)+|[A-Za-z]\d+(?:\.\d+)+))\s*[.)—–:-]?\s+(.+)$/i);
+        const match = nestedMatch || itemLine.match(/^([-*+]\s+|\d+\s*[.)]\s*|[A-Za-z]\s*[.)]\s*)(.+)$/);
         if (!match) break;
-        let marker = match[1].trim().replace(/[.)]\s*$/, "").trim();
+        let marker = nestedMatch ? match[1].trim() : match[1].trim().replace(/[.)]\s*$/, "").trim();
         if (/^[A-Za-z]$/.test(marker)) marker = marker.toLowerCase();
         items.push({ marker: marker || "•", text: match[2].trim() });
         index += 1;
@@ -312,6 +327,60 @@ function renderD2Content(rawText = "") {
       root.appendChild(wrapper);
       firstTextBlock = false;
     }
+  });
+
+  if (!root.childElementCount) {
+    const empty = document.createElement("div");
+    empty.className = "detail__d2--empty";
+    empty.textContent = "No detailed description has been added yet.";
+    root.appendChild(empty);
+  }
+  return root;
+}
+
+function renderD2Topics(rawTopics = []) {
+  const root = document.createElement("div");
+  root.className = "detail__d2 d2-rich";
+  const topics = Array.isArray(rawTopics)
+    ? rawTopics.slice().sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0))
+    : [];
+
+  topics.forEach((topic) => {
+    const heading = String(topic.heading || "").replace(/^#{1,6}\s*/, "").trim();
+    const content = topic.type === "code"
+      ? String(topic.code || "")
+      : String(topic.content || "");
+    const sampleOutput = topic.type === "code" ? String(topic.sampleOutput || "") : "";
+    if (!heading && !content.trim() && !sampleOutput.trim()) return;
+
+    const section = document.createElement("section");
+    section.className = heading ? "d2-topic-section d2-topic-section--headed" : "d2-topic-section";
+    if (heading) {
+      const title = document.createElement("h3");
+      title.className = "d2-heading";
+      title.textContent = heading;
+      section.appendChild(title);
+    }
+
+    if (topic.type === "code") {
+      const language = String(topic.language || "python").replace(/[^A-Za-z0-9_+#.-]/g, "") || "python";
+      if (content.trim()) {
+        const renderedCode = renderD2Content(`\`\`\`${language}\n${content}\n\`\`\``);
+        renderedCode.classList.add("d2-topic-section__content");
+        section.appendChild(renderedCode);
+      }
+      if (sampleOutput.trim()) {
+        const renderedOutput = renderD2Content(`\`\`\`OUTPUT\n${sampleOutput}\n\`\`\``);
+        renderedOutput.classList.add("d2-topic-section__content");
+        section.appendChild(renderedOutput);
+      }
+    } else if (content.trim()) {
+      const renderedContent = renderD2Content(content);
+      renderedContent.classList.add("d2-topic-section__content");
+      section.appendChild(renderedContent);
+    }
+
+    root.appendChild(section);
   });
 
   if (!root.childElementCount) {

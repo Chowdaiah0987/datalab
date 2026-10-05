@@ -503,7 +503,7 @@ function validateD2Builder() {
       error.textContent = "";
       return;
     }
-    if (!topic.heading.trim()) {
+    if (!topic.heading.trim() && topic.id !== "legacy-topic-1") {
       error.textContent = "Add a heading for this topic.";
       valid = false;
       return;
@@ -648,7 +648,7 @@ function openExperimentModal(id = null) {
     d2ContentInput.value = item.d2Content;
     const d2Topics = Array.isArray(item.d2Topics) && item.d2Topics.length
       ? item.d2Topics
-      : [{ heading: "Details", type: "text", content: item.d2Content || "", order: 1 }];
+      : [{ id: "legacy-topic-1", heading: "", type: "text", content: item.d2Content || "", order: 1 }];
     restoreD2Topics(d2Topics);
     githubInput.value = item.githubUrl;
     mainCover = item.cover;

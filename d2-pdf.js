@@ -44,7 +44,20 @@ function highlightCode(code) {
 }
 
 function parseD2(rawText = "") {
-  const lines = String(rawText ?? "").replace(/\r\n?/g, "\n").split("\n");
+  const sourceLines = String(rawText ?? "").replace(/\r\n?/g, "\n").split("\n");
+  const lines = [];
+  let insideFence = false;
+  sourceLines.forEach((line) => {
+    if (/^\s*```/.test(line)) {
+      insideFence = !insideFence;
+      lines.push(line);
+      return;
+    }
+    const splitLine = insideFence
+      ? line
+      : line.replace(/\s+(?=(?:\d+[A-Za-z]?\.\d+(?:\.\d+)*|[A-Za-z]\d+(?:\.\d+)+)\s*[.)—–:-]?\s+)/g, "\n");
+    lines.push(...splitLine.split("\n"));
+  });
   const blocks = [];
   let index = 0;
 
@@ -52,7 +65,8 @@ function parseD2(rawText = "") {
   // when the source description does not use Markdown # syntax.
   const sectionNames = /^(?:aim|objective|objectives|purpose|syntax|general syntax|topics?|key points?|notes?|theory|introduction|description|requirements|procedure|algorithm|explanation|program|program solution|solution|sample program|example|examples|output|sample output|expected output|result|conclusion|installation|steps involved|working principle|advantages|applications|observation|observations|summary)\s*:?[ \t]*$/i;
   const isSectionHeading = (line) => sectionNames.test(line.trim());
-  const isListLine = (line) => /^(?:[-*+]\s+|\d+\s*[.)]\s*|[A-Za-z]\s*[.)]\s*)\S/i.test(line.trim());
+  const isNestedNumberedLine = (line) => /^(?:\d+[A-Za-z]?(?:\.\d+)+|[A-Za-z]\d+(?:\.\d+)+)\s*[.)—–:-]?\s+\S/i.test(line.trim());
+  const isListLine = (line) => /^(?:[-*+]\s+|\d+\s*[.)]\s*|[A-Za-z]\s*[.)]\s*)\S/i.test(line.trim()) || isNestedNumberedLine(line);
   const isCodeLikeLine = (line) => {
     const t = line.trim();
     return /^(?:import\s+|from\s+|print\s*\(|return\s+|def\s+|class\s+|for\s+.+\s+in\s+|if\s+.+:)/.test(t) ||
@@ -117,9 +131,10 @@ function parseD2(rawText = "") {
       const items = [];
       while (index < lines.length) {
         const itemLine = lines[index].trim();
-        const match = itemLine.match(/^([-*+]\s+|\d+\s*[.)]\s*|[A-Za-z]\s*[.)]\s*)(.+)$/);
+        const nestedMatch = itemLine.match(/^((?:\d+[A-Za-z]?(?:\.\d+)+|[A-Za-z]\d+(?:\.\d+)+))\s*[.)—–:-]?\s+(.+)$/i);
+        const match = nestedMatch || itemLine.match(/^([-*+]\s+|\d+\s*[.)]\s*|[A-Za-z]\s*[.)]\s*)(.+)$/);
         if (!match) break;
-        let marker = match[1].trim().replace(/[.)]\s*$/, "").trim();
+        let marker = nestedMatch ? match[1].trim() : match[1].trim().replace(/[.)]\s*$/, "").trim();
         if (/^[A-Za-z]$/.test(marker)) marker = marker.toLowerCase();
         items.push({ marker: marker || "•", text: match[2].trim() });
         index += 1;
@@ -332,7 +347,7 @@ function slugify(value) {
     .slice(0, 60) || "experiment";
 }
 
-function downloadD2Pdf({ label = "", title = "", heading = "", content = "" } = {}) {
+function downloadD2Pdf({ label = "", title = "", heading = "", content = "", topics = [] } = {}) {
   if (!window.jspdf || !window.jspdf.jsPDF) {
     const error = new Error("PDF library is unavailable. Please refresh the page and try again.");
     error.isPdfMessage = true;
@@ -341,98 +356,221 @@ function downloadD2Pdf({ label = "", title = "", heading = "", content = "" } = 
 
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: "pt", format: "a4" });
-  const margin = 48;
+  const margin = 50;
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   const innerWidth = pageWidth - margin * 2;
-  const blocks = parseD2(content || "");
+  const structuredTopics = Array.isArray(topics) ? topics
+    .slice()
+    .sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0))
+    .filter((topic) => topic && (topic.heading || topic.content || topic.code || topic.sampleOutput))
+    : [];
+  const blocks = structuredTopics.length
+    ? structuredTopics.flatMap((topic) => {
+      const topicBlocks = [];
+      const topicHeading = String(topic.heading || "").replace(/^#{1,6}\s*/, "").trim();
+      if (topicHeading) topicBlocks.push({ type: "heading", text: topicHeading, mainTopic: true });
+      if (topic.type === "code") {
+        if (String(topic.code || "").trim()) {
+          topicBlocks.push({
+            type: "code",
+            label: String(topic.language || "python").replace(/[^A-Za-z0-9_+#.-]/g, "") || "python",
+            text: String(topic.code)
+          });
+        }
+        if (String(topic.sampleOutput || "").trim()) {
+          topicBlocks.push({ type: "code", label: "OUTPUT", text: String(topic.sampleOutput) });
+        }
+      } else if (String(topic.content || "").trim()) {
+        topicBlocks.push(...parseD2(String(topic.content)));
+      }
+      return topicBlocks;
+    })
+    : parseD2(content || "");
+  const accent = [13, 124, 134];
+  const ink = [43, 54, 68];
+  const muted = [105, 118, 132];
+  const line = [222, 230, 236];
+  const codeFill = [244, 248, 250];
+  const cleanPdfText = (value) => String(value ?? "")
+    .replace(/\|/g, "")
+    .replace(/\*\*|__/g, "")
+    .replace(/\*([^*]+)\*/g, "$1")
+    .replace(/_([^_]+)_/g, "$1")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/^#{1,6}\s*/, "");
 
-  let y = 52;
-  const advance = (amount) => {
-    y += amount;
-    if (y > pageHeight - 60) {
-      doc.addPage();
-      y = 52;
+  let y = 58;
+  const bottom = pageHeight - 52;
+  const startNewPage = () => {
+    doc.addPage();
+    y = 48;
+    doc.setDrawColor(...accent);
+    doc.setLineWidth(2);
+    doc.line(margin, 30, pageWidth - margin, 30);
+  };
+  const ensureSpace = (amount) => {
+    if (y + amount > bottom) startNewPage();
+  };
+  const drawLines = (lines, x, lineHeight) => {
+    let index = 0;
+    while (index < lines.length) {
+      const availableLines = Math.floor((bottom - y - 8) / lineHeight);
+      if (availableLines < 1) {
+        startNewPage();
+        continue;
+      }
+      const pageLines = lines.slice(index, index + availableLines);
+      doc.text(pageLines, x, y);
+      y += pageLines.length * lineHeight;
+      index += pageLines.length;
+      if (index < lines.length) startNewPage();
     }
   };
 
-  doc.setFillColor(248, 250, 252);
+  doc.setFillColor(255, 255, 255);
   doc.rect(0, 0, pageWidth, pageHeight, "F");
-  doc.setTextColor(17, 24, 39);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(20);
-  doc.text(String(title || heading || "DS Lab Report"), margin, y);
-  advance(26);
+  doc.setFillColor(...accent);
+  doc.rect(0, 0, pageWidth, 5, "F");
+  doc.setTextColor(...ink);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(19);
+  const titleLines = doc.splitTextToSize(cleanPdfText(title || heading || "DS Lab Report"), innerWidth);
+  doc.text(titleLines.map(cleanPdfText), margin, y);
+  y += titleLines.length * 23 + 6;
 
   if (label) {
-    doc.setTextColor(100, 116, 139);
+    doc.setTextColor(...muted);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
-    doc.text(String(label).toUpperCase(), margin, y);
-    advance(16);
+    doc.text(cleanPdfText(label).toUpperCase(), margin, y);
+    y += 17;
   }
 
   if (heading) {
-    doc.setTextColor(15, 23, 42);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(14);
-    doc.text(String(heading), margin, y);
-    advance(20);
+    doc.setDrawColor(...line);
+    doc.setLineWidth(.7);
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 16;
+    doc.setTextColor(...accent);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(12);
+    const headingLines = doc.splitTextToSize(cleanPdfText(heading), innerWidth);
+    doc.text(headingLines, margin, y);
+    y += headingLines.length * 16 + 6;
   }
 
   doc.setFont("helvetica", "normal");
-  doc.setTextColor(15, 23, 42);
-  doc.setFontSize(11);
+  doc.setTextColor(...ink);
+  doc.setFontSize(10.5);
 
   blocks.forEach((block) => {
     if (block.type === "heading") {
       doc.setFont("helvetica", "bold");
       doc.setFontSize(12);
-      const lines = doc.splitTextToSize(String(block.text || ""), innerWidth);
-      doc.text(lines, margin, y);
-      advance(lines.length * 14 + 12);
+      const lines = doc.splitTextToSize(cleanPdfText(block.text), innerWidth);
+      ensureSpace(lines.length * 16 + 13);
+      doc.setTextColor(...accent);
+      if (block.mainTopic || /^\d+[A-Z]\s*[—–-]/i.test(String(block.text || ""))) {
+        doc.setDrawColor(...accent);
+        doc.setLineWidth(2);
+        doc.line(margin, y - 10, margin, Math.min(bottom, y + lines.length * 16 - 2));
+      }
+      drawLines(lines, margin, 16);
+      y += 9;
+      doc.setTextColor(...ink);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10.5);
       return;
     }
 
     if (block.type === "text") {
       const text = String(block.text || "").trim();
       if (!text) return;
-      const lines = doc.splitTextToSize(text, innerWidth);
-      doc.text(lines, margin, y);
-      advance(lines.length * 13 + 8);
+      const lines = doc.splitTextToSize(cleanPdfText(text), innerWidth);
+      ensureSpace(lines.length * 14 + 8);
+      doc.setTextColor(...ink);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10.5);
+      drawLines(lines, margin, 14);
+      y += 7;
       return;
     }
 
     if (block.type === "list") {
       doc.setFont("helvetica", "normal");
       block.items.forEach((item) => {
-        const bullet = `${item.marker || "•"}. ${item.text || ""}`.trim();
-        const lines = doc.splitTextToSize(bullet, innerWidth - 12);
-        doc.text(lines, margin + 12, y);
-        advance(lines.length * 13 + 4);
+        const marker = cleanPdfText(item.marker || "");
+        const nested = /^(?:\d+[A-Za-z]?(?:\.\d+)+|[A-Za-z]\d+(?:\.\d+)+)$/i.test(marker);
+        const text = cleanPdfText(item.text || "");
+        const bulletX = margin + 45;
+        const textX = bulletX + 10;
+        const itemText = marker && marker !== "•"
+          ? `${marker}${nested ? " — " : "  "}${text}`
+          : text;
+        const lines = doc.splitTextToSize(itemText, pageWidth - margin - textX);
+        ensureSpace(lines.length * 14 + 4);
+        doc.setFillColor(...accent);
+        doc.circle(bulletX + 2, y - 3, 1.7, "F");
+        doc.setTextColor(...ink);
+        drawLines(lines, textX, 14);
+        y += 4;
       });
       return;
     }
 
     if (block.type === "code") {
-      const text = String(block.text || "").trim();
-      if (!text) return;
-      const codeLines = doc.splitTextToSize(text, innerWidth - 12);
+      const sourceLines = String(block.text || "").replace(/\s+$/, "").split("\n");
+      if (!sourceLines.some((sourceLine) => sourceLine.trim())) return;
       const label = String(block.label || "code").toUpperCase();
-      const boxHeight = codeLines.length * 12 + 22;
-      doc.setFillColor(15, 23, 42);
-      doc.roundedRect(margin, y - 8, innerWidth, boxHeight, 4, 4, "F");
-      doc.setTextColor(255, 255, 255);
-      doc.setFont("courier", "bold");
-      doc.setFontSize(9);
-      doc.text(label, margin + 10, y + 6);
-      doc.setTextColor(245, 247, 249);
+      const padding = 11;
+      const lineHeight = 12;
+      const codeWidth = innerWidth - padding * 2;
       doc.setFont("courier", "normal");
-      doc.setFontSize(9);
-      doc.text(codeLines, margin + 10, y + 20);
-      advance(boxHeight + 12);
+      doc.setFontSize(8.5);
+      const codeLines = sourceLines.flatMap((sourceLine) => doc.splitTextToSize(sourceLine, codeWidth));
+      const firstPageLines = Math.max(1, Math.floor((bottom - y - 40) / lineHeight));
+      ensureSpace(Math.min(codeLines.length, firstPageLines) * lineHeight + 40);
+      let lineIndex = 0;
+
+      while (lineIndex < codeLines.length) {
+        const availableLines = Math.max(1, Math.floor((bottom - y - 40) / lineHeight));
+        const pageLines = codeLines.slice(lineIndex, lineIndex + availableLines);
+        const boxHeight = pageLines.length * lineHeight + 30;
+        doc.setFillColor(...codeFill);
+        doc.roundedRect(margin, y, innerWidth, boxHeight, 4, 4, "F");
+        doc.setDrawColor(...line);
+        doc.setLineWidth(.5);
+        doc.roundedRect(margin, y, innerWidth, boxHeight, 4, 4, "S");
+        doc.setTextColor(...accent);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8);
+        doc.text(label, margin + padding, y + 12);
+        doc.setTextColor(...ink);
+        doc.setFont("courier", "normal");
+        doc.setFontSize(8.5);
+        doc.text(pageLines, margin + padding, y + 25);
+        lineIndex += pageLines.length;
+        y += boxHeight + 10;
+        if (lineIndex < codeLines.length) {
+          startNewPage();
+        }
+      }
     }
   });
+
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let page = 1; page <= pageCount; page++) {
+    doc.setPage(page);
+    doc.setDrawColor(...line);
+    doc.setLineWidth(.5);
+    doc.line(margin, pageHeight - 34, pageWidth - margin, pageHeight - 34);
+    doc.setTextColor(...muted);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.text("DS LAB", margin, pageHeight - 20);
+    doc.text(`${page} / ${pageCount}`, pageWidth - margin, pageHeight - 20, { align: "right" });
+  }
 
   const fileName = `${slugify(title || heading || label || "experiment")}.pdf`;
   doc.save(fileName);
