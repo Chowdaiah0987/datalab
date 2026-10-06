@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Explore the Data Science Digital Laboratory's modules, experiments, tools, and learning resources.">
+  <title>Home – Data Science Digital Laboratory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="header.css?v=20261006-profile-name">
+  <link rel="stylesheet" href="home.css?v=20261006-card-management">
+</head>
+<body class="home-page">
+  <header class="site-header home-profile">
+    <div class="hero">
+      <h2 class="hero__heading">Student Profile</h2>
+    </div>
+    <aside class="id-card home-id-card" id="homeIdCard" aria-label="Student profile">
+      <div class="id-card__strip"></div>
+      <div class="id-card__body">
+        <img class="id-card__photo" id="homeIdPhoto" alt="Student photo">
+        <dl class="id-card__details">
+          <div><dt>Name</dt><dd id="homeIdName">Loading profile...</dd></div>
+          <div><dt>Roll No</dt><dd id="homeIdRoll">Not added</dd></div>
+          <div><dt>Section</dt><dd id="homeIdSection">Not added</dd></div>
+          <div><dt>Branch</dt><dd id="homeIdBranch">Not added</dd></div>
+          <div><dt>Assistant Professor</dt><dd id="homeIdProfessor">Not added</dd></div>
+          <div><dt>GitHub Repo</dt><dd id="homeIdGithub">Not added</dd></div>
+        </dl>
+      </div>
+      <button type="button" class="id-card__edit" id="homeEditIdBtn" aria-label="Edit ID card details" title="Edit ID card">&#9998;</button>
+    </aside>
+  </header>
+  <main class="home-main">
+    <section class="home-intro" aria-labelledby="home-title">
+      <p class="home-eyebrow">Learn · Explore · Apply</p>
+      <h1 id="home-title">Data Science Digital Laboratory</h1>
+      <p class="home-lead">A place to build a strong foundation in data science through structured topics, practical experiments, useful tools, and curated learning resources.</p>
+    </section>
+
+    <section class="home-sections" aria-label="Explore the laboratory">
+      <article class="home-card">
+        <span class="home-card__number" aria-hidden="true">01</span>
+        <div class="home-card__cover home-card__cover--modules" aria-hidden="true"><span>LEARNING PATHWAY</span><strong>Modules</strong></div>
+        <div class="home-card__body">
+          <h2>Modules</h2>
+          <p class="home-card__count" id="homeCountModules" role="status">Loading count…</p>
+          <p>Follow core data science topics from data collection and preparation through analysis, modeling, and communication.</p>
+          <a class="home-card__link" href="modules.html">Read more <span aria-hidden="true">&rarr;</span></a>
+        </div>
+      </article>
+      <article class="home-card">
+        <span class="home-card__number" aria-hidden="true">02</span>
+        <div class="home-card__cover home-card__cover--experiments" aria-hidden="true"><span>PRACTICAL LEARNING</span><strong>Experiments</strong></div>
+        <div class="home-card__body">
+          <h2>Experiments</h2>
+          <p class="home-card__count" id="homeCountExperiments" role="status">Loading count…</p>
+          <p>Explore the laboratory's experiment list, practical activities, explanations, code, and supporting materials.</p>
+          <a class="home-card__link" href="index.html">Read more <span aria-hidden="true">&rarr;</span></a>
+        </div>
+      </article>
+      <article class="home-card">
+        <span class="home-card__number" aria-hidden="true">03</span>
+        <div class="home-card__cover home-card__cover--tools" aria-hidden="true"><span>WORKSPACE</span><strong>Tools</strong></div>
+        <div class="home-card__body">
+          <h2>Tools</h2>
+          <p class="home-card__count" id="homeCountTools" role="status">Loading count…</p>
+          <p>Get acquainted with common programming environments and libraries used to work with data and build analyses.</p>
+          <a class="home-card__link" href="tools.html">Read more <span aria-hidden="true">&rarr;</span></a>
+        </div>
+      </article>
+      <article class="home-card">
+        <span class="home-card__number" aria-hidden="true">04</span>
+        <div class="home-card__cover home-card__cover--resources" aria-hidden="true"><span>REFERENCE LIBRARY</span><strong>Resources</strong></div>
+        <div class="home-card__body">
+          <h2>Resources</h2>
+          <p class="home-card__count" id="homeCountResources" role="status">Loading count…</p>
+          <p>Use a guided set of resource categories for reference material, datasets, documentation, and continued study.</p>
+          <a class="home-card__link" href="resources.html">Read more <span aria-hidden="true">&rarr;</span></a>
+        </div>
+      </article>
+    </section>
+  </main>
+  <script src="shared.js?v=20261005-d2-topics-2"></script>
+  <script src="header.js?v=20261006-home-profile"></script>
+  <script src="home-counts.js?v=20261006-db-counts"></script>
+</body>
+</html>

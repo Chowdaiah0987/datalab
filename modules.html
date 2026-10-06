@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Modules – Data Science Digital Laboratory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="header.css?v=20261006-profile-name">
+  <link rel="stylesheet" href="home.css?v=20261006-card-management">
+</head>
+<body class="home-page">
+  <main class="home-main module-main">
+    <section class="module-intro">
+      <p class="home-eyebrow">Learning pathway</p>
+      <h1>Modules</h1>
+      <p class="home-lead">Create and explore learning modules with topics, video lessons, and PDF notes.</p>
+    </section>
+    <details class="module-create">
+      <summary class="btn btn--primary">+ Add Module</summary>
+      <form id="moduleForm" class="module-form">
+        <label class="module-field">
+          <span>Module name</span>
+          <input id="moduleTitle" type="text" maxlength="100" required placeholder="e.g. Introduction to Data Science">
+        </label>
+        <label class="module-field">
+          <span>Short description</span>
+          <textarea id="moduleDescription" rows="3" maxlength="500" placeholder="What will learners study in this module?"></textarea>
+        </label>
+        <label class="module-field">
+          <span>Cover image (optional)</span>
+          <input id="moduleCover" type="file" accept="image/*">
+        </label>
+        <img id="moduleCoverPreview" class="library-image-preview" alt="Module cover preview" hidden>
+        <label id="moduleRemoveCoverRow" class="module-current-file" hidden><input id="moduleRemoveCover" type="checkbox"><span>Remove existing cover image</span></label>
+        <div id="moduleCurrentFiles" class="module-current-files" hidden></div>
+        <fieldset class="module-topic-set">
+          <legend>Topics</legend>
+          <div id="moduleTopics" class="module-topics"></div>
+          <button type="button" id="addModuleTopic" class="btn btn--ghost">+ Add topic</button>
+        </fieldset>
+        <label class="module-field">
+          <span>PDF notes and video lessons (optional)</span>
+          <input id="moduleFiles" type="file" accept="application/pdf,video/*" multiple>
+          <small>PDF and video attachments will be available on the module page.</small>
+        </label>
+        <p id="moduleFormMessage" class="module-message" role="status"></p>
+        <div class="module-form__actions">
+          <button id="saveModule" type="submit" class="btn btn--primary">Save Module</button>
+          <button id="cancelModuleEdit" type="button" class="btn btn--ghost" hidden>Cancel edit</button>
+        </div>
+      </form>
+    </details>
+    <p id="moduleStatus" class="module-status" role="status">Loading modules...</p>
+    <section id="moduleList" class="home-sections module-list" aria-label="Saved modules"></section>
+  </main>
+  <script src="shared.js?v=20261005-d2-topics-2"></script>
+  <script src="header.js?v=20261006-home-profile"></script>
+  <script src="card-menu.js?v=20261006-card-crud"></script>
+  <script src="modules.js?v=20261006-module-crud"></script>
+</body>
+</html>

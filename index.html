@@ -8,32 +8,14 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="header.css?v=20261006-profile-name">
 </head>
 <body>
-  <header class="site-header">
+  <header class="site-header experiments-header">
 
     <div class="hero">
-      <h1 class="hero__title">DS LAB</h1>
-      <p class="hero__subtitle">Data Science Laboratory – Experiments &amp; Projects</p>
+      <h1 class="hero__tagline">Data Science Laboratory – Experiments &amp; Projects</h1>
     </div>
-
-    <aside class="id-card" aria-label="Student ID card">
-      <div class="id-card__strip"></div>
-      <div class="id-card__body">
-        <!-- Replace this src with your own photo, e.g. "photo.jpg" -->
-        <img class="id-card__photo" id="idPhoto" alt="Student photo"
-          src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 100'%3E%3Crect width='80' height='100' fill='%23dfe8ee'/%3E%3Ccircle cx='40' cy='38' r='16' fill='%2399aebb'/%3E%3Cpath d='M8 100c0-22 14-36 32-36s32 14 32 36z' fill='%2399aebb'/%3E%3C/svg%3E">
-        <dl class="id-card__details">
-          <div><dt>Name</dt><dd id="idName">Kalle Chowdaiah</dd></div>
-          <div><dt>Roll No</dt><dd id="idRoll">24102A030040</dd></div>
-          <div><dt>Section</dt><dd id="idSection">DS 1</dd></div>
-          <div><dt>Branch</dt><dd id="idBranch">Data Science</dd></div>
-          <div><dt>Assistant Professor</dt><dd id="idProfessor">Not added</dd></div>
-          <div><dt>GitHub Repo</dt><dd id="idGithub">Not added</dd></div>
-        </dl>
-      </div>
-      <button type="button" class="id-card__edit" id="editIdBtn" aria-label="Edit ID card details" title="Edit ID card">&#9998;</button>
-    </aside>
   </header>
 
   <main class="container">
@@ -211,6 +193,7 @@
   <div class="toast" id="toast" role="status" hidden></div>
 
   <script src="shared.js?v=20261005-d2-topics-2"></script>
-  <script src="script.js?v=20261005-d2-topics-3"></script>
+  <script src="header.js?v=20261006-home-profile"></script>
+  <script src="script.js?v=20261006-profile-card-removed"></script>
 </body>
 </html>

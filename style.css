@@ -62,6 +62,23 @@ body {
   font-size: clamp(0.95rem, 2.4vw, 1.1rem);
 }
 
+.hero__tagline {
+  margin-top: 10px;
+  color: var(--ink);
+  font-size: clamp(1.1rem, 2.6vw, 1.55rem);
+  font-weight: 600;
+}
+
+.experiments-header {
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+}
+
+.experiments-header .hero {
+  grid-column: 1;
+  width: 100%;
+}
+
 /* ---------- ID card ---------- */
 .id-card {
   position: relative;

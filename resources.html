@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Resources – Data Science Digital Laboratory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="header.css?v=20261006-profile-name">
+  <link rel="stylesheet" href="home.css?v=20261006-card-management">
+</head>
+<body class="home-page">
+  <main class="home-main library-main">
+    <section class="module-intro">
+      <p class="home-eyebrow">Further study</p>
+      <h1>Resources</h1>
+      <p class="home-lead">Add and organize references, datasets, learning material, and supporting files.</p>
+    </section>
+    <details class="module-create" id="resourceCreate">
+      <summary class="btn btn--primary">+ Add Resource</summary>
+      <form id="resourceForm" class="module-form">
+        <label class="module-field"><span>Resource name</span><input id="resourceName" maxlength="120" required></label>
+        <label class="module-field"><span>Short description</span><textarea id="resourceDescription" rows="3" maxlength="1000"></textarea></label>
+        <label class="module-field"><span>Detailed description</span><textarea id="resourceDetailedDescription" rows="5" maxlength="10000"></textarea></label>
+        <label class="module-field"><span>Resource type (optional)</span><input id="resourceType" maxlength="80" placeholder="e.g. Article, Dataset, Course"></label>
+        <label class="module-field"><span>URL (optional)</span><input id="resourceUrl" type="url" placeholder="https://"></label>
+        <label class="module-field"><span>Resource image (optional)</span><input id="resourceImage" type="file" accept="image/*"></label>
+        <img id="resourceImagePreview" class="library-image-preview" alt="Resource image preview" hidden>
+        <label class="module-field"><span>PDF or image file (optional)</span><input id="resourceFile" type="file" accept="application/pdf,image/*"></label>
+        <div id="resourceCurrentFile" class="module-current-files" hidden></div>
+        <p id="resourceFormMessage" class="module-message" role="status"></p>
+        <button id="saveResource" type="submit" class="btn btn--primary">Save Resource</button>
+      </form>
+    </details>
+    <p id="resourceStatus" class="module-status" role="status">Loading resources...</p>
+    <section id="resourceList" class="home-sections library-list" aria-label="Resources"></section>
+  </main>
+  <script src="shared.js?v=20261005-d2-topics-2"></script>
+  <script src="header.js?v=20261006-home-profile"></script>
+  <script src="card-menu.js?v=20261006-card-crud"></script>
+  <script src="library-cards.js?v=20261006-library-crud"></script>
+</body>
+</html>

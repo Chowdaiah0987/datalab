@@ -1,0 +1,96 @@
+/* DS Lab common header – load after style.css. Uses the site's existing colour variables. */
+:root { --dsl-header-h: 76px; }
+
+.dsl-header {
+  position: sticky; top: 0; z-index: 40;
+  background: var(--surface, #fff);
+  border-bottom: 1px solid var(--line, #dbe3ea);
+  box-shadow: 0 1px 6px rgba(18, 32, 47, 0.06);
+}
+.dsl-header::before { content: ""; display: block; height: 3px; background: linear-gradient(90deg, var(--accent, #0d7c86), #2a5d9f); }
+.dsl-header__inner {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 20px;
+  max-width: 1320px; height: calc(var(--dsl-header-h) - 3px); margin: 0 auto; padding: 0 24px;
+}
+
+/* Left: logo + title */
+.dsl-brand { position: relative; display: flex; align-items: center; justify-self: start; min-width: 0; }
+.dsl-brand__link { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--ink, #12202f); min-width: 0; }
+.dsl-logo { width: 46px; height: 46px; object-fit: contain; border-radius: 10px; flex-shrink: 0; }
+.dsl-brand__text { display: grid; line-height: 1.15; min-width: 0; }
+.dsl-brand__text strong { font-family: "Sora", system-ui, sans-serif; font-size: 1.15rem; font-weight: 700; letter-spacing: 0.01em; white-space: nowrap; }
+.dsl-brand__text small { color: var(--muted, #5b6b7b); font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; }
+.dsl-logo-edit {
+  position: absolute; left: -6px; top: -6px; width: 20px; height: 20px; padding: 0;
+  border: 1px solid var(--line, #dbe3ea); border-radius: 50%; background: var(--surface, #fff);
+  color: var(--accent-dark, #095f67); font-size: 0.7rem; line-height: 1; cursor: pointer; opacity: 0; transition: opacity 0.2s;
+}
+.dsl-brand:hover .dsl-logo-edit, .dsl-logo-edit:focus-visible { opacity: 1; }
+@media (hover: none) { .dsl-logo-edit { opacity: 0.85; } }
+
+/* Centre: navigation */
+.dsl-nav { display: flex; align-items: center; justify-content: center; gap: 4px; }
+.dsl-nav a {
+  position: relative; padding: 9px 16px; border-radius: 8px;
+  color: var(--ink, #12202f); font-weight: 500; font-size: 0.95rem; text-decoration: none; white-space: nowrap;
+  transition: background 0.2s, color 0.2s;
+}
+.dsl-nav a:hover { background: var(--accent-soft, #e2f3f4); color: var(--accent-dark, #095f67); }
+.dsl-nav a.is-active { color: var(--accent-dark, #095f67); font-weight: 600; }
+.dsl-nav a.is-active::after { content: ""; position: absolute; left: 16px; right: 16px; bottom: 3px; height: 2px; border-radius: 2px; background: var(--accent, #0d7c86); }
+
+/* Right: profile + hamburger */
+.dsl-right { display: flex; align-items: center; justify-self: end; gap: 10px; min-width: 0; }
+.dsl-profile {
+  display: flex; align-items: center; gap: 10px; max-width: 100%; padding: 4px 12px 4px 4px;
+  border: 1px solid transparent; border-radius: 999px; background: none; font: inherit; color: var(--ink, #12202f); cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.dsl-profile:hover { background: var(--accent-soft, #e2f3f4); border-color: var(--line, #dbe3ea); }
+.dsl-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent-soft, #e2f3f4); flex-shrink: 0; background: var(--line, #dbe3ea); }
+.dsl-profile__name { font-weight: 600; font-size: 0.92rem; white-space: nowrap; text-transform: capitalize; }
+.dsl-burger { display: none; width: 40px; height: 40px; border: 1px solid var(--line, #dbe3ea); border-radius: 10px; background: var(--surface, #fff); font-size: 1.3rem; line-height: 1; cursor: pointer; color: var(--ink, #12202f); }
+
+/* Logo dialog */
+.dsl-modal { position: fixed; inset: 0; z-index: 70; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(18, 32, 47, 0.55); }
+.dsl-modal__panel { width: 100%; max-width: 380px; display: grid; gap: 14px; padding: 24px; border-radius: 16px; background: var(--surface, #fff); box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35); }
+.dsl-modal__panel h2 { font-family: "Sora", system-ui, sans-serif; font-size: 1.15rem; }
+.dsl-modal__preview { justify-self: center; width: 110px; height: 110px; object-fit: contain; border: 1px dashed var(--line, #dbe3ea); border-radius: 14px; padding: 8px; background: var(--bg, #f3f6f9); }
+.dsl-modal__row { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.dsl-modal__msg { min-height: 1.1em; font-size: 0.85rem; color: var(--danger, #c0392b); }
+
+/* Read More page: its two panels were sized for a page without this header */
+@media (min-width: 901px) and (min-height: 560px) {
+  body.detail-page .detail__left, body.detail-page .detail__panel { max-height: calc(100vh - 110px - var(--dsl-header-h)); }
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .dsl-header__inner { gap: 10px; padding: 0 16px; }
+  .dsl-nav a { padding: 8px 10px; font-size: 0.9rem; }
+  .dsl-nav a.is-active::after { left: 10px; right: 10px; }
+  .dsl-brand__text strong { font-size: 1.02rem; }
+}
+
+/* Mobile: hamburger menu */
+@media (max-width: 820px) {
+  :root { --dsl-header-h: 68px; }
+  .dsl-header__inner { grid-template-columns: minmax(0, 1fr) auto; }
+  .dsl-burger { display: inline-flex; align-items: center; justify-content: center; }
+  .dsl-nav {
+    display: none; position: absolute; left: 0; right: 0; top: 100%;
+    flex-direction: column; align-items: stretch; gap: 2px; padding: 8px 16px 14px;
+    background: var(--surface, #fff); border-bottom: 1px solid var(--line, #dbe3ea); box-shadow: 0 10px 20px rgba(18, 32, 47, 0.1);
+  }
+  .dsl-nav.is-open { display: flex; }
+  .dsl-nav a { padding: 12px 14px; }
+  .dsl-nav a.is-active { background: var(--accent-soft, #e2f3f4); }
+  .dsl-nav a.is-active::after { display: none; }
+}
+@media (max-width: 560px) {
+  .dsl-profile { padding: 2px; }
+  .dsl-profile__name { display: none; }
+  .dsl-logo { width: 40px; height: 40px; }
+  .dsl-brand__text strong { font-size: 0.98rem; }
+  .dsl-brand__text small { font-size: 0.7rem; }
+}

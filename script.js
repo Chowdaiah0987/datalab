@@ -889,13 +889,14 @@ const idOutputs = {
 };
 
 const defaultProfile = {
-  name: idOutputs.name.textContent,
-  roll: idOutputs.roll.textContent,
-  section: idOutputs.section.textContent,
-  branch: idOutputs.branch.textContent,
+  name: idOutputs.name?.textContent || "",
+  roll: idOutputs.roll?.textContent || "",
+  section: idOutputs.section?.textContent || "",
+  branch: idOutputs.branch?.textContent || "",
   assistantProfessor: "", // never hard-coded: comes from the profile form
   githubRepo: "",         // optional repo link from the profile form
-  photo: idPhoto.getAttribute("src"),
+  photo: idPhoto?.getAttribute("src") || "",
+  logo: "",
 };
 let profile = { ...defaultProfile };
 let pendingPhoto = "";
@@ -911,16 +912,16 @@ async function loadProfile() {
   })();
 
   const remote = await apiRequest("/profile");
-  const hasRemoteValues = ["name", "roll", "section", "branch", "assistantProfessor", "githubRepo", "photo"]
+  const hasRemoteValues = ["name", "roll", "section", "branch", "assistantProfessor", "githubRepo", "photo", "logo"]
     .some((key) => Boolean(remote[key]));
   if (!hasRemoteValues && saved) {
     // One-time copy of the ID card saved by the old browser-only version
-    profile = { ...defaultProfile, ...saved, photo: saved.photo || defaultProfile.photo };
+    profile = { ...defaultProfile, ...saved, photo: saved.photo || defaultProfile.photo, logo: saved.logo || defaultProfile.logo };
     await apiRequest("/profile", { method: "PUT", body: JSON.stringify(profile) });
     localStorage.removeItem(PROFILE_KEY);
     return;
   }
-  profile = { ...defaultProfile, ...remote, photo: remote.photo || defaultProfile.photo };
+  profile = { ...defaultProfile, ...saved, ...remote, photo: remote.photo || saved?.photo || defaultProfile.photo, logo: remote.logo || saved?.logo || defaultProfile.logo };
 }
 
 async function saveProfile() {
@@ -930,6 +931,12 @@ async function saveProfile() {
       body: JSON.stringify(profile),
     }) };
     profile.photo = profile.photo || defaultProfile.photo;
+    profile.logo = profile.logo || defaultProfile.logo;
+    try {
+      localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+    } catch (error) {
+      console.warn("Could not cache the ID card profile locally:", error);
+    }
     return true;
   } catch (error) {
     showToast(`Could not save ID card: ${error.message}`, true);
@@ -939,6 +946,7 @@ async function saveProfile() {
 
 function renderProfile() {
   Object.keys(idOutputs).forEach((key) => {
+    if (!idOutputs[key]) return;
     const value = String(profile[key] || "").trim();
     if (key === "githubRepo") {
       const output = idOutputs[key];
@@ -961,7 +969,8 @@ function renderProfile() {
       idOutputs[key].textContent = value;
     }
   });
-  idPhoto.src = profile.photo;
+  if (idPhoto) idPhoto.src = profile.photo;
+  window.dispatchEvent(new CustomEvent("dslab:profile-updated", { detail: profile }));
 }
 
 function openProfileModal() {
@@ -1017,7 +1026,7 @@ async function handleProfileSubmit(event) {
   if (!valid) return;
 
   const previous = profile;
-  profile = { photo: pendingPhoto };
+  profile = { ...profile, photo: pendingPhoto };
   Object.keys(profileFields).forEach((key) => (profile[key] = profileFields[key].value.trim()));
 
   if (!await saveProfile()) {
@@ -1039,7 +1048,7 @@ document.querySelectorAll(".modal").forEach((modal) => {
 form.addEventListener("submit", handleSubmit);
 coverInput.addEventListener("change", handleMainCoverChange);
 searchInput.addEventListener("input", renderExperiments);
-document.getElementById("editIdBtn").addEventListener("click", openProfileModal);
+document.getElementById("editIdBtn")?.addEventListener("click", openProfileModal);
 profileForm.addEventListener("submit", handleProfileSubmit);
 profilePhotoInput.addEventListener("change", handleProfilePhotoChange);
 document.addEventListener("click", closeAllMenus);
@@ -1057,6 +1066,10 @@ async function initialize() {
     showToast(`Could not load ID card from server: ${error.message}`, true);
   }
   renderProfile();
+
+  if (new URLSearchParams(location.search).has("editProfile")) {
+    openProfileModal();
+  }
 
   try {
     await loadExperiments();

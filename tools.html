@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tools – Data Science Digital Laboratory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="header.css?v=20261006-profile-name">
+  <link rel="stylesheet" href="home.css?v=20261006-card-management">
+</head>
+<body class="home-page">
+  <main class="home-main library-main">
+    <section class="module-intro">
+      <p class="home-eyebrow">Practical toolkit</p>
+      <h1>Tools</h1>
+      <p class="home-lead">Add and organize tools used in data science practice.</p>
+    </section>
+    <details class="module-create" id="toolCreate">
+      <summary class="btn btn--primary">+ Add Tool</summary>
+      <form id="toolForm" class="module-form">
+        <label class="module-field"><span>Tool name</span><input id="toolName" maxlength="100" required></label>
+        <label class="module-field"><span>Short description</span><textarea id="toolDescription" rows="3" maxlength="1000"></textarea></label>
+        <label class="module-field"><span>Category (optional)</span><input id="toolCategory" maxlength="80" placeholder="e.g. Visualization"></label>
+        <label class="module-field"><span>Website (optional)</span><input id="toolWebsite" type="url" placeholder="https://"></label>
+        <label class="module-field"><span>Tool image or logo (optional)</span><input id="toolImage" type="file" accept="image/*"></label>
+        <img id="toolImagePreview" class="library-image-preview" alt="Tool image preview" hidden>
+        <p id="toolFormMessage" class="module-message" role="status"></p>
+        <button id="saveTool" type="submit" class="btn btn--primary">Save Tool</button>
+      </form>
+    </details>
+    <p id="toolStatus" class="module-status" role="status">Loading tools...</p>
+    <section id="toolList" class="home-sections library-list" aria-label="Tools"></section>
+  </main>
+  <script src="shared.js?v=20261005-d2-topics-2"></script>
+  <script src="header.js?v=20261006-home-profile"></script>
+  <script src="card-menu.js?v=20261006-card-crud"></script>
+  <script src="library-cards.js?v=20261006-library-crud"></script>
+</body>
+</html>

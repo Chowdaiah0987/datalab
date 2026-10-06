@@ -1,0 +1,29 @@
+1) index.html and experiment.html
+   In <head> after style.css:      <link rel="stylesheet" href="header.css">
+   Before </body>, after shared.js: <script src="header.js"></script>
+
+2) server.js
+   a) in profileSchema add:  logo: { type: String, default: "" },
+   b) above   app.use("/api", (req, res) => res.status(404)...   add:
+
+app.put("/api/profile/logo", wrap(async (req, res) => {
+  const logo = optionalImage(req.body && req.body.logo);
+  const profile = await Profile.findOneAndUpdate({ key: "main" }, { logo }, { new: true, upsert: true, setDefaultsOnInsert: true });
+  res.json({ logo: profile.logo });
+}));
+
+3) script.js
+   a) last line of renderProfile():  after   idPhoto.src = profile.photo;   add
+      window.dispatchEvent(new CustomEvent("dslab:profile-updated", { detail: profile }));
+   b) end of initialize() (after renderExperiments();) add
+      if (new URLSearchParams(location.search).has("editProfile")) openProfileModal();
+
+4) Make Home the default page (server.js, "Website files" section at the bottom)
+   Replace:
+     app.use(express.static(__dirname));
+     ...res.sendFile(path.join(__dirname, "index.html"))...
+   with:
+     app.use(express.static(__dirname, { index: "home.html" }));
+     ...res.sendFile(path.join(__dirname, "home.html"))...
+   Then http://localhost:3000/ opens home.html. Experiments is still http://localhost:3000/index.html.
+   (If you have no home.html yet, copy optional-placeholder-pages/home.html next to index.html.)
