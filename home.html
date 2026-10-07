@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="header.css?v=20261006-profile-name">
-  <link rel="stylesheet" href="home.css?v=20261006-card-management">
+  <link rel="stylesheet" href="header.css?v=20261007-home-profile-layout">
+  <link rel="stylesheet" href="home.css?v=20261007-home-overview">
 </head>
 <body class="home-page">
   <header class="site-header home-profile">
@@ -35,12 +35,14 @@
   </header>
   <main class="home-main">
     <section class="home-intro" aria-labelledby="home-title">
+      <h1 id="home-title" class="home-intro__title">DATA SCIENCE</h1>
+      <p class="home-intro__subtitle">Digital Laboratory</p>
       <p class="home-eyebrow">Learn · Explore · Apply</p>
-      <h1 id="home-title">Data Science Digital Laboratory</h1>
       <p class="home-lead">A place to build a strong foundation in data science through structured topics, practical experiments, useful tools, and curated learning resources.</p>
     </section>
 
     <section class="home-sections" aria-label="Explore the laboratory">
+      <h2 class="home-section-title">Explore the Laboratory</h2>
       <article class="home-card">
         <span class="home-card__number" aria-hidden="true">01</span>
         <div class="home-card__cover home-card__cover--modules" aria-hidden="true"><span>LEARNING PATHWAY</span><strong>Modules</strong></div>
@@ -48,7 +50,7 @@
           <h2>Modules</h2>
           <p class="home-card__count" id="homeCountModules" role="status">Loading count…</p>
           <p>Follow core data science topics from data collection and preparation through analysis, modeling, and communication.</p>
-          <a class="home-card__link" href="modules.html">Read more <span aria-hidden="true">&rarr;</span></a>
+          <a class="home-card__link" href="modules.html">Explore <span aria-hidden="true">&rarr;</span></a>
         </div>
       </article>
       <article class="home-card">
@@ -58,7 +60,7 @@
           <h2>Experiments</h2>
           <p class="home-card__count" id="homeCountExperiments" role="status">Loading count…</p>
           <p>Explore the laboratory's experiment list, practical activities, explanations, code, and supporting materials.</p>
-          <a class="home-card__link" href="index.html">Read more <span aria-hidden="true">&rarr;</span></a>
+          <a class="home-card__link" href="index.html">Explore <span aria-hidden="true">&rarr;</span></a>
         </div>
       </article>
       <article class="home-card">
@@ -68,7 +70,7 @@
           <h2>Tools</h2>
           <p class="home-card__count" id="homeCountTools" role="status">Loading count…</p>
           <p>Get acquainted with common programming environments and libraries used to work with data and build analyses.</p>
-          <a class="home-card__link" href="tools.html">Read more <span aria-hidden="true">&rarr;</span></a>
+          <a class="home-card__link" href="tools.html">Explore <span aria-hidden="true">&rarr;</span></a>
         </div>
       </article>
       <article class="home-card">
@@ -78,13 +80,34 @@
           <h2>Resources</h2>
           <p class="home-card__count" id="homeCountResources" role="status">Loading count…</p>
           <p>Use a guided set of resource categories for reference material, datasets, documentation, and continued study.</p>
-          <a class="home-card__link" href="resources.html">Read more <span aria-hidden="true">&rarr;</span></a>
+          <a class="home-card__link" href="resources.html">Explore <span aria-hidden="true">&rarr;</span></a>
         </div>
       </article>
     </section>
+    <section class="home-overview" aria-labelledby="home-overview-title">
+      <h2 id="home-overview-title">Laboratory Overview</h2>
+      <div class="home-overview__stats">
+        <article class="home-overview__stat">
+          <strong id="homeOverviewModules">—</strong>
+          <span>Modules</span>
+        </article>
+        <article class="home-overview__stat">
+          <strong id="homeOverviewExperiments">—</strong>
+          <span>Experiments</span>
+        </article>
+        <article class="home-overview__stat">
+          <strong id="homeOverviewTools">—</strong>
+          <span>Tools</span>
+        </article>
+        <article class="home-overview__stat">
+          <strong id="homeOverviewResources">—</strong>
+          <span>Resources</span>
+        </article>
+      </div>
+    </section>
   </main>
   <script src="shared.js?v=20261005-d2-topics-2"></script>
-  <script src="header.js?v=20261006-home-profile"></script>
-  <script src="home-counts.js?v=20261006-db-counts"></script>
+  <script src="header.js?v=20261007-home-profile-layout"></script>
+  <script src="home-counts.js?v=20261007-home-overview"></script>
 </body>
 </html>

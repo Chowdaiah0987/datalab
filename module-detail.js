@@ -28,25 +28,93 @@ function renderModuleDetail(module) {
   const topicsHeading = document.createElement("h2");
   topicsHeading.textContent = "Topics";
   topicsPanel.appendChild(topicsHeading);
-  for (const topic of module.topics) {
+  const topics = Array.isArray(module.topics) ? module.topics : [];
+  for (const [index, topic] of topics.entries()) {
     const item = document.createElement("article");
     item.className = "module-detail__topic";
+    const number = document.createElement("p");
+    number.className = "module-detail__topic-number";
+    number.textContent = `Topic ${index + 1}`;
     const topicTitle = document.createElement("h3");
     topicTitle.textContent = topic.title;
     const content = document.createElement("p");
     content.textContent = topic.content;
-    item.append(topicTitle, content);
+    item.append(number, topicTitle);
+    if (topic.content) item.appendChild(content);
+    if (topic.pdfFile) {
+      const pdfUrl = `${API_BASE}/module-files/${encodeURIComponent(topic.pdfFile.id)}`;
+      const links = document.createElement("div");
+      links.className = "module-detail__file-actions";
+      const view = document.createElement("a");
+      view.className = "module-detail__pdf";
+      view.href = pdfUrl;
+      view.target = "_blank";
+      view.rel = "noopener noreferrer";
+      view.textContent = "📄 View PDF";
+      const download = document.createElement("a");
+      download.className = "module-detail__pdf";
+      download.href = `${pdfUrl}?download=1`;
+      download.setAttribute("download", topic.pdfFile.name);
+      download.textContent = "⬇ Download PDF";
+      links.append(view, download);
+      item.appendChild(links);
+    }
+    if (topic.videoFile) {
+      const video = document.createElement("video");
+      video.controls = true;
+      video.preload = "metadata";
+      video.src = `${API_BASE}/module-files/${encodeURIComponent(topic.videoFile.id)}`;
+      video.setAttribute("aria-label", `${topic.title} video lesson`);
+      item.appendChild(video);
+    }
     topicsPanel.appendChild(item);
   }
   detailRoot.appendChild(topicsPanel);
 
-  if (module.files.length) {
+  const importantQuestions = module.importantQuestions || {};
+  const questionText = String(importantQuestions.text || "").trim();
+  const questionPdf = importantQuestions.pdfFile;
+  if (questionText || questionPdf) {
+    const questionsPanel = document.createElement("section");
+    questionsPanel.className = "home-detail__panel module-detail__questions";
+    const questionsHeading = document.createElement("h2");
+    questionsHeading.textContent = "Important Questions";
+    questionsPanel.appendChild(questionsHeading);
+    if (questionText) {
+      const text = document.createElement("p");
+      text.className = "module-detail__questions-text";
+      text.textContent = questionText;
+      questionsPanel.appendChild(text);
+    }
+    if (questionPdf) {
+      const pdfUrl = `${API_BASE}/important-question-files/${encodeURIComponent(questionPdf.id)}`;
+      const links = document.createElement("div");
+      links.className = "module-detail__file-actions";
+      const view = document.createElement("a");
+      view.className = "module-detail__pdf";
+      view.href = pdfUrl;
+      view.target = "_blank";
+      view.rel = "noopener noreferrer";
+      view.textContent = "📄 View Important Questions PDF";
+      const download = document.createElement("a");
+      download.className = "module-detail__pdf";
+      download.href = `${pdfUrl}?download=1`;
+      download.setAttribute("download", questionPdf.name);
+      download.textContent = "⬇ Download PDF";
+      links.append(view, download);
+      questionsPanel.appendChild(links);
+    }
+    detailRoot.appendChild(questionsPanel);
+  }
+
+  const moduleFiles = Array.isArray(module.files) ? module.files : [];
+  if (moduleFiles.length) {
     const filesPanel = document.createElement("section");
     filesPanel.className = "home-detail__panel module-detail__files";
     const filesHeading = document.createElement("h2");
-    filesHeading.textContent = "Videos and PDF notes";
+    filesHeading.textContent = "Additional module files";
     filesPanel.appendChild(filesHeading);
-    for (const file of module.files) {
+    for (const file of moduleFiles) {
       const url = `${API_BASE}/module-files/${encodeURIComponent(file.id)}`;
       if (file.contentType.startsWith("video/")) {
         const item = document.createElement("div");

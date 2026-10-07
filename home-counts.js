@@ -4,6 +4,12 @@ const homeCountElements = {
   tools: document.getElementById("homeCountTools"),
   resources: document.getElementById("homeCountResources"),
 };
+const homeOverviewElements = {
+  modules: document.getElementById("homeOverviewModules"),
+  experiments: document.getElementById("homeOverviewExperiments"),
+  tools: document.getElementById("homeOverviewTools"),
+  resources: document.getElementById("homeOverviewResources"),
+};
 
 let homeCountsLoading = false;
 
@@ -22,18 +28,25 @@ async function refreshHomeCounts() {
   homeCountsLoading = true;
   try {
     const counts = await apiRequest("/home-counts");
-    for (const [key, element] of Object.entries(homeCountElements)) {
-      if (!element) continue;
+    for (const key of Object.keys(homeCountElements)) {
       const count = counts[key];
       if (!Number.isInteger(count) || count < 0) {
         throw new Error(`The server returned an invalid ${key} count.`);
       }
-      element.textContent = formatHomeCount(key, count);
-      element.removeAttribute("title");
+      const card = homeCountElements[key];
+      if (card) {
+        card.textContent = formatHomeCount(key, count);
+        card.removeAttribute("title");
+      }
+      const overview = homeOverviewElements[key];
+      if (overview) {
+        overview.textContent = String(count).padStart(2, "0");
+        overview.removeAttribute("title");
+      }
     }
   } catch (error) {
     console.error("Could not load Home card counts:", error);
-    for (const element of Object.values(homeCountElements)) {
+    for (const element of [...Object.values(homeCountElements), ...Object.values(homeOverviewElements)]) {
       if (!element) continue;
       element.textContent = "Count unavailable";
       element.title = error.message;

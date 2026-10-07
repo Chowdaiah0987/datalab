@@ -14,7 +14,7 @@
   else if (page === "module.html") page = "modules.html";
 
   const header = document.createElement("header");
-  header.className = "dsl-header";
+  header.className = `dsl-header${page === "home.html" ? " dsl-header--home" : ""}`;
   header.innerHTML = `
     <div class="dsl-header__inner">
       <div class="dsl-brand">

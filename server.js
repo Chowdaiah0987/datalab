@@ -60,15 +60,31 @@ const experimentSchema = new Schema({
   subExperiments: { type: [subExperimentSchema], default: [] },
 }, { timestamps: true });
 
-const moduleTopicSchema = new Schema({
-  title: { type: String, required: true },
-  content: { type: String, default: "" },
-}, { _id: false });
-
 const moduleFileSchema = new Schema({
   id: { type: String, required: true },
   name: { type: String, required: true },
   contentType: { type: String, required: true },
+}, { _id: false });
+
+const moduleTopicSchema = new Schema({
+  id: { type: String, required: true, default: () => new mongoose.Types.ObjectId().toString() },
+  title: { type: String, required: true },
+  content: { type: String, default: "" },
+  pdfFile: { type: moduleFileSchema, default: null },
+  videoFile: { type: moduleFileSchema, default: null },
+}, { _id: false });
+
+const importantQuestionsPdfSchema = new Schema({
+  id: { type: String, required: true },
+  name: { type: String, required: true },
+  contentType: { type: String, required: true, enum: ["application/pdf"] },
+}, { _id: false });
+
+const importantQuestionsSchema = new Schema({
+  type: { type: String, enum: ["text", "pdf", "both", "none"], default: "none" },
+  text: { type: String, default: "" },
+  pdfUrl: { type: String, default: "" },
+  pdfFile: { type: importantQuestionsPdfSchema, default: null },
 }, { _id: false });
 
 const moduleSchema = new Schema({
@@ -77,6 +93,7 @@ const moduleSchema = new Schema({
   cover: { type: String, default: "" },
   topics: { type: [moduleTopicSchema], default: [] },
   files: { type: [moduleFileSchema], default: [] },
+  importantQuestions: { type: importantQuestionsSchema, default: () => ({}) },
 }, { timestamps: true });
 
 const toolSchema = new Schema({
@@ -159,6 +176,7 @@ const Resource = mongoose.model("Resource", resourceSchema);
 const Profile = mongoose.model("Profile", profileSchema);
 let videoBucket; // GridFS bucket for uploaded videos, created after connecting
 let moduleFileBucket;
+let importantQuestionsFileBucket;
 let resourceFileBucket;
 
 // ---------- Validation ----------
@@ -319,15 +337,71 @@ function parseProfile(body = {}) {
 function parseModule(body = {}) {
   const topics = Array.isArray(body.topics) ? body.topics : [];
   const files = Array.isArray(body.files) ? body.files : [];
+  const importantQuestions = body.importantQuestions && typeof body.importantQuestions === "object"
+    ? body.importantQuestions
+    : {};
   if (!topics.length) throw new HttpError(400, "Add at least one module topic.");
+  const questionText = String(importantQuestions.text || "");
+  let pdfFile = null;
+  if (importantQuestions.pdfFile) {
+    if (!OBJECT_ID.test(String(importantQuestions.pdfFile.id || ""))) {
+      throw new HttpError(400, "The Important Questions PDF is invalid.");
+    }
+    if (text(importantQuestions.pdfFile.contentType) !== "application/pdf") {
+      throw new HttpError(400, "Important Questions attachments must be PDFs.");
+    }
+    if (!/\.pdf$/i.test(text(importantQuestions.pdfFile.name))) {
+      throw new HttpError(400, "The Important Questions attachment must have a .pdf filename.");
+    }
+    pdfFile = {
+      id: String(importantQuestions.pdfFile.id),
+      name: requireText(importantQuestions.pdfFile.name, "The Important Questions PDF needs a file name."),
+      contentType: "application/pdf",
+    };
+  }
+  if (pdfFile && importantQuestions.pdfUrl !== `/api/important-question-files/${pdfFile.id}`) {
+    throw new HttpError(400, "The Important Questions PDF URL does not match its uploaded file.");
+  }
+  const hasQuestionText = Boolean(questionText.trim());
+  const questionType = hasQuestionText && pdfFile ? "both" : hasQuestionText ? "text" : pdfFile ? "pdf" : "none";
+  const topicIds = new Set();
   return {
     title: requireText(body.title, "Module name is required."),
     description: text(body.description),
     cover: optionalImage(body.cover),
-    topics: topics.map((topic) => ({
-      title: requireText(topic && topic.title, "Every module topic needs a title."),
-      content: text(topic && topic.content),
-    })),
+    topics: topics.map((topic) => {
+      const normalizeTopicFile = (file, expectedType, label) => {
+        if (!file) return null;
+        const contentType = text(file.contentType);
+        if (!OBJECT_ID.test(String(file.id || ""))) {
+          throw new HttpError(400, `The ${label} attachment is invalid.`);
+        }
+        if (expectedType === "application/pdf" && contentType !== expectedType) {
+          throw new HttpError(400, "Topic attachments must be PDFs.");
+        }
+        if (expectedType === "application/pdf" && !/\.pdf$/i.test(text(file.name))) {
+          throw new HttpError(400, "Topic PDF attachments must have a .pdf filename.");
+        }
+        if (expectedType === "video" && !contentType.startsWith("video/")) {
+          throw new HttpError(400, "Topic video attachments must be video files.");
+        }
+        return {
+          id: String(file.id),
+          name: requireText(file.name, `The ${label} attachment needs a file name.`),
+          contentType,
+        };
+      };
+      const id = text(topic && topic.id) || new mongoose.Types.ObjectId().toString();
+      if (topicIds.has(id)) throw new HttpError(400, "Every topic must have a unique ID.");
+      topicIds.add(id);
+      return {
+        id,
+        title: requireText(topic && topic.title, "Every module topic needs a title."),
+        content: text(topic && topic.content),
+        pdfFile: normalizeTopicFile(topic && topic.pdfFile, "application/pdf", "Topic PDF"),
+        videoFile: normalizeTopicFile(topic && topic.videoFile, "video", "Topic video"),
+      };
+    }),
     files: files.map((file) => {
       const contentType = text(file && file.contentType);
       if (!OBJECT_ID.test(String(file && file.id || ""))) {
@@ -342,6 +416,12 @@ function parseModule(body = {}) {
         contentType,
       };
     }),
+    importantQuestions: {
+      type: questionType,
+      text: questionText,
+      pdfUrl: pdfFile ? `/api/important-question-files/${pdfFile.id}` : "",
+      pdfFile,
+    },
   };
 }
 
@@ -410,6 +490,15 @@ async function deleteModuleFile(id) {
   if (!OBJECT_ID.test(id || "")) return;
   try {
     await moduleFileBucket.delete(new mongoose.Types.ObjectId(id));
+  } catch (error) {
+    if (!/File\s*not found|no file with id/i.test(String(error.message))) throw error;
+  }
+}
+
+async function deleteImportantQuestionsFile(id) {
+  if (!OBJECT_ID.test(id || "")) return;
+  try {
+    await importantQuestionsFileBucket.delete(new mongoose.Types.ObjectId(id));
   } catch (error) {
     if (!/File\s*not found|no file with id/i.test(String(error.message))) throw error;
   }
@@ -516,7 +605,14 @@ app.put("/api/modules/:id", wrap(async (req, res) => {
 app.delete("/api/modules/:id", wrap(async (req, res) => {
   const module = OBJECT_ID.test(req.params.id) ? await Module.findById(req.params.id) : null;
   if (!module) throw new HttpError(404, "Module not found.");
-  await Promise.all(module.files.map((file) => deleteModuleFile(file.id)));
+  const moduleFileIds = new Set([
+    ...module.files.map((file) => file.id),
+    ...module.topics.flatMap((topic) => [topic.pdfFile && topic.pdfFile.id, topic.videoFile && topic.videoFile.id]),
+  ].filter(Boolean));
+  await Promise.all([...moduleFileIds].map((id) => deleteModuleFile(id)));
+  if (module.importantQuestions && module.importantQuestions.pdfFile) {
+    await deleteImportantQuestionsFile(module.importantQuestions.pdfFile.id);
+  }
   await module.deleteOne();
   res.json({ ok: true });
 }));
@@ -526,9 +622,6 @@ app.post("/api/module-files", wrap(async (req, res) => {
   if (type !== "application/pdf" && !type.startsWith("video/")) {
     throw new HttpError(400, "Only PDF documents and video files can be attached to a module.");
   }
-  if (Number(req.get("content-length")) > MAX_VIDEO_BYTES) {
-    throw new HttpError(413, `Module files can be at most ${Math.round(MAX_VIDEO_BYTES / 1024 / 1024)} MB.`);
-  }
   let requestedName = req.get("X-Module-File-Name") || "";
   try {
     requestedName = decodeURIComponent(requestedName);
@@ -537,6 +630,12 @@ app.post("/api/module-files", wrap(async (req, res) => {
   }
   requestedName = requestedName.replace(/\\/g, "/");
   const name = path.basename(requestedName).replace(/[\r\n"]/g, "").slice(0, 200) || `module-file-${Date.now()}`;
+  if (type === "application/pdf" && !/\.pdf$/i.test(name)) {
+    throw new HttpError(400, "PDF attachments must have a .pdf filename.");
+  }
+  if (Number(req.get("content-length")) > MAX_VIDEO_BYTES) {
+    throw new HttpError(413, `Module attachments can be at most ${Math.round(MAX_VIDEO_BYTES / 1024 / 1024)} MB.`);
+  }
   const upload = moduleFileBucket.openUploadStream(name, { metadata: { contentType: type } });
   let received = 0;
   await new Promise((resolve, reject) => {
@@ -545,7 +644,7 @@ app.post("/api/module-files", wrap(async (req, res) => {
       if (received > MAX_VIDEO_BYTES) {
         req.unpipe(upload);
         upload.abort().catch(() => {});
-        reject(new HttpError(413, `Module files can be at most ${Math.round(MAX_VIDEO_BYTES / 1024 / 1024)} MB.`));
+        reject(new HttpError(413, `Module attachments can be at most ${Math.round(MAX_VIDEO_BYTES / 1024 / 1024)} MB.`));
       }
     });
     req.on("error", reject);
@@ -564,7 +663,7 @@ app.get("/api/module-files/:id", wrap(async (req, res) => {
   res.set({
     "Content-Type": contentType,
     "Content-Length": file.length,
-    "Content-Disposition": `inline; filename*=UTF-8''${filename}`,
+    "Content-Disposition": `${req.query.download === "1" ? "attachment" : "inline"}; filename*=UTF-8''${filename}`,
   });
   moduleFileBucket.openDownloadStream(id).on("error", (error) => res.destroy(error)).pipe(res);
 }));
@@ -572,6 +671,61 @@ app.get("/api/module-files/:id", wrap(async (req, res) => {
 app.delete("/api/module-files/:id", wrap(async (req, res) => {
   if (!OBJECT_ID.test(req.params.id)) throw new HttpError(404, "Module file not found.");
   await deleteModuleFile(req.params.id);
+  res.json({ ok: true });
+}));
+
+app.post("/api/important-question-files", wrap(async (req, res) => {
+  const type = req.get("Content-Type") || "";
+  if (type !== "application/pdf") throw new HttpError(400, "Important Questions attachments must be PDF documents.");
+  let requestedName = req.get("X-Important-Questions-File-Name") || "";
+  try {
+    requestedName = decodeURIComponent(requestedName);
+  } catch (error) {
+    throw new HttpError(400, "The Important Questions PDF filename is invalid.");
+  }
+  requestedName = requestedName.replace(/\\/g, "/");
+  const name = path.basename(requestedName).replace(/[\r\n"]/g, "").slice(0, 200);
+  if (!/\.pdf$/i.test(name)) throw new HttpError(400, "Important Questions attachments must have a .pdf filename.");
+  if (Number(req.get("content-length")) > MAX_VIDEO_BYTES) {
+    throw new HttpError(413, `PDF files can be at most ${Math.round(MAX_VIDEO_BYTES / 1024 / 1024)} MB.`);
+  }
+  const upload = importantQuestionsFileBucket.openUploadStream(name, {
+    metadata: { contentType: "application/pdf" },
+  });
+  let received = 0;
+  await new Promise((resolve, reject) => {
+    req.on("data", (chunk) => {
+      received += chunk.length;
+      if (received > MAX_VIDEO_BYTES) {
+        req.unpipe(upload);
+        upload.abort().catch(() => {});
+        reject(new HttpError(413, `PDF files can be at most ${Math.round(MAX_VIDEO_BYTES / 1024 / 1024)} MB.`));
+      }
+    });
+    req.on("error", reject);
+    req.pipe(upload).on("error", reject).on("finish", resolve);
+  });
+  res.status(201).json({ id: String(upload.id), name, contentType: "application/pdf" });
+}));
+
+app.get("/api/important-question-files/:id", wrap(async (req, res) => {
+  if (!OBJECT_ID.test(req.params.id)) throw new HttpError(404, "Important Questions PDF not found.");
+  const id = new mongoose.Types.ObjectId(req.params.id);
+  const [file] = await importantQuestionsFileBucket.find({ _id: id }).toArray();
+  if (!file) throw new HttpError(404, "Important Questions PDF not found.");
+  const filename = encodeURIComponent(path.basename(file.filename || "important-questions.pdf"));
+  res.set({
+    "Content-Type": "application/pdf",
+    "Content-Length": file.length,
+    "Content-Disposition": `${req.query.download === "1" ? "attachment" : "inline"}; filename*=UTF-8''${filename}`,
+    "X-Content-Type-Options": "nosniff",
+  });
+  importantQuestionsFileBucket.openDownloadStream(id).on("error", (error) => res.destroy(error)).pipe(res);
+}));
+
+app.delete("/api/important-question-files/:id", wrap(async (req, res) => {
+  if (!OBJECT_ID.test(req.params.id)) throw new HttpError(404, "Important Questions PDF not found.");
+  await deleteImportantQuestionsFile(req.params.id);
   res.json({ ok: true });
 }));
 
@@ -777,6 +931,7 @@ async function start() {
   await mongoose.connect(MONGODB_URI, { serverSelectionTimeoutMS: 8000 });
   videoBucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, { bucketName: "videos" });
   moduleFileBucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, { bucketName: "moduleFiles" });
+  importantQuestionsFileBucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, { bucketName: "importantQuestionFiles" });
   resourceFileBucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, { bucketName: "resourceFiles" });
   app.listen(PORT, () => console.log(`DS Lab running at http://localhost:${PORT}`));
 }

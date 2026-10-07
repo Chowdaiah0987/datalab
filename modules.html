@@ -8,15 +8,15 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="header.css?v=20261006-profile-name">
-  <link rel="stylesheet" href="home.css?v=20261006-card-management">
+  <link rel="stylesheet" href="header.css?v=20261007-home-profile-layout">
+  <link rel="stylesheet" href="home.css?v=20261007-module-topics">
 </head>
 <body class="home-page">
   <main class="home-main module-main">
     <section class="module-intro">
       <p class="home-eyebrow">Learning pathway</p>
       <h1>Modules</h1>
-      <p class="home-lead">Create and explore learning modules with topics, video lessons, and PDF notes.</p>
+      <p class="home-lead">Create and explore learning modules with topic notes, PDFs, and video lessons.</p>
     </section>
     <details class="module-create">
       <summary class="btn btn--primary">+ Add Module</summary>
@@ -35,17 +35,38 @@
         </label>
         <img id="moduleCoverPreview" class="library-image-preview" alt="Module cover preview" hidden>
         <label id="moduleRemoveCoverRow" class="module-current-file" hidden><input id="moduleRemoveCover" type="checkbox"><span>Remove existing cover image</span></label>
-        <div id="moduleCurrentFiles" class="module-current-files" hidden></div>
         <fieldset class="module-topic-set">
           <legend>Topics</legend>
           <div id="moduleTopics" class="module-topics"></div>
           <button type="button" id="addModuleTopic" class="btn btn--ghost">+ Add topic</button>
         </fieldset>
-        <label class="module-field">
-          <span>PDF notes and video lessons (optional)</span>
-          <input id="moduleFiles" type="file" accept="application/pdf,video/*" multiple>
-          <small>PDF and video attachments will be available on the module page.</small>
-        </label>
+        <fieldset class="module-topic-set module-important-questions">
+          <legend>Important Questions</legend>
+          <p class="module-field__hint">Add questions as text, upload a PDF, or provide both.</p>
+          <label class="module-option">
+            <input id="importantQuestionsTextEnabled" type="checkbox">
+            <span>Add questions as text</span>
+          </label>
+          <label class="module-field" id="importantQuestionsTextField" hidden>
+            <span>Important Questions</span>
+            <textarea id="importantQuestionsText" rows="8" maxlength="20000" placeholder="Enter important questions here..."></textarea>
+          </label>
+          <label class="module-option">
+            <input id="importantQuestionsPdfEnabled" type="checkbox">
+            <span>Upload questions as PDF</span>
+          </label>
+          <div id="importantQuestionsPdfField" hidden>
+            <label class="module-field">
+              <span>Important Questions PDF</span>
+              <input id="importantQuestionsPdf" type="file" accept=".pdf,application/pdf">
+              <small>Choose a PDF file only.</small>
+            </label>
+            <label id="importantQuestionsCurrentPdf" class="module-current-file" hidden>
+              <input id="removeImportantQuestionsPdf" type="checkbox">
+              <span></span>
+            </label>
+          </div>
+        </fieldset>
         <p id="moduleFormMessage" class="module-message" role="status"></p>
         <div class="module-form__actions">
           <button id="saveModule" type="submit" class="btn btn--primary">Save Module</button>
@@ -57,8 +78,8 @@
     <section id="moduleList" class="home-sections module-list" aria-label="Saved modules"></section>
   </main>
   <script src="shared.js?v=20261005-d2-topics-2"></script>
-  <script src="header.js?v=20261006-home-profile"></script>
+  <script src="header.js?v=20261007-home-profile-layout"></script>
   <script src="card-menu.js?v=20261006-card-crud"></script>
-  <script src="modules.js?v=20261006-module-crud"></script>
+  <script src="modules.js?v=20261007-module-topics"></script>
 </body>
 </html>

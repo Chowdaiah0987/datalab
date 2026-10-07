@@ -49,6 +49,7 @@
 .dsl-profile:hover { background: var(--accent-soft, #e2f3f4); border-color: var(--line, #dbe3ea); }
 .dsl-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent-soft, #e2f3f4); flex-shrink: 0; background: var(--line, #dbe3ea); }
 .dsl-profile__name { font-weight: 600; font-size: 0.92rem; white-space: nowrap; text-transform: capitalize; }
+.dsl-header--home .dsl-profile { display: none; }
 .dsl-burger { display: none; width: 40px; height: 40px; border: 1px solid var(--line, #dbe3ea); border-radius: 10px; background: var(--surface, #fff); font-size: 1.3rem; line-height: 1; cursor: pointer; color: var(--ink, #12202f); }
 
 /* Logo dialog */
@@ -89,7 +90,9 @@
 }
 @media (max-width: 560px) {
   .dsl-profile { padding: 2px; }
-  .dsl-profile__name { display: none; }
+  .dsl-profile { gap: 5px; }
+  .dsl-profile__name { font-size: 0.76rem; }
+  .dsl-avatar { width: 34px; height: 34px; }
   .dsl-logo { width: 40px; height: 40px; }
   .dsl-brand__text strong { font-size: 0.98rem; }
   .dsl-brand__text small { font-size: 0.7rem; }
