@@ -17,7 +17,7 @@ document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") closeOpenCardMenu();
 });
 
-function createCardMenu(onEdit, onDelete) {
+function createCardMenu(onEdit, onDelete, options = {}) {
   const wrapper = document.createElement("div");
   wrapper.className = "card-menu";
   const toggle = document.createElement("button");
@@ -31,12 +31,23 @@ function createCardMenu(onEdit, onDelete) {
   menu.hidden = true;
   const edit = document.createElement("button");
   edit.type = "button";
-  edit.textContent = "✎ Edit";
+  edit.textContent = options.editLabel || "✎ Edit";
+  const actions = (options.actions || []).map(({ label, onClick }) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = label;
+    button.addEventListener("click", () => {
+      menu.hidden = true;
+      closeOpenCardMenu();
+      onClick();
+    });
+    return button;
+  });
   const remove = document.createElement("button");
   remove.type = "button";
-  remove.textContent = "Delete";
+  remove.textContent = options.deleteLabel || "Delete";
   remove.className = "card-menu__delete";
-  menu.append(edit, remove);
+  menu.append(edit, ...actions, remove);
   wrapper.append(toggle, menu);
 
   toggle.addEventListener("click", (event) => {

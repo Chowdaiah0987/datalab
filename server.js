@@ -1,5 +1,6 @@
 // Use public DNS so mongodb+srv:// addresses resolve on networks where Node's default DNS fails
 require("node:dns").setServers(["8.8.8.8", "1.1.1.1"]);
+const { createHash } = require("node:crypto");
 require("dotenv").config();
 const path = require("path");
 const cors = require("cors");
@@ -71,7 +72,9 @@ const moduleTopicSchema = new Schema({
   title: { type: String, required: true },
   content: { type: String, default: "" },
   pdfFile: { type: moduleFileSchema, default: null },
+  pdfUrl: { type: String, default: "" },
   videoFile: { type: moduleFileSchema, default: null },
+  videoUrl: { type: String, default: "" },
 }, { _id: false });
 
 const importantQuestionsPdfSchema = new Schema({
@@ -365,6 +368,16 @@ function parseModule(body = {}) {
   const hasQuestionText = Boolean(questionText.trim());
   const questionType = hasQuestionText && pdfFile ? "both" : hasQuestionText ? "text" : pdfFile ? "pdf" : "none";
   const topicIds = new Set();
+  const normalizeTopicUrl = (value, label) => {
+    const url = text(value);
+    if (!url) return "";
+    try {
+      if (!["http:", "https:"].includes(new URL(url).protocol)) throw new Error();
+    } catch (error) {
+      throw new HttpError(400, `Enter a valid ${label} URL.`);
+    }
+    return url;
+  };
   return {
     title: requireText(body.title, "Module name is required."),
     description: text(body.description),
@@ -394,12 +407,20 @@ function parseModule(body = {}) {
       const id = text(topic && topic.id) || new mongoose.Types.ObjectId().toString();
       if (topicIds.has(id)) throw new HttpError(400, "Every topic must have a unique ID.");
       topicIds.add(id);
+      const pdfFile = normalizeTopicFile(topic && topic.pdfFile, "application/pdf", "Topic PDF");
+      const videoFile = normalizeTopicFile(topic && topic.videoFile, "video", "Topic video");
+      const pdfUrl = normalizeTopicUrl(topic && topic.pdfUrl, "topic PDF");
+      const videoUrl = normalizeTopicUrl(topic && topic.videoUrl, "topic video");
+      if (pdfFile && pdfUrl) throw new HttpError(400, "A topic can use either an uploaded PDF or a PDF URL, not both.");
+      if (videoFile && videoUrl) throw new HttpError(400, "A topic can use either an uploaded video or a video URL, not both.");
       return {
         id,
         title: requireText(topic && topic.title, "Every module topic needs a title."),
         content: text(topic && topic.content),
-        pdfFile: normalizeTopicFile(topic && topic.pdfFile, "application/pdf", "Topic PDF"),
-        videoFile: normalizeTopicFile(topic && topic.videoFile, "video", "Topic video"),
+        pdfFile,
+        pdfUrl,
+        videoFile,
+        videoUrl,
       };
     }),
     files: files.map((file) => {
@@ -659,13 +680,65 @@ app.get("/api/module-files/:id", wrap(async (req, res) => {
   const [file] = await moduleFileBucket.find({ _id: id }).toArray();
   if (!file) throw new HttpError(404, "Module file not found.");
   const contentType = (file.metadata && file.metadata.contentType) || "application/octet-stream";
-  const filename = encodeURIComponent(path.basename(file.filename || "module-file"));
-  res.set({
+  let rangeStart = 0;
+  let rangeEnd = file.length - 1;
+  let status = 200;
+  const range = req.get("Range");
+  if (range) {
+    const match = /^bytes=(\d*)-(\d*)$/.exec(range.trim());
+    if (!match || file.length === 0 || (!match[1] && !match[2])) {
+      res.set("Content-Range", `bytes */${file.length}`).status(416).end();
+      return;
+    }
+    if (!match[1]) {
+      const suffixLength = Number(match[2]);
+      if (!Number.isSafeInteger(suffixLength) || suffixLength <= 0) {
+        res.set("Content-Range", `bytes */${file.length}`).status(416).end();
+        return;
+      }
+      rangeStart = Math.max(0, file.length - suffixLength);
+    } else {
+      rangeStart = Number(match[1]);
+      if (!Number.isSafeInteger(rangeStart) || rangeStart >= file.length) {
+        res.set("Content-Range", `bytes */${file.length}`).status(416).end();
+        return;
+      }
+    }
+    if (match[2]) {
+      rangeEnd = Number(match[2]);
+      if (!Number.isSafeInteger(rangeEnd) || rangeEnd < rangeStart) {
+        res.set("Content-Range", `bytes */${file.length}`).status(416).end();
+        return;
+      }
+      rangeEnd = Math.min(rangeEnd, file.length - 1);
+    }
+    status = 206;
+  }
+  const requestedDownloadName = String(req.query.downloadName || "")
+    .replace(/\\/g, "/")
+    .split("/")
+    .pop()
+    .replace(/[^A-Za-z0-9._-]/g, "_")
+    .slice(0, 120);
+  const filename = encodeURIComponent(
+    req.query.download === "1" && /\.pdf$/i.test(requestedDownloadName)
+      ? requestedDownloadName
+      : path.basename(file.filename || "module-file"),
+  );
+  const headers = {
     "Content-Type": contentType,
-    "Content-Length": file.length,
+    "Content-Length": status === 206 ? rangeEnd - rangeStart + 1 : file.length,
     "Content-Disposition": `${req.query.download === "1" ? "attachment" : "inline"}; filename*=UTF-8''${filename}`,
-  });
-  moduleFileBucket.openDownloadStream(id).on("error", (error) => res.destroy(error)).pipe(res);
+    "Accept-Ranges": "bytes",
+  };
+  if (status === 206) headers["Content-Range"] = `bytes ${rangeStart}-${rangeEnd}/${file.length}`;
+  res.status(status).set(headers);
+  if (req.method === "HEAD") {
+    res.end();
+    return;
+  }
+  const streamOptions = status === 206 ? { start: rangeStart, end: rangeEnd + 1 } : undefined;
+  moduleFileBucket.openDownloadStream(id, streamOptions).on("error", (error) => res.destroy(error)).pipe(res);
 }));
 
 app.delete("/api/module-files/:id", wrap(async (req, res) => {
@@ -835,6 +908,53 @@ app.delete("/api/resource-files/:id", wrap(async (req, res) => {
 }));
 
 // ----- Profile (ID card) -----
+app.get("/api/profile/header", wrap(async (req, res) => {
+  const profile = await Profile.findOne({ key: "main" })
+    .select("name roll section branch assistantProfessor githubRepo photo logo updatedAt")
+    .lean();
+  if (!profile) {
+    res.set("Cache-Control", "no-store");
+    res.json({});
+    return;
+  }
+  const photoVersion = profile.photo ? createHash("sha256").update(profile.photo).digest("hex").slice(0, 16) : "";
+  const logoVersion = profile.logo ? createHash("sha256").update(profile.logo).digest("hex").slice(0, 16) : "";
+  res.set("Cache-Control", "no-store");
+  res.json({
+    name: profile.name || "",
+    roll: profile.roll || "",
+    section: profile.section || "",
+    branch: profile.branch || "",
+    assistantProfessor: profile.assistantProfessor || "",
+    githubRepo: profile.githubRepo || "",
+    photoUrl: photoVersion ? `/api/profile/assets/${photoVersion}/photo` : "",
+    logoUrl: logoVersion ? `/api/profile/assets/${logoVersion}/logo` : "",
+  });
+}));
+
+app.get("/api/profile/assets/:version/:asset", wrap(async (req, res) => {
+  const assetField = req.params.asset === "photo" ? "photo" : req.params.asset === "logo" ? "logo" : null;
+  if (!assetField || !/^[a-f\d]{16}$/.test(req.params.version)) {
+    throw new HttpError(404, "Profile image not found.");
+  }
+  const profile = await Profile.findOne({ key: "main" }).select(assetField).lean();
+  const imageData = profile && profile[assetField];
+  const currentVersion = imageData ? createHash("sha256").update(imageData).digest("hex").slice(0, 16) : "";
+  if (!profile || currentVersion !== req.params.version) {
+    throw new HttpError(404, "Profile image not found.");
+  }
+  const match = new RegExp(`^data:(image/[A-Za-z0-9.+-]+);base64,([A-Za-z0-9+/=]+)$`).exec(imageData);
+  if (!match) throw new HttpError(404, "Profile image not found.");
+  const image = Buffer.from(match[2], "base64");
+  res.set({
+    "Cache-Control": "private, max-age=31536000, immutable",
+    "Content-Type": match[1],
+    "Content-Length": image.length,
+    "X-Content-Type-Options": "nosniff",
+  });
+  res.send(image);
+}));
+
 app.get("/api/profile", wrap(async (req, res) => {
   const profile = await Profile.findOne({ key: "main" });
   res.json(profile ? profile.toJSON() : {});

@@ -6,6 +6,7 @@
   const DEFAULT_LOGO = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230d7c86'/%3E%3Ctext x='32' y='41' font-family='Arial' font-size='26' font-weight='700' text-anchor='middle' fill='white'%3EDS%3C/text%3E%3C/svg%3E";
   const DEFAULT_PHOTO = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 100'%3E%3Crect width='80' height='100' fill='%23dfe8ee'/%3E%3Ccircle cx='40' cy='38' r='16' fill='%2399aebb'/%3E%3Cpath d='M8 100c0-22 14-36 32-36s32 14 32 36z' fill='%2399aebb'/%3E%3C/svg%3E";
   const api = () => (typeof API_BASE !== "undefined" ? API_BASE : "/api");
+  const PROFILE_CACHE_KEY = "dsLabProfileHeaderCache";
 
   // The site root is Home; the Read More page belongs to Experiments too.
   let page = location.pathname.split("/").pop().toLowerCase();
@@ -38,15 +39,32 @@
   const nameEl = header.querySelector(".dsl-profile__name");
   logo.src = DEFAULT_LOGO; avatar.src = DEFAULT_PHOTO; nameEl.textContent = "Student";
 
-  // Show whatever the existing profile holds (no separate header copy is stored)
+  function getCachedProfile() {
+    try {
+      return JSON.parse(sessionStorage.getItem(PROFILE_CACHE_KEY) || "null");
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function cacheProfile(profile) {
+    try {
+      sessionStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify(profile));
+    } catch (error) {
+      console.warn("Could not cache the header profile for this session:", error);
+    }
+  }
+
   function apply(profile) {
     if (!profile) return;
     nameEl.textContent = (profile.name || "").trim() || "Student";
-    avatar.src = profile.photo || DEFAULT_PHOTO;
-    if (profile.logo !== undefined) logo.src = profile.logo || DEFAULT_LOGO;
+    avatar.src = profile.photoUrl || profile.photo || DEFAULT_PHOTO;
+    if (profile.logoUrl !== undefined || profile.logo !== undefined) {
+      logo.src = profile.logoUrl || profile.logo || DEFAULT_LOGO;
+    }
     const homeProfile = document.getElementById("homeIdCard");
     if (homeProfile) {
-      homeProfile.querySelector("#homeIdPhoto").src = profile.photo || DEFAULT_PHOTO;
+      homeProfile.querySelector("#homeIdPhoto").src = profile.photoUrl || profile.photo || DEFAULT_PHOTO;
       homeProfile.querySelector("#homeIdName").textContent = profile.name || "Not added";
       homeProfile.querySelector("#homeIdRoll").textContent = profile.roll || "Not added";
       homeProfile.querySelector("#homeIdSection").textContent = profile.section || "Not added";
@@ -67,8 +85,24 @@
       }
     }
   }
-  fetch(`${api()}/profile`).then((r) => (r.ok ? r.json() : null)).then(apply).catch(() => {});
-  window.addEventListener("dslab:profile-updated", (event) => apply(event.detail));
+  const cachedProfile = getCachedProfile();
+  if (cachedProfile) apply(cachedProfile);
+  async function refreshProfile() {
+    try {
+      const response = await fetch(`${api()}/profile/header`, { cache: "no-store" });
+      if (!response.ok) throw new Error(`Profile request failed with status ${response.status}.`);
+      const profile = await response.json();
+      cacheProfile(profile);
+      apply(profile);
+    } catch (error) {
+      if (!cachedProfile) console.error("Could not load the profile for the site header:", error);
+    }
+  }
+  refreshProfile();
+  window.addEventListener("dslab:profile-updated", (event) => {
+    apply(event.detail);
+    refreshProfile();
+  });
 
   // Profile click: open the existing ID-card editor
   header.querySelector(".dsl-profile").addEventListener("click", () => {
@@ -146,6 +180,7 @@
         if (!res.ok) throw new Error("Could not save the logo.");
         logo.src = chosen || DEFAULT_LOGO;
         close();
+        refreshProfile();
       } catch (error) {
         msg.textContent = error.message;
         saveBtn.disabled = false; saveBtn.textContent = "Save";

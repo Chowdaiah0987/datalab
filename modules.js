@@ -4,6 +4,9 @@ const moduleList = document.getElementById("moduleList");
 const moduleStatus = document.getElementById("moduleStatus");
 const moduleFormMessage = document.getElementById("moduleFormMessage");
 const moduleSaveButton = document.getElementById("saveModule");
+const moduleSearch = document.getElementById("moduleSearch");
+const totalModules = document.getElementById("totalModules");
+const totalTopics = document.getElementById("totalTopics");
 const moduleCoverInput = document.getElementById("moduleCover");
 const cancelModuleEdit = document.getElementById("cancelModuleEdit");
 const moduleCoverPreview = document.getElementById("moduleCoverPreview");
@@ -18,6 +21,8 @@ const importantQuestionsPdfInput = document.getElementById("importantQuestionsPd
 const importantQuestionsCurrentPdf = document.getElementById("importantQuestionsCurrentPdf");
 const removeImportantQuestionsPdf = document.getElementById("removeImportantQuestionsPdf");
 let editingModule = null;
+let loadedModules = [];
+let modulesLoaded = false;
 
 function setModuleMessage(element, message, isError = false) {
   element.textContent = message;
@@ -70,7 +75,7 @@ function addModuleTopic(data = {}) {
   notes.value = data.content || "";
   contentLabel.append(contentText, notes);
 
-  function addTopicFileField(kind, labelText, accept, file) {
+  function addTopicFileField(kind, labelText, accept, file, resourceUrl) {
     const label = document.createElement("label");
     label.className = "module-field";
     const labelSpan = document.createElement("span");
@@ -81,6 +86,39 @@ function addModuleTopic(data = {}) {
     input.className = `module-topic__${kind}-input`;
     label.append(labelSpan, input);
     topic.appendChild(label);
+    let previewUrl = "";
+    const preview = document.createElement("div");
+    preview.className = "module-topic__preview";
+    topic.appendChild(preview);
+    input.addEventListener("change", () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      previewUrl = "";
+      preview.replaceChildren();
+      const selected = input.files[0];
+      if (!selected) return;
+      const urlInput = topic.querySelector(`.module-topic__${kind}-url`);
+      if (urlInput) {
+        urlInput.value = "";
+        urlInput.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+      previewUrl = URL.createObjectURL(selected);
+      if (kind === "video") {
+        const player = document.createElement("video");
+        player.controls = true;
+        player.preload = "metadata";
+        player.src = previewUrl;
+        player.setAttribute("aria-label", `Preview ${selected.name}`);
+        preview.appendChild(player);
+      } else {
+        const link = document.createElement("a");
+        link.className = "module-detail__pdf";
+        link.href = previewUrl;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = "Preview selected PDF";
+        preview.appendChild(link);
+      }
+    });
     if (file) {
       const current = document.createElement("label");
       current.className = "module-current-file";
@@ -92,15 +130,43 @@ function addModuleTopic(data = {}) {
       current.append(remove, name);
       topic.appendChild(current);
     }
+    const urlLabel = document.createElement("label");
+    urlLabel.className = "module-field";
+    const urlLabelText = document.createElement("span");
+    urlLabelText.textContent = `${kind === "pdf" ? "PDF" : "Video"} URL (optional)`;
+    const urlInput = document.createElement("input");
+    urlInput.type = "url";
+    urlInput.className = `module-topic__${kind}-url`;
+    urlInput.placeholder = kind === "video" ? "https://... or a YouTube link" : "https://...";
+    urlInput.value = resourceUrl || "";
+    const urlPreview = document.createElement("a");
+    urlPreview.className = "module-detail__pdf module-topic__url-preview";
+    urlPreview.target = "_blank";
+    urlPreview.rel = "noopener noreferrer";
+    urlPreview.textContent = `Preview ${kind === "pdf" ? "PDF" : "video"} URL`;
+    urlPreview.hidden = !resourceUrl;
+    urlPreview.href = resourceUrl || "#";
+    urlInput.addEventListener("input", () => {
+      const removeInput = topic.querySelector(`.module-topic__remove-${kind}`);
+      if (removeInput) removeInput.checked = Boolean(urlInput.value.trim());
+      urlPreview.href = urlInput.value.trim() || "#";
+      urlPreview.hidden = !urlInput.value.trim();
+    });
+    urlLabel.append(urlLabelText, urlInput);
+    topic.append(urlLabel, urlPreview);
   }
-  addTopicFileField("pdf", "Topic PDF (optional)", ".pdf,application/pdf", data.pdfFile);
-  addTopicFileField("video", "Video lesson (optional)", "video/*", data.videoFile);
+  addTopicFileField("pdf", "Topic PDF (optional)", ".pdf,application/pdf", data.pdfFile, data.pdfUrl);
+  addTopicFileField("video", "Video lesson (optional)", "video/*", data.videoFile, data.videoUrl);
 
   const remove = document.createElement("button");
   remove.type = "button";
   remove.className = "btn btn--ghost module-topic__remove";
   remove.textContent = "Remove topic";
   remove.addEventListener("click", () => {
+    topic.querySelectorAll("video").forEach((player) => {
+      if (player.src.startsWith("blob:")) URL.revokeObjectURL(player.src);
+    });
+    topic.querySelectorAll("a[href^='blob:']").forEach((link) => URL.revokeObjectURL(link.href));
     topic.remove();
     renumberModuleTopics();
   });
@@ -217,7 +283,7 @@ function resetModuleForm() {
   moduleForm.closest("details").querySelector("summary").textContent = "+ Add Module";
 }
 
-function editModule(module) {
+function editModule(module, focusTarget = "") {
   editingModule = module;
   moduleForm.reset();
   document.getElementById("moduleTitle").value = module.title;
@@ -244,6 +310,32 @@ function editModule(module) {
   moduleForm.closest("details").querySelector("summary").textContent = "Edit Module";
   moduleForm.closest("details").open = true;
   moduleForm.scrollIntoView({ behavior: "smooth", block: "start" });
+  if (focusTarget === "topics") {
+    const firstTopic = moduleTopics.querySelector('input[type="text"]');
+    firstTopic?.focus({ preventScroll: true });
+  } else if (focusTarget === "cover") {
+    moduleCoverInput.focus({ preventScroll: true });
+  }
+}
+
+function moduleDetailUrl(module) {
+  return `module.html?id=${encodeURIComponent(module.id)}`;
+}
+
+function createResourceIndicator(label, iconPath, href) {
+  const indicator = document.createElement("a");
+  indicator.className = "module-resource";
+  indicator.href = href;
+  const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  icon.setAttribute("viewBox", "0 0 24 24");
+  icon.setAttribute("aria-hidden", "true");
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("d", iconPath);
+  icon.appendChild(path);
+  const text = document.createElement("span");
+  text.textContent = label;
+  indicator.append(icon, text);
+  return indicator;
 }
 
 function createModuleCard(module, index) {
@@ -259,6 +351,15 @@ function createModuleCard(module, index) {
       } catch (error) {
         setModuleMessage(moduleStatus, error.message, true);
       }
+    },
+    {
+      editLabel: "Edit Module",
+      deleteLabel: "Delete Module",
+      actions: [
+        { label: "Manage Topics", onClick: () => editModule(module, "topics") },
+        { label: "Change Cover Image", onClick: () => editModule(module, "cover") },
+        { label: "Preview Module", onClick: () => { window.location.href = moduleDetailUrl(module); } },
+      ],
     },
   ));
 
@@ -280,16 +381,38 @@ function createModuleCard(module, index) {
   body.className = "home-card__body";
   const heading = document.createElement("h2");
   heading.textContent = module.title;
+  const topics = Array.isArray(module.topics) ? module.topics : [];
   const description = document.createElement("p");
-  description.textContent = module.description || `${module.topics.length} topic${module.topics.length === 1 ? "" : "s"} in this module.`;
+  description.textContent = module.description || `${topics.length} topic${topics.length === 1 ? "" : "s"} in this module.`;
+  const metadata = document.createElement("div");
+  metadata.className = "module-card__metadata";
+  const topicCount = document.createElement("span");
+  topicCount.className = "module-topic-count";
+  topicCount.textContent = `${topics.length} topic${topics.length === 1 ? "" : "s"}`;
+  metadata.appendChild(topicCount);
+  const resources = document.createElement("div");
+  resources.className = "module-card__resources";
+  const hasPdf = topics.some((topic) => Boolean(topic.pdfFile || topic.pdfUrl));
+  const hasVideo = topics.some((topic) => Boolean(topic.videoFile || topic.videoUrl));
+  if (hasPdf) resources.appendChild(createResourceIndicator(
+    "Notes & PDFs",
+    "M6 2h8l4 4v16H6z M14 2v5h5 M9 13h6 M9 17h6",
+    `${moduleDetailUrl(module)}&view=notes`,
+  ));
+  if (hasVideo) resources.appendChild(createResourceIndicator(
+    "Video Lessons",
+    "m9 7 9 5-9 5z M4 5v14",
+    `${moduleDetailUrl(module)}&view=videos`,
+  ));
+  if (resources.childElementCount) metadata.appendChild(resources);
   const actions = document.createElement("div");
   actions.className = "module-card__actions";
   const readMore = document.createElement("a");
   readMore.className = "home-card__link";
-  readMore.href = `module.html?id=${encodeURIComponent(module.id)}`;
-  readMore.textContent = "Read more →";
+  readMore.href = moduleDetailUrl(module);
+  readMore.textContent = "Read More →";
   actions.append(readMore);
-  body.append(heading, description, actions);
+  body.append(heading, description, metadata, actions);
   article.append(cover, body);
   return article;
 }
@@ -297,15 +420,41 @@ function createModuleCard(module, index) {
 async function loadModules() {
   moduleStatus.textContent = "Loading modules...";
   try {
-    const modules = await apiRequest("/modules");
-    moduleList.replaceChildren(...modules.map(createModuleCard));
+    loadedModules = await apiRequest("/modules");
+    modulesLoaded = true;
+    totalModules.textContent = String(loadedModules.length);
+    totalTopics.textContent = String(loadedModules.reduce(
+      (sum, module) => sum + (Array.isArray(module.topics) ? module.topics.length : 0),
+      0,
+    ));
     moduleStatus.classList.remove("is-error");
-    moduleStatus.textContent = modules.length ? "" : "No modules have been added yet.";
+    renderModules();
   } catch (error) {
     moduleStatus.textContent = `Could not load modules: ${error.message}`;
     moduleStatus.classList.add("is-error");
   }
 }
+
+function renderModules() {
+  if (!modulesLoaded) return;
+  const query = moduleSearch.value.trim().toLowerCase();
+  const filteredModules = loadedModules.filter((module) => (
+    `${module.title || ""} ${module.description || ""}`.toLowerCase().includes(query)
+  ));
+  moduleList.replaceChildren(...filteredModules.map((module) => createModuleCard(
+    module,
+    loadedModules.indexOf(module),
+  )));
+  if (!loadedModules.length) {
+    moduleStatus.textContent = "No modules have been added yet.";
+  } else if (!filteredModules.length) {
+    moduleStatus.textContent = "No modules match your search.";
+  } else {
+    moduleStatus.textContent = "";
+  }
+}
+
+moduleSearch.addEventListener("input", renderModules);
 
 moduleForm.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -315,6 +464,8 @@ moduleForm.addEventListener("submit", async (event) => {
     id: topic.dataset.topicId,
     title: topic.querySelector('input[type="text"]').value.trim(),
     content: topic.querySelector("textarea").value.trim(),
+    pdfUrl: topic.querySelector(".module-topic__pdf-url").value.trim(),
+    videoUrl: topic.querySelector(".module-topic__video-url").value.trim(),
   }));
   if (!topics.length || topics.some((topic) => !topic.title)) {
     setModuleMessage(moduleFormMessage, "Add at least one topic and give every topic a name.", true);
@@ -326,6 +477,16 @@ moduleForm.addEventListener("submit", async (event) => {
     return;
   }
   for (const topic of topicElements) {
+    if (topic.querySelector(".module-topic__pdf-input").files[0] &&
+        topic.querySelector(".module-topic__pdf-url").value.trim()) {
+      setModuleMessage(moduleFormMessage, "Choose either an uploaded PDF or a PDF URL for each topic, not both.", true);
+      return;
+    }
+    if (topic.querySelector(".module-topic__video-input").files[0] &&
+        topic.querySelector(".module-topic__video-url").value.trim()) {
+      setModuleMessage(moduleFormMessage, "Choose either an uploaded video or a video URL for each topic, not both.", true);
+      return;
+    }
     const pdf = topic.querySelector(".module-topic__pdf-input").files[0];
     if (pdf && !/\.pdf$/i.test(pdf.name)) {
       setModuleMessage(moduleFormMessage, "Each topic PDF must have a .pdf filename.", true);
@@ -352,6 +513,8 @@ moduleForm.addEventListener("submit", async (event) => {
       const videoInput = element.querySelector(".module-topic__video-input");
       const removePdf = element.querySelector(".module-topic__remove-pdf");
       const removeVideo = element.querySelector(".module-topic__remove-video");
+      const pdfUrlInput = element.querySelector(".module-topic__pdf-url");
+      const videoUrlInput = element.querySelector(".module-topic__video-url");
       let pdfFile = original?.pdfFile || null;
       let videoFile = original?.videoFile || null;
 
@@ -372,6 +535,8 @@ moduleForm.addEventListener("submit", async (event) => {
 
       topics[index].pdfFile = pdfFile;
       topics[index].videoFile = videoFile;
+      topics[index].pdfUrl = pdfFile ? "" : pdfUrlInput.value.trim();
+      topics[index].videoUrl = videoFile ? "" : videoUrlInput.value.trim();
     }
     const previousQuestions = editingModule?.importantQuestions || {};
     let questionPdf = previousQuestions.pdfFile || null;

@@ -9,18 +9,43 @@
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="header.css?v=20261007-home-profile-layout">
-  <link rel="stylesheet" href="home.css?v=20261007-module-topics">
+  <link rel="stylesheet" href="home.css?v=20261010-topic-resource-actions">
 </head>
 <body class="home-page">
   <main class="home-main module-main">
-    <section class="module-intro">
-      <p class="home-eyebrow">Learning pathway</p>
-      <h1>Modules</h1>
-      <p class="home-lead">Create and explore learning modules with topic notes, PDFs, and video lessons.</p>
-    </section>
-    <details class="module-create">
-      <summary class="btn btn--primary">+ Add Module</summary>
-      <form id="moduleForm" class="module-form">
+    <section class="module-dashboard" aria-labelledby="modulePageTitle">
+      <header class="module-page-header">
+        <div>
+          <p class="home-eyebrow">Learning pathway</p>
+          <h1 id="modulePageTitle">Modules</h1>
+          <p class="module-page-subtitle">Explore your learning pathway</p>
+        </div>
+        <span class="module-portal-badge">Student Portal</span>
+      </header>
+      <section class="module-summary" aria-label="Module overview">
+        <article class="module-summary-card">
+          <span class="module-summary-card__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16M8 7h8M8 11h8"/></svg>
+          </span>
+          <span class="module-summary-card__value" id="totalModules">—</span>
+          <span class="module-summary-card__label">Total Modules</span>
+        </article>
+        <article class="module-summary-card">
+          <span class="module-summary-card__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 12 9 5 9-5M3 16l9 5 9-5"/></svg>
+          </span>
+          <span class="module-summary-card__value" id="totalTopics">—</span>
+          <span class="module-summary-card__label">Topics</span>
+        </article>
+      </section>
+      <div class="module-toolbar">
+        <label class="module-search">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4.5 4.5"/></svg>
+          <input id="moduleSearch" type="search" placeholder="Search modules..." aria-label="Search modules">
+        </label>
+        <details class="module-create">
+          <summary class="btn btn--primary">+ Add Module</summary>
+          <form id="moduleForm" class="module-form">
         <label class="module-field">
           <span>Module name</span>
           <input id="moduleTitle" type="text" maxlength="100" required placeholder="e.g. Introduction to Data Science">
@@ -72,14 +97,16 @@
           <button id="saveModule" type="submit" class="btn btn--primary">Save Module</button>
           <button id="cancelModuleEdit" type="button" class="btn btn--ghost" hidden>Cancel edit</button>
         </div>
-      </form>
-    </details>
-    <p id="moduleStatus" class="module-status" role="status">Loading modules...</p>
-    <section id="moduleList" class="home-sections module-list" aria-label="Saved modules"></section>
+          </form>
+        </details>
+      </div>
+      <p id="moduleStatus" class="module-status" role="status">Loading modules...</p>
+      <section id="moduleList" class="home-sections module-list" aria-label="Saved modules"></section>
+    </section>
   </main>
   <script src="shared.js?v=20261005-d2-topics-2"></script>
-  <script src="header.js?v=20261007-home-profile-layout"></script>
-  <script src="card-menu.js?v=20261006-card-crud"></script>
-  <script src="modules.js?v=20261007-module-topics"></script>
+  <script src="header.js?v=20261007-profile-cache"></script>
+  <script src="card-menu.js?v=20261010-module-actions"></script>
+  <script src="modules.js?v=20261010-topic-resource-actions"></script>
 </body>
 </html>
