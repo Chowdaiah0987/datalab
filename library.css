@@ -233,3 +233,45 @@
   .module-form { padding: 16px; }
   .library-card__cover { padding-left: 16px; }
 }
+
+/* ---------- Form actions (Save + Cancel on one row) ---------- */
+.module-form__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.module-form__actions .btn { min-height: 44px; }
+.module-create > summary { min-height: 44px; align-items: center; }
+.library-image-preview { max-width: min(220px, 100%); height: auto; }
+
+/* ---------- Responsive: tablet ---------- */
+@media (max-width: 900px) {
+  .library-main { padding-right: 18px; padding-left: 18px; }
+  .module-form { max-width: none; }
+  .module-intro h1 { font-size: clamp(2rem, 7vw, 2.8rem); }
+}
+
+/* ---------- Responsive: phone ---------- */
+@media (max-width: 680px) {
+  .module-intro { margin: 4px 0 16px; padding-bottom: 12px; }
+  .module-intro .home-lead { font-size: 0.98rem; }
+
+  /* 16px inputs stop iOS from zooming the page when a field is focused */
+  .module-field input:not([type="file"]),
+  .module-field textarea { font-size: 16px; }
+
+  /* Save / Cancel fill the width so they are easy to tap */
+  .module-form__actions .btn { flex: 1 1 140px; }
+  .module-create > summary { display: flex; justify-content: center; width: 100%; }
+
+  .library-card:has(.library-card__cover img) { grid-template-rows: 130px minmax(0, 1fr); }
+  .library-card__cover > strong { font-size: 1.1rem; }
+
+  /* Bigger touch targets in the three-dot menu */
+  .card-menu__toggle { width: 40px; height: 40px; }
+  .card-menu__items button { min-height: 44px; }
+  .library-card__link,
+  .library-card__file { display: inline-flex; align-items: center; min-height: 40px; }
+}
+
+/* ---------- Responsive: small phone ---------- */
+@media (max-width: 380px) {
+  .library-main { padding-right: 12px; padding-left: 12px; }
+  .module-form { padding: 12px; }
+}

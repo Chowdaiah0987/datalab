@@ -43,7 +43,7 @@
       card.removeAttribute("title");
     }
     if (overview) {
-      overview.textContent = String(count).padStart(2, "0");
+      overview.textContent = String(count);
       overview.removeAttribute("title");
     }
   }

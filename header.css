@@ -230,6 +230,20 @@
   :root { --dsl-header-h: 70px; }
   .dsl-header__inner { grid-template-columns: minmax(0, 1fr) auto; }
   .dsl-burger { display: inline-flex; align-items: center; justify-content: center; }
+
+  /* Photo only: the name is visually hidden but still read by screen readers */
+  .dsl-profile { gap: 0; padding: 2px; }
+  .dsl-profile__name {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
   .dsl-nav {
     position: absolute;
     top: 100%;
@@ -250,9 +264,9 @@
   .dsl-nav a.is-active::after { display: none; }
 }
 @media (max-width: 560px) {
-  .dsl-profile { gap: 5px; padding: 2px; }
-  .dsl-profile__name { font-size: 0.76rem; }
-  .dsl-avatar { width: 34px; height: 34px; }
+  .dsl-header__inner { padding: 0 12px; }
+  .dsl-right { gap: 8px; }
+  .dsl-avatar { width: 38px; height: 38px; }
   .dsl-logo { width: 40px; height: 40px; }
   .dsl-brand__text strong { font-size: 1rem; }
   .dsl-brand__text small { font-size: 0.64rem; }

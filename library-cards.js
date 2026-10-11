@@ -41,6 +41,8 @@ async function uploadResourceFile(file) {
 function makeLibraryCard({ kind, item }) {
   const article = document.createElement("article");
   article.className = "home-card library-card";
+  article.id = `${kind}-${item.id}`;
+  article.dataset.id = String(item.id);
   article.appendChild(createCardMenu(
     () => (kind === "tool" ? editTool(item) : editResource(item)),
     async () => {
@@ -165,6 +167,12 @@ function setupToolCards() {
     form.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  form.querySelector("[data-cancel-add]")?.addEventListener("click", () => {
+    reset();
+    create.open = false;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
   imageInput.addEventListener("change", () => {
     const file = imageInput.files[0];
     if (!file) return;
@@ -257,6 +265,12 @@ function setupResourceCards() {
     create.open = true;
     form.scrollIntoView({ behavior: "smooth", block: "start" });
   };
+
+  form.querySelector("[data-cancel-add]")?.addEventListener("click", () => {
+    reset();
+    create.open = false;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
 
   imageInput.addEventListener("change", () => {
     const file = imageInput.files[0];

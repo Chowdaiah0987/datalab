@@ -10,8 +10,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Source+Serif+4:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css?v=20261011-classic">
   <link rel="stylesheet" href="header.css?v=20261011-classic">
-  <link rel="stylesheet" href="home.css?v=20261011-classic">
-  <link rel="stylesheet" href="library.css?v=20261011-classic">
+  <link rel="stylesheet" href="home.css?v=20261011-responsive">
+  <link rel="stylesheet" href="library.css?v=20261011-responsive">
 </head>
 <body class="home-page">
   <main class="home-main library-main">
@@ -33,7 +33,10 @@
         <label class="module-field"><span>PDF or image file (optional)</span><input id="resourceFile" type="file" accept="application/pdf,image/*"></label>
         <div id="resourceCurrentFile" class="module-current-files" hidden></div>
         <p id="resourceFormMessage" class="module-message" role="status"></p>
-        <button id="saveResource" type="submit" class="btn btn--primary">Save Resource</button>
+        <div class="module-form__actions">
+          <button id="saveResource" type="submit" class="btn btn--primary">Save Resource</button>
+          <button type="button" class="btn" data-cancel-add>Cancel</button>
+        </div>
       </form>
     </details>
     <p id="resourceStatus" class="module-status" role="status">Loading resources...</p>
@@ -43,5 +46,6 @@
   <script src="header.js?v=20261011-classic"></script>
   <script src="card-menu.js?v=20261011-restore"></script>
   <script src="library-cards.js?v=20261011-classic"></script>
+  <script src="quick-add.js?v=20261011-add"></script>
 </body>
 </html>
