@@ -28,7 +28,7 @@ async function uploadResourceFile(file) {
   const response = await fetch(`${API_BASE}/resource-files`, {
     method: "POST",
     headers: {
-      "Content-Type": file.type,
+      "Content-Type": file.type || "application/octet-stream",
       "X-Resource-File-Name": encodeURIComponent(file.name),
     },
     body: file,
@@ -138,6 +138,8 @@ function setupToolCards() {
   const preview = document.getElementById("toolImagePreview");
   const save = document.getElementById("saveTool");
   let editing = null;
+  // Closing the form while editing abandons the edit (there is no Cancel button)
+  create.addEventListener("toggle", () => { if (!create.open && editing) reset(); });
 
   function reset() {
     editing = null;
@@ -189,8 +191,8 @@ function setupToolCards() {
       });
       reset();
       create.open = false;
+      await loadLibraryCards("tool"); // reload first, otherwise it wipes the success message
       setLibraryMessage(document.getElementById("toolStatus"), wasEditing ? "Tool updated." : "Tool saved.");
-      await loadLibraryCards("tool");
     } catch (error) {
       setLibraryMessage(document.getElementById("toolFormMessage"), `Could not save tool: ${error.message}`, true);
     } finally {
@@ -211,6 +213,8 @@ function setupResourceCards() {
   const currentFile = document.getElementById("resourceCurrentFile");
   const save = document.getElementById("saveResource");
   let editing = null;
+  // Closing the form while editing abandons the edit (there is no Cancel button)
+  create.addEventListener("toggle", () => { if (!create.open && editing) reset(); });
 
   function reset() {
     editing = null;
@@ -290,8 +294,8 @@ function setupResourceCards() {
       }
       reset();
       create.open = false;
-      setLibraryMessage(document.getElementById("resourceStatus"), wasEditing ? "Resource updated." : "Resource saved.");
       await loadLibraryCards("resource");
+      setLibraryMessage(document.getElementById("resourceStatus"), wasEditing ? "Resource updated." : "Resource saved.");
     } catch (error) {
       if (uploaded) {
         const cleanup = await fetch(`${API_BASE}/resource-files/${encodeURIComponent(uploaded.id)}`, { method: "DELETE" });

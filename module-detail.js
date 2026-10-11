@@ -105,6 +105,7 @@ function renderResourceList(module, resourceType) {
       item.appendChild(action);
       if (isPdf) {
         const download = makeElement("button", "btn btn--ghost module-resource-topic__download", "Download PDF");
+        download.type = "button";
         const status = makeElement("p", "module-resource-topic__status");
         status.hidden = true;
         const fallback = makeElement("a", "module-detail__pdf", "Open PDF in a new tab");
@@ -189,7 +190,8 @@ function renderPdfViewer(module, topic) {
   retry.addEventListener("click", () => {
     error.hidden = true;
     loading.hidden = false;
-    viewer.src = pdfUrl;
+    viewer.src = "about:blank";
+    setTimeout(() => { viewer.src = pdfUrl; }, 60);
   });
   detailRoot.append(error, open, retry);
   renderBackLink(module, moduleUrl(module, "notes"), "← Back to Notes & PDFs");
@@ -260,17 +262,21 @@ function renderModuleDetail(module) {
     if (pdfUrl) {
       const links = makeElement("div", "module-detail__file-actions");
       const viewPdf = makeElement("a", "module-detail__pdf", "📄 View PDF");
-      viewPdf.href = moduleUrl(module, "notes", topic.id);
+      viewPdf.href = moduleUrl(module, "pdf", topic.id);
       const download = makeElement("a", "module-detail__pdf", "⬇ Download PDF");
       download.href = pdfUrl;
       download.download = safePdfFilename(topic.title);
+      if (!pdfUrl.startsWith(API_BASE)) { // outside links cannot be downloaded in place: open them in a new tab
+        download.target = "_blank";
+        download.rel = "noopener noreferrer";
+      }
       links.append(viewPdf, download);
       item.appendChild(links);
     }
     const videoUrl = topicVideoUrl(topic);
     if (videoUrl) {
       const videoLink = makeElement("a", "module-detail__pdf", "▶ Watch Video");
-      videoLink.href = moduleUrl(module, "videos", topic.id);
+      videoLink.href = moduleUrl(module, "video", topic.id);
       item.appendChild(videoLink);
     }
     topicsPanel.appendChild(item);
@@ -307,7 +313,7 @@ function renderModuleDetail(module) {
     panel.appendChild(makeElement("h2", "", "Additional module files"));
     for (const file of moduleFiles) {
       const url = `${API_BASE}/module-files/${encodeURIComponent(file.id)}`;
-      if (file.contentType.startsWith("video/")) {
+      if (String(file.contentType || "").startsWith("video/")) {
         const item = makeElement("div", "module-detail__file");
         const label = makeElement("h3", "", file.name);
         const video = document.createElement("video");

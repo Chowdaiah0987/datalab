@@ -626,5 +626,15 @@ moduleCoverInput.addEventListener("change", async () => {
     setModuleMessage(moduleFormMessage, error.message, true);
   }
 });
+
+// Closing the form while editing cancels the edit, so the next "Add Module" cannot overwrite the old module
+const moduleDetails = moduleForm.closest("details");
+moduleDetails.addEventListener("toggle", () => {
+  if (!moduleDetails.open && editingModule) resetModuleForm();
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && moduleDetails.open) moduleDetails.open = false;
+});
+
 resetModuleForm();
 loadModules();
