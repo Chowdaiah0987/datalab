@@ -1,367 +1,358 @@
-const detailRoot = document.getElementById("moduleDetail");
-const params = new URLSearchParams(location.search);
-const moduleId = params.get("id");
-const view = params.get("view") || "detail";
-const selectedTopicId = params.get("topic");
+/* Module Details page (module.html?id=<moduleId>). Needs shared.js and modules-common.js. */
+(function () {
+  "use strict";
 
-function makeElement(tag, className, text) {
-  const node = document.createElement(tag);
-  if (className) node.className = className;
-  if (text !== undefined) node.textContent = text;
-  return node;
-}
+  const MC = window.ModuleCommon;
+  const { el, icon, ICONS, plural } = MC;
+  const root = document.getElementById("moduleDetail");
+  const params = new URLSearchParams(location.search);
+  const moduleId = params.get("id");
+  const view = params.get("view") || "";
 
-function moduleUrl(module, resourceView = "detail", topicId = "") {
-  const url = new URL("module.html", location.href);
-  url.searchParams.set("id", module.id);
-  if (resourceView !== "detail") url.searchParams.set("view", resourceView);
-  if (topicId) url.searchParams.set("topic", topicId);
-  return `${url.pathname.split("/").pop()}${url.search}`;
-}
-
-function topicPdfUrl(topic) {
-  if (topic.pdfFile) return `${API_BASE}/module-files/${encodeURIComponent(topic.pdfFile.id)}`;
-  return topic.pdfUrl || "";
-}
-
-function topicVideoUrl(topic) {
-  if (topic.videoFile) return `${API_BASE}/module-files/${encodeURIComponent(topic.videoFile.id)}`;
-  return topic.videoUrl || "";
-}
-
-function safePdfFilename(title) {
-  const slug = String(title || "Topic")
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^A-Za-z0-9]+/g, "_")
-    .replace(/^_+|_+$/g, "");
-  return `${slug || "Topic"}.pdf`;
-}
-
-function youtubeEmbedUrl(source) {
-  try {
-    const url = new URL(source);
-    const host = url.hostname.toLowerCase().replace(/^www\./, "");
-    let videoId = "";
-    if (host === "youtu.be") {
-      videoId = url.pathname.split("/").filter(Boolean)[0] || "";
-    } else if (host === "youtube.com" || host.endsWith(".youtube.com")) {
-      videoId = url.searchParams.get("v") || url.pathname.match(/^\/(?:embed|shorts|live)\/([^/]+)/)?.[1] || "";
-    }
-    if (!/^[A-Za-z0-9_-]{11}$/.test(videoId)) return "";
-    return `https://www.youtube-nocookie.com/embed/${videoId}`;
-  } catch (error) {
-    return "";
-  }
-}
-
-function renderPageHeading(module, subtitle) {
-  const eyebrow = makeElement("p", "home-detail__eyebrow", subtitle);
-  const title = makeElement("h1", "", module.title);
-  const description = makeElement("p", "home-detail__lead", module.description || "");
-  detailRoot.append(eyebrow, title);
-  if (description.textContent) detailRoot.appendChild(description);
-}
-
-function renderBackLink(module, href, label) {
-  const back = makeElement("a", "home-detail__back", label);
-  back.href = href;
-  detailRoot.appendChild(back);
-}
-
-function renderResourceList(module, resourceType) {
-  const isPdf = resourceType === "notes";
-  const label = isPdf ? "Notes & PDFs" : "Video Lessons";
-  document.title = `${module.title} — ${label} – Data Science Digital Laboratory`;
-  renderPageHeading(module, `Learning module · ${label}`);
-
-  const backPanel = makeElement("div", "module-resource-list__back");
-  const back = makeElement("a", "home-detail__back", "← Back to Module");
-  back.href = moduleUrl(module);
-  backPanel.appendChild(back);
-  detailRoot.appendChild(backPanel);
-
-  const topics = Array.isArray(module.topics) ? module.topics : [];
-  if (!topics.length) {
-    detailRoot.appendChild(makeElement("p", "module-resource-list__empty", "No topics available yet."));
-    return;
+  // Old links (module.html?id=..&view=pdf|video&topic=..) now open the Topic Details page
+  if ((view === "pdf" || view === "video") && moduleId && params.get("topic")) {
+    location.replace(MC.topicHref(moduleId, params.get("topic"), `&focus=${view}`));
   }
 
-  const list = makeElement("section", "module-resource-list");
-  list.setAttribute("aria-label", `${label} by topic`);
-  for (const [index, topic] of topics.entries()) {
-    const item = makeElement("article", "module-resource-topic");
-    const number = makeElement("span", "module-detail__topic-number", `Topic ${index + 1}`);
-    const name = makeElement("h2", "module-resource-topic__title", topic.title);
-    const hasResource = isPdf ? Boolean(topicPdfUrl(topic)) : Boolean(topicVideoUrl(topic));
-    const resourceUrl = isPdf ? topicPdfUrl(topic) : topicVideoUrl(topic);
-    item.append(number, name);
-    if (hasResource) {
-      item.appendChild(makeElement("p", "module-resource-topic__available",
-        isPdf ? "PDF available" : "Video available"));
-      const action = makeElement("a", "btn btn--primary module-resource-topic__action",
-        isPdf ? "View PDF" : "Watch Video");
-      action.href = moduleUrl(module, isPdf ? "pdf" : "video", topic.id);
-      item.appendChild(action);
-      if (isPdf) {
-        const download = makeElement("button", "btn btn--ghost module-resource-topic__download", "Download PDF");
-        download.type = "button";
-        const status = makeElement("p", "module-resource-topic__status");
-        status.hidden = true;
-        const fallback = makeElement("a", "module-detail__pdf", "Open PDF in a new tab");
-        fallback.href = resourceUrl;
-        fallback.target = "_blank";
-        fallback.rel = "noopener noreferrer";
-        fallback.hidden = true;
-        download.addEventListener("click", () => downloadPdf(resourceUrl, topic.title, status, fallback));
-        item.append(download, status, fallback);
-      }
-    } else {
-      item.appendChild(makeElement("p", "module-resource-topic__unavailable",
-        isPdf ? "PDF not available" : "Video not available"));
-    }
-    list.appendChild(item);
-  }
-  detailRoot.appendChild(list);
-}
-
-async function downloadPdf(url, title, status, fallback) {
-  status.hidden = false;
-  status.classList.remove("is-error");
-  status.textContent = "Preparing download...";
-  fallback.hidden = true;
-  try {
-    const downloadUrl = new URL(url, location.href);
-    if (downloadUrl.origin === location.origin && downloadUrl.pathname.includes("/module-files/")) {
-      downloadUrl.searchParams.set("download", "1");
-      downloadUrl.searchParams.set("downloadName", safePdfFilename(title));
-    }
-    const response = await fetch(downloadUrl);
-    if (!response.ok) throw new Error(`The file server returned ${response.status}.`);
-    const blob = await response.blob();
-    if (!blob.size) throw new Error("The PDF file is empty.");
-    const objectUrl = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = objectUrl;
-    anchor.download = safePdfFilename(title);
-    document.body.appendChild(anchor);
-    anchor.click();
-    anchor.remove();
-    window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
-    status.textContent = "Download started.";
-  } catch (error) {
-    status.textContent = `Could not download this PDF: ${error.message}`;
-    status.classList.add("is-error");
-    fallback.hidden = false;
-  }
-}
-
-function renderPdfViewer(module, topic) {
-  document.title = `${topic.title} — PDF – Data Science Digital Laboratory`;
-  renderPageHeading(module, "Notes & PDFs");
-  detailRoot.appendChild(makeElement("h2", "module-resource-viewer__title", topic.title));
-  const pdfUrl = topicPdfUrl(topic);
-  if (!pdfUrl) {
-    detailRoot.appendChild(makeElement("p", "module-resource-list__empty", "PDF not available for this topic."));
-    renderBackLink(module, moduleUrl(module, "notes"), "← Back to Notes & PDFs");
-    return;
-  }
-  const viewer = makeElement("iframe", "module-resource-viewer__pdf");
-  viewer.src = pdfUrl;
-  viewer.title = `${topic.title} PDF viewer`;
-  viewer.loading = "eager";
-  const loading = makeElement("p", "module-resource-viewer__loading", "Loading PDF...");
-  loading.setAttribute("role", "status");
-  viewer.addEventListener("load", () => { loading.hidden = true; });
-  viewer.addEventListener("error", () => {
-    const error = document.getElementById("pdfViewerError");
-    if (error) error.hidden = false;
-  });
-  detailRoot.append(loading, viewer);
-  const error = makeElement("p", "module-resource-viewer__error", "The PDF may not be available inline. Use the link below to open it in a new tab.");
-  error.id = "pdfViewerError";
-  error.hidden = true;
-  const open = makeElement("a", "module-detail__pdf", "Open PDF in a new tab");
-  open.href = pdfUrl;
-  open.target = "_blank";
-  open.rel = "noopener noreferrer";
-  const retry = makeElement("button", "btn btn--ghost module-resource-viewer__retry", "Retry PDF");
-  retry.type = "button";
-  retry.addEventListener("click", () => {
-    error.hidden = true;
-    loading.hidden = false;
-    viewer.src = "about:blank";
-    setTimeout(() => { viewer.src = pdfUrl; }, 60);
-  });
-  detailRoot.append(error, open, retry);
-  renderBackLink(module, moduleUrl(module, "notes"), "← Back to Notes & PDFs");
-}
-
-function renderVideoViewer(module, topic) {
-  document.title = `${topic.title} — Video Lesson – Data Science Digital Laboratory`;
-  renderPageHeading(module, "Video Lessons");
-  detailRoot.appendChild(makeElement("h2", "module-resource-viewer__title", topic.title));
-  const source = topicVideoUrl(topic);
-  if (!source) {
-    detailRoot.appendChild(makeElement("p", "module-resource-list__empty", "Video not available for this topic."));
-    renderBackLink(module, moduleUrl(module, "videos"), "← Back to Video Lessons");
-    return;
-  }
-  const embedUrl = youtubeEmbedUrl(source);
-  if (embedUrl) {
-    const player = makeElement("iframe", "module-resource-viewer__video");
-    player.src = embedUrl;
-    player.title = `${topic.title} video lesson`;
-    player.allow = "accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
-    player.allowFullscreen = true;
-    detailRoot.appendChild(player);
-  } else {
-    const player = document.createElement("video");
-    player.className = "module-resource-viewer__video";
-    player.controls = true;
-    player.preload = "metadata";
-    player.src = source;
-    player.setAttribute("aria-label", `${topic.title} video lesson`);
-    const error = makeElement("p", "module-resource-viewer__error", "This video could not be loaded. Check the connection or try again.");
-    error.hidden = true;
-    const retry = makeElement("button", "btn btn--ghost", "Retry video");
-    retry.type = "button";
-    retry.addEventListener("click", () => {
-      error.hidden = true;
-      player.load();
-    });
-    player.addEventListener("error", () => { error.hidden = false; });
-    detailRoot.append(player, error, retry);
-  }
-  renderBackLink(module, moduleUrl(module, "videos"), "← Back to Video Lessons");
-}
-
-function renderModuleDetail(module) {
-  document.title = `${module.title} – Data Science Digital Laboratory`;
-  renderPageHeading(module, "Learning module");
-
-  if (module.cover) {
-    const cover = document.createElement("img");
-    cover.className = "module-detail__cover";
-    cover.src = module.cover;
-    cover.alt = `${module.title} cover`;
-    detailRoot.appendChild(cover);
+  function showMessage(text, isError) {
+    root.replaceChildren(el("p", `module-status${isError ? " is-error" : ""}`, text));
+    const back = el("a", "mbtn mbtn--ghost", "← Back to Modules");
+    back.href = "modules.html";
+    root.appendChild(back);
   }
 
-  const topicsPanel = makeElement("section", "home-detail__panel module-detail__topics");
-  topicsPanel.appendChild(makeElement("h2", "", "Topics"));
-  const topics = Array.isArray(module.topics) ? module.topics : [];
-  for (const [index, topic] of topics.entries()) {
-    const item = makeElement("article", "module-detail__topic");
-    item.append(
-      makeElement("p", "module-detail__topic-number", `Topic ${index + 1}`),
-      makeElement("h3", "", topic.title),
+  function actionLink(label, pathData, href, className, options = {}) {
+    const a = el("a", className);
+    a.href = href;
+    a.append(icon(pathData), el("span", "", label));
+    if (options.newTab) { a.target = "_blank"; a.rel = "noopener noreferrer"; }
+    if (options.download) a.download = options.download;
+    return a;
+  }
+
+  function unavailable(text) {
+    return el("p", "munavailable", text);
+  }
+
+  /* ---------------------------------------------------------------- sections */
+  function renderHero(module) {
+    const hero = el("section", "mdhero");
+    const text = el("div", "mdhero__text");
+    text.append(
+      el("span", "mdhero__badge", `MODULE ${module.numberLabel}`),
+      el("h1", "", module.title),
+      el("p", "mdhero__desc", module.fullDescription || module.shortDescription || "No description has been added for this module yet."),
     );
-    if (topic.content) item.appendChild(makeElement("p", "", topic.content));
-    const pdfUrl = topicPdfUrl(topic);
-    if (pdfUrl) {
-      const links = makeElement("div", "module-detail__file-actions");
-      const viewPdf = makeElement("a", "module-detail__pdf", "📄 View PDF");
-      viewPdf.href = moduleUrl(module, "pdf", topic.id);
-      const download = makeElement("a", "module-detail__pdf", "⬇ Download PDF");
-      download.href = pdfUrl;
-      download.download = safePdfFilename(topic.title);
-      if (!pdfUrl.startsWith(API_BASE)) { // outside links cannot be downloaded in place: open them in a new tab
-        download.target = "_blank";
-        download.rel = "noopener noreferrer";
-      }
-      links.append(viewPdf, download);
-      item.appendChild(links);
-    }
-    const videoUrl = topicVideoUrl(topic);
-    if (videoUrl) {
-      const videoLink = makeElement("a", "module-detail__pdf", "▶ Watch Video");
-      videoLink.href = moduleUrl(module, "video", topic.id);
-      item.appendChild(videoLink);
-    }
-    topicsPanel.appendChild(item);
-  }
-  if (!topics.length) topicsPanel.appendChild(makeElement("p", "", "No topics available yet."));
-  detailRoot.appendChild(topicsPanel);
-
-  const importantQuestions = module.importantQuestions || {};
-  const questionText = String(importantQuestions.text || "").trim();
-  const questionPdf = importantQuestions.pdfFile;
-  if (questionText || questionPdf) {
-    const panel = makeElement("section", "home-detail__panel module-detail__questions");
-    panel.appendChild(makeElement("h2", "", "Important Questions"));
-    if (questionText) panel.appendChild(makeElement("p", "module-detail__questions-text", questionText));
-    if (questionPdf) {
-      const pdfUrl = `${API_BASE}/important-question-files/${encodeURIComponent(questionPdf.id)}`;
-      const links = makeElement("div", "module-detail__file-actions");
-      const viewPdf = makeElement("a", "module-detail__pdf", "📄 View Important Questions PDF");
-      viewPdf.href = pdfUrl;
-      viewPdf.target = "_blank";
-      viewPdf.rel = "noopener noreferrer";
-      const download = makeElement("a", "module-detail__pdf", "⬇ Download PDF");
-      download.href = `${pdfUrl}?download=1`;
-      download.download = questionPdf.name;
-      links.append(viewPdf, download);
-      panel.appendChild(links);
-    }
-    detailRoot.appendChild(panel);
-  }
-
-  const moduleFiles = Array.isArray(module.files) ? module.files : [];
-  if (moduleFiles.length) {
-    const panel = makeElement("section", "home-detail__panel module-detail__files");
-    panel.appendChild(makeElement("h2", "", "Additional module files"));
-    for (const file of moduleFiles) {
-      const url = `${API_BASE}/module-files/${encodeURIComponent(file.id)}`;
-      if (String(file.contentType || "").startsWith("video/")) {
-        const item = makeElement("div", "module-detail__file");
-        const label = makeElement("h3", "", file.name);
-        const video = document.createElement("video");
-        video.controls = true;
-        video.preload = "metadata";
-        video.src = url;
-        video.setAttribute("aria-label", file.name);
-        item.append(label, video);
-        panel.appendChild(item);
-      } else {
-        const link = makeElement("a", "module-detail__pdf", `Open PDF: ${file.name}`);
-        link.href = url;
-        link.target = "_blank";
-        link.rel = "noopener noreferrer";
-        panel.appendChild(link);
-      }
-    }
-    detailRoot.appendChild(panel);
-  }
-
-  renderBackLink(module, "modules.html", "← Back to Modules");
-}
-
-async function loadModuleDetail() {
-  if (!moduleId) {
-    detailRoot.textContent = "No module was selected.";
-    return;
-  }
-  try {
-    const module = await apiRequest(`/modules/${encodeURIComponent(moduleId)}`);
-    const topics = Array.isArray(module.topics) ? module.topics : [];
-    detailRoot.replaceChildren();
-    if (view === "notes" || view === "videos") {
-      renderResourceList(module, view);
-    } else if (view === "pdf" || view === "video") {
-      const topic = topics.find((item) => String(item.id) === selectedTopicId);
-      if (!topic) {
-        detailRoot.textContent = "The selected topic could not be found.";
-        return;
-      }
-      if (view === "pdf") renderPdfViewer(module, topic);
-      else renderVideoViewer(module, topic);
+    hero.appendChild(text);
+    if (module.cover) {
+      const art = el("div", "mdhero__art");
+      const img = document.createElement("img");
+      img.src = module.cover; img.alt = `${module.title} cover`;
+      art.appendChild(img);
+      hero.appendChild(art);
     } else {
-      renderModuleDetail(module);
+      hero.classList.add("mdhero--plain");
     }
-  } catch (error) {
-    detailRoot.textContent = `Could not load module: ${error.message}`;
+    return hero;
   }
-}
 
-loadModuleDetail();
+  function renderNotesCard(module, mergeEnabled) {
+    const card = el("section", "mres mres--notes");
+    card.id = "module-notes";
+    const head = el("div", "mres__head");
+    const iconBox = el("span", "mres__icon mres__icon--pdf");
+    iconBox.appendChild(icon(ICONS.doc));
+    const titles = el("div", "mres__titles");
+    titles.append(el("h2", "", "Module Notes & PDFs"), el("p", "", "View and download all PDFs for this module."));
+    head.append(iconBox, titles);
+    card.appendChild(head);
+
+    const actions = el("div", "mres__actions");
+    if (module.notes) {
+      actions.append(
+        actionLink("View PDF", ICONS.doc, module.notes, "mbtn mbtn--primary", { newTab: true }),
+        actionLink("Download PDF", ICONS.download, MC.downloadHref(module.notes, `${module.title} notes`), "mbtn mbtn--ghost",
+          MC.isHostedHere(module.notes) ? { download: MC.safePdfName(`${module.title} notes`) } : { newTab: true }),
+      );
+    } else {
+      actions.appendChild(unavailable("The complete module notes PDF is not available yet."));
+    }
+    card.appendChild(actions);
+
+    // Combined PDF: only offered when the server can really merge (pdf-lib installed)
+    const hostedPdf = module.raw.notesFile || module.topics.some((t) => t.pdfFile) || (module.raw.importantQuestions || {}).pdfFile;
+    if (mergeEnabled && hostedPdf) {
+      const combined = el("div", "mres__combined");
+      combined.appendChild(el("p", "", "Complete module PDF: module notes, then each topic’s notes in order, then additional files, with Important Questions as the final section."));
+      const button = el("button", "mbtn mbtn--gold", "Download complete module PDF");
+      button.type = "button";
+      const status = el("p", "mres__status");
+      status.setAttribute("role", "status");
+      button.addEventListener("click", async () => {
+        button.disabled = true;
+        MC.setStatus(status, "Building the complete PDF…");
+        try {
+          const response = await fetch(`${API_BASE}/modules/${encodeURIComponent(module.id)}/combined-pdf?download=1`);
+          if (!response.ok) {
+            const body = await response.json().catch(() => null);
+            throw new Error(body?.error || `The server returned ${response.status}.`);
+          }
+          const blob = await response.blob();
+          const objectUrl = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = objectUrl;
+          a.download = MC.safePdfName(`${module.title} complete`);
+          document.body.appendChild(a); a.click(); a.remove();
+          setTimeout(() => URL.revokeObjectURL(objectUrl), 1500);
+          const skipped = Number(response.headers.get("X-Combined-Skipped") || 0);
+          MC.setStatus(status, `Complete PDF created from ${plural(Number(response.headers.get("X-Combined-Parts") || 0), "PDF")}.${skipped ? ` ${plural(skipped, "linked PDF")} hosted elsewhere could not be included.` : ""}`);
+        } catch (error) {
+          MC.setStatus(status, `Could not create the complete PDF: ${error.message}`, true);
+        } finally {
+          button.disabled = false;
+        }
+      });
+      combined.append(button, status);
+      card.appendChild(combined);
+    }
+    return card;
+  }
+
+  function videoItems(module) {
+    const items = [];
+    if (module.video) items.push({ label: "Complete module video", url: module.video });
+    module.topics.forEach((topic, index) => {
+      if (topic.video) items.push({ label: `${index + 1}. ${topic.title}`, url: topic.video });
+    });
+    return items;
+  }
+
+  function renderVideoCard(module, openPanel) {
+    const card = el("section", "mres mres--video");
+    card.id = "module-video";
+    const head = el("div", "mres__head");
+    const iconBox = el("span", "mres__icon mres__icon--video");
+    iconBox.appendChild(icon(ICONS.play));
+    const titles = el("div", "mres__titles");
+    titles.append(el("h2", "", "Module Video Lessons"), el("p", "", "Watch all video lessons for this module."));
+    head.append(iconBox, titles);
+    card.appendChild(head);
+    const actions = el("div", "mres__actions");
+    const items = videoItems(module);
+    if (items.length) {
+      const play = el("button", "mbtn mbtn--primary");
+      play.type = "button";
+      play.append(icon(ICONS.play), el("span", "", "Play"));
+      play.setAttribute("aria-controls", "videoPanel");
+      play.addEventListener("click", () => openPanel());
+      actions.appendChild(play);
+    } else {
+      actions.appendChild(unavailable("No video lessons are available for this module yet."));
+    }
+    card.appendChild(actions);
+    return card;
+  }
+
+  function renderVideoPanel(module) {
+    const panel = el("section", "mpanel mvideo");
+    panel.id = "videoPanel";
+    panel.hidden = true;
+    panel.setAttribute("aria-label", "Video lessons");
+    const head = el("div", "mpanel__head");
+    head.appendChild(el("h2", "", "Video Lessons"));
+    const close = el("button", "mbtn mbtn--tiny", "Close");
+    close.type = "button";
+    head.appendChild(close);
+    const chips = el("div", "mvideo__chips");
+    const stage = el("div", "mvideo__stage");
+    panel.append(head, chips, stage);
+    const items = videoItems(module);
+    let active = -1;
+    function play(index) {
+      active = index;
+      stage.replaceChildren(MC.createPlayer(items[index].url, items[index].label));
+      chips.querySelectorAll("button").forEach((b, i) => b.setAttribute("aria-pressed", String(i === index)));
+    }
+    items.forEach((item, index) => {
+      const chip = el("button", "mvideo__chip", item.label);
+      chip.type = "button";
+      chip.setAttribute("aria-pressed", "false");
+      chip.addEventListener("click", () => play(index));
+      chips.appendChild(chip);
+    });
+    close.addEventListener("click", () => { panel.hidden = true; stage.replaceChildren(); active = -1; });
+    return {
+      panel,
+      open() {
+        panel.hidden = false;
+        if (active < 0 && items.length) play(0);
+        panel.scrollIntoView({ behavior: "smooth", block: "start" });
+      },
+    };
+  }
+
+  function renderTopics(module) {
+    const section = el("section", "mpanel");
+    section.id = "module-topics";
+    const head = el("div", "mpanel__head");
+    const title = el("h2", "mpanel__title");
+    title.append(icon(ICONS.book), document.createTextNode("Topics in this Module"));
+    head.append(title, el("span", "mpanel__count", plural(module.topics.length, "Topic")));
+    section.appendChild(head);
+    if (!module.topics.length) {
+      section.appendChild(unavailable("No topics have been added to this module yet."));
+      return section;
+    }
+    const rows = el("ol", "mtopics");
+    module.topics.forEach((topic, index) => {
+      const row = el("li", "mtopic");
+      const badge = el("span", "mtopic__badge", String(index + 1).padStart(2, "0"));
+      const main = el("div", "mtopic__main");
+      const link = el("a", "mtopic__title", topic.title);
+      link.href = MC.topicHref(module.id, topic.id);
+      main.appendChild(link);
+      const summary = topic.description || (topic.lesson ? topic.lesson.replace(/[#*`>\-!\[\]()]/g, "").replace(/\s+/g, " ").trim().slice(0, 160) : "");
+      row.append(badge, main, el("p", "mtopic__desc", summary || "No description added yet."));
+
+      const resource = (label, pathData, available, focus, className) => {
+        if (available) {
+          const a = el("a", `mchipbtn ${className}`);
+          a.href = MC.topicHref(module.id, topic.id, `&focus=${focus}`);
+          a.append(icon(pathData), el("span", "", label));
+          a.setAttribute("aria-label", `${label} for ${topic.title}`);
+          return a;
+        }
+        const span = el("span", `mchipbtn is-unavailable ${className}`);
+        span.append(icon(pathData), el("span", "", label));
+        span.setAttribute("aria-label", `${label} not available for ${topic.title}`);
+        span.title = `${label} not available`;
+        return span;
+      };
+      const open = el("a", "mtopic__go");
+      open.href = MC.topicHref(module.id, topic.id);
+      open.setAttribute("aria-label", `Open topic: ${topic.title}`);
+      open.appendChild(icon(ICONS.arrow));
+      const buttons = el("div", "mtopic__buttons");
+      buttons.append(resource("PDF", ICONS.doc, Boolean(topic.pdf), "pdf", "is-pdf"), resource("Video", ICONS.play, Boolean(topic.video), "video", "is-video"), open);
+      row.appendChild(buttons);
+      rows.appendChild(row);
+    });
+    section.appendChild(rows);
+    return section;
+  }
+
+  // Resource order on this page: module notes -> topic resources -> Important Questions
+  function renderQuestions(module) {
+    const q = module.questions;
+    const section = el("section", "mpanel miq");
+    section.id = "important-questions";
+    const head = el("div", "mpanel__head");
+    const title = el("h2", "mpanel__title");
+    title.append(icon(ICONS.help), document.createTextNode(q.title));
+    head.appendChild(title);
+    section.appendChild(head);
+    if (q.description) section.appendChild(el("p", "miq__desc", q.description));
+    if (q.text) section.appendChild(el("p", "miq__text", q.text));
+    if (q.pdf) {
+      const actions = el("div", "mres__actions");
+      actions.append(
+        actionLink("View Important Questions PDF", ICONS.doc, q.pdf, "mbtn mbtn--primary", { newTab: true }),
+        actionLink("Download PDF", ICONS.download, MC.downloadHref(q.pdf, `${module.title} important questions`), "mbtn mbtn--ghost",
+          MC.isHostedHere(q.pdf) ? { download: MC.safePdfName(`${module.title} important questions`) } : { newTab: true }),
+      );
+      section.appendChild(actions);
+    } else {
+      section.appendChild(unavailable("The Important Questions PDF is not available for this module yet."));
+    }
+    return section;
+  }
+
+  function renderAbout(module) {
+    const section = el("section", "mpanel");
+    section.id = "about-module";
+    const head = el("div", "mpanel__head");
+    const title = el("h2", "mpanel__title");
+    title.append(icon(ICONS.info), document.createTextNode("About this Module"));
+    head.appendChild(title);
+    section.appendChild(head);
+
+    const grid = el("div", "mabout");
+    const stats = el("dl", "mabout__stats");
+    const pdfCount = (module.notes ? 1 : 0) + module.topics.filter((t) => t.pdf).length;
+    const videoCount = (module.video ? 1 : 0) + module.topics.filter((t) => t.video).length;
+    const stat = (label, value, pathData) => {
+      const row = el("div", "mabout__row");
+      const dt = el("dt");
+      dt.append(icon(pathData), document.createTextNode(label));
+      row.append(dt, el("dd", "", String(value)));
+      stats.appendChild(row);
+    };
+    stat("Total Topics", module.topics.length, ICONS.layers);
+    stat("Notes & PDFs", pdfCount, ICONS.doc);
+    stat("Video Lessons", videoCount, ICONS.play);
+    stat("Module PDF", module.notes ? "Available" : "Not available", ICONS.doc);
+    stat("Module video", module.video ? "Available" : "Not available", ICONS.play);
+    stat("Important Questions", module.questions.pdf || module.questions.text ? "Available" : "Not available", ICONS.help);
+
+    const learn = el("div", "mabout__learn");
+    learn.appendChild(el("h3", "", "What you will learn"));
+    if (module.outcomes.length) {
+      const ul = el("ul", "mchecklist");
+      module.outcomes.forEach((outcome) => {
+        const li = el("li");
+        li.append(icon(ICONS.check), el("span", "", outcome));
+        ul.appendChild(li);
+      });
+      learn.appendChild(ul);
+    } else {
+      learn.appendChild(unavailable("Learning outcomes have not been added for this module yet."));
+    }
+    grid.append(stats, learn);
+    section.appendChild(grid);
+    return section;
+  }
+
+  /* -------------------------------------------------------------------- page */
+  async function mergeAvailable() {
+    try {
+      const result = await apiRequest("/capabilities");
+      return Boolean(result && result.pdfMerge);
+    } catch (error) {
+      return false; // older server without the route: do not offer the combined PDF
+    }
+  }
+
+  async function init() {
+    if (!moduleId) { showMessage("No module was selected."); return; }
+    try {
+      const [modules, mergeEnabled] = await Promise.all([MC.loadModules(), mergeAvailable()]);
+      const module = modules.find((m) => m.id === moduleId);
+      MC.renderSidebar(document.getElementById("moduleSidebar"), modules, { moduleId });
+      if (!module) { showMessage("This module could not be found. It may have been deleted.", true); return; }
+      module.raw = module; // normalised modules keep the saved fields (notesFile, importantQuestions…)
+      document.title = `${module.title} – Data Science Digital Laboratory`;
+
+      const crumbs = el("nav", "mcrumbs-wrap");
+      MC.renderBreadcrumbs(crumbs, [
+        { label: "Home", href: "home.html" },
+        { label: "Modules", href: "modules.html" },
+        { label: module.title },
+      ]);
+      const videoPanel = renderVideoPanel(module);
+      const resources = el("div", "mres-grid");
+      resources.append(renderNotesCard(module, mergeEnabled), renderVideoCard(module, videoPanel.open));
+      root.replaceChildren(crumbs, renderHero(module), resources, videoPanel.panel, renderTopics(module), renderQuestions(module), renderAbout(module));
+
+      if (view === "videos") videoPanel.open();
+      else if (view === "notes") {
+        const notes = document.getElementById("module-notes");
+        notes.classList.add("is-highlight");
+        notes.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    } catch (error) {
+      showMessage(`Could not load this module: ${error.message}`, true);
+    }
+  }
+
+  init();
+})();

@@ -10,7 +10,16 @@ const mongoose = require("mongoose");
 const PORT = process.env.PORT || 3000;
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/dslab";
 const MAX_VIDEO_BYTES = (Number(process.env.MAX_VIDEO_MB) || 300) * 1024 * 1024;
+const MAX_PDF_BYTES = (Number(process.env.MAX_PDF_MB) || 50) * 1024 * 1024;
 const OBJECT_ID = /^[a-f\d]{24}$/i;
+
+// Optional dependency: PDF merging only works when `npm install pdf-lib` has been run.
+let PDFDocument = null;
+try {
+  ({ PDFDocument } = require("pdf-lib"));
+} catch (error) {
+  console.warn("pdf-lib is not installed: the combined module PDF feature is disabled (npm install pdf-lib to enable).");
+}
 
 class HttpError extends Error {
   constructor(status, message) {
@@ -70,7 +79,9 @@ const moduleFileSchema = new Schema({
 const moduleTopicSchema = new Schema({
   id: { type: String, required: true, default: () => new mongoose.Types.ObjectId().toString() },
   title: { type: String, required: true },
+  description: { type: String, default: "" },
   content: { type: String, default: "" },
+  order: { type: Number, default: 0 },
   pdfFile: { type: moduleFileSchema, default: null },
   pdfUrl: { type: String, default: "" },
   videoFile: { type: moduleFileSchema, default: null },
@@ -85,15 +96,24 @@ const importantQuestionsPdfSchema = new Schema({
 
 const importantQuestionsSchema = new Schema({
   type: { type: String, enum: ["text", "pdf", "both", "none"], default: "none" },
+  title: { type: String, default: "" },
+  description: { type: String, default: "" },
   text: { type: String, default: "" },
   pdfUrl: { type: String, default: "" },
   pdfFile: { type: importantQuestionsPdfSchema, default: null },
 }, { _id: false });
 
 const moduleSchema = new Schema({
+  number: { type: String, default: "" },
   title: { type: String, required: true },
-  description: { type: String, default: "" },
+  description: { type: String, default: "" }, // short description (shown on cards)
+  fullDescription: { type: String, default: "" },
+  learningOutcomes: { type: [String], default: [] },
   cover: { type: String, default: "" },
+  notesFile: { type: moduleFileSchema, default: null },
+  notesUrl: { type: String, default: "" },
+  moduleVideoFile: { type: moduleFileSchema, default: null },
+  moduleVideoUrl: { type: String, default: "" },
   topics: { type: [moduleTopicSchema], default: [] },
   files: { type: [moduleFileSchema], default: [] },
   importantQuestions: { type: importantQuestionsSchema, default: () => ({}) },
@@ -337,6 +357,42 @@ function parseProfile(body = {}) {
   };
 }
 
+function httpUrl(value, label) {
+  const url = text(value);
+  if (!url) return "";
+  try {
+    if (!["http:", "https:"].includes(new URL(url).protocol)) throw new Error();
+  } catch (error) {
+    throw new HttpError(400, `Enter a valid ${label} URL (it must start with http:// or https://).`);
+  }
+  return url;
+}
+
+// Module covers are either an uploaded image (stored as a data URL) or an http(s) image link
+function moduleCover(value) {
+  const cover = typeof value === "string" ? value.trim() : "";
+  if (!cover) return "";
+  if (cover.startsWith("data:image/")) return cover;
+  return httpUrl(cover, "cover image");
+}
+
+function parseModuleFile(file, kind, label) {
+  if (!file) return null;
+  const contentType = text(file.contentType);
+  if (!OBJECT_ID.test(String(file.id || ""))) throw new HttpError(400, `The ${label} attachment is invalid.`);
+  if (kind === "pdf") {
+    if (contentType !== "application/pdf") throw new HttpError(400, `${label} must be a PDF.`);
+    if (!/\.pdf$/i.test(text(file.name))) throw new HttpError(400, `${label} must have a .pdf filename.`);
+  } else if (!contentType.startsWith("video/")) {
+    throw new HttpError(400, `${label} must be a video file.`);
+  }
+  return {
+    id: String(file.id),
+    name: requireText(file.name, `The ${label} attachment needs a file name.`),
+    contentType,
+  };
+}
+
 function parseModule(body = {}) {
   const topics = Array.isArray(body.topics) ? body.topics : [];
   const files = Array.isArray(body.files) ? body.files : [];
@@ -344,79 +400,63 @@ function parseModule(body = {}) {
     ? body.importantQuestions
     : {};
   if (!topics.length) throw new HttpError(400, "Add at least one module topic.");
+
+  const number = text(body.number).slice(0, 10);
+  if (number && !/^[A-Za-z0-9.\-]{1,10}$/.test(number)) {
+    throw new HttpError(400, "The module number can only contain letters, digits, dots and dashes.");
+  }
+  const outcomes = (Array.isArray(body.learningOutcomes) ? body.learningOutcomes : [])
+    .map((item) => text(item).slice(0, 300))
+    .filter(Boolean)
+    .slice(0, 30);
+
+  const notesFile = parseModuleFile(body.notesFile, "pdf", "The module notes PDF");
+  const notesUrl = httpUrl(body.notesUrl, "module notes PDF");
+  if (notesFile && notesUrl) throw new HttpError(400, "Use either an uploaded module notes PDF or a URL, not both.");
+  const moduleVideoFile = parseModuleFile(body.moduleVideoFile, "video", "The module video");
+  const moduleVideoUrl = httpUrl(body.moduleVideoUrl, "module video");
+  if (moduleVideoFile && moduleVideoUrl) throw new HttpError(400, "Use either an uploaded module video or a URL, not both.");
+
   const questionText = String(importantQuestions.text || "");
-  let pdfFile = null;
-  if (importantQuestions.pdfFile) {
-    if (!OBJECT_ID.test(String(importantQuestions.pdfFile.id || ""))) {
-      throw new HttpError(400, "The Important Questions PDF is invalid.");
-    }
-    if (text(importantQuestions.pdfFile.contentType) !== "application/pdf") {
-      throw new HttpError(400, "Important Questions attachments must be PDFs.");
-    }
-    if (!/\.pdf$/i.test(text(importantQuestions.pdfFile.name))) {
-      throw new HttpError(400, "The Important Questions attachment must have a .pdf filename.");
-    }
-    pdfFile = {
-      id: String(importantQuestions.pdfFile.id),
-      name: requireText(importantQuestions.pdfFile.name, "The Important Questions PDF needs a file name."),
-      contentType: "application/pdf",
-    };
-  }
-  if (pdfFile && importantQuestions.pdfUrl !== `/api/important-question-files/${pdfFile.id}`) {
-    throw new HttpError(400, "The Important Questions PDF URL does not match its uploaded file.");
-  }
+  const questionPdf = parseModuleFile(importantQuestions.pdfFile, "pdf", "The Important Questions PDF");
+  const questionUrl = questionPdf ? "" : httpUrl(
+    importantQuestions.pdfUrl && !String(importantQuestions.pdfUrl).startsWith("/api/")
+      ? importantQuestions.pdfUrl : "",
+    "Important Questions PDF",
+  );
   const hasQuestionText = Boolean(questionText.trim());
-  const questionType = hasQuestionText && pdfFile ? "both" : hasQuestionText ? "text" : pdfFile ? "pdf" : "none";
+  const hasPdf = Boolean(questionPdf || questionUrl);
+  const questionType = hasQuestionText && hasPdf ? "both" : hasQuestionText ? "text" : hasPdf ? "pdf" : "none";
+
   const topicIds = new Set();
-  const normalizeTopicUrl = (value, label) => {
-    const url = text(value);
-    if (!url) return "";
-    try {
-      if (!["http:", "https:"].includes(new URL(url).protocol)) throw new Error();
-    } catch (error) {
-      throw new HttpError(400, `Enter a valid ${label} URL.`);
-    }
-    return url;
-  };
   return {
+    number,
     title: requireText(body.title, "Module name is required."),
-    description: text(body.description),
-    cover: optionalImage(body.cover),
-    topics: topics.map((topic) => {
-      const normalizeTopicFile = (file, expectedType, label) => {
-        if (!file) return null;
-        const contentType = text(file.contentType);
-        if (!OBJECT_ID.test(String(file.id || ""))) {
-          throw new HttpError(400, `The ${label} attachment is invalid.`);
-        }
-        if (expectedType === "application/pdf" && contentType !== expectedType) {
-          throw new HttpError(400, "Topic attachments must be PDFs.");
-        }
-        if (expectedType === "application/pdf" && !/\.pdf$/i.test(text(file.name))) {
-          throw new HttpError(400, "Topic PDF attachments must have a .pdf filename.");
-        }
-        if (expectedType === "video" && !contentType.startsWith("video/")) {
-          throw new HttpError(400, "Topic video attachments must be video files.");
-        }
-        return {
-          id: String(file.id),
-          name: requireText(file.name, `The ${label} attachment needs a file name.`),
-          contentType,
-        };
-      };
+    description: text(body.description).slice(0, 600),
+    fullDescription: text(body.fullDescription).slice(0, 10000),
+    learningOutcomes: outcomes,
+    cover: moduleCover(body.cover),
+    notesFile,
+    notesUrl,
+    moduleVideoFile,
+    moduleVideoUrl,
+    topics: topics.map((topic, index) => {
       const id = text(topic && topic.id) || new mongoose.Types.ObjectId().toString();
       if (topicIds.has(id)) throw new HttpError(400, "Every topic must have a unique ID.");
       topicIds.add(id);
-      const pdfFile = normalizeTopicFile(topic && topic.pdfFile, "application/pdf", "Topic PDF");
-      const videoFile = normalizeTopicFile(topic && topic.videoFile, "video", "Topic video");
-      const pdfUrl = normalizeTopicUrl(topic && topic.pdfUrl, "topic PDF");
-      const videoUrl = normalizeTopicUrl(topic && topic.videoUrl, "topic video");
+      const pdfFile = parseModuleFile(topic && topic.pdfFile, "pdf", "Topic PDF");
+      const videoFile = parseModuleFile(topic && topic.videoFile, "video", "Topic video");
+      const pdfUrl = httpUrl(topic && topic.pdfUrl, "topic PDF");
+      const videoUrl = httpUrl(topic && topic.videoUrl, "topic video");
       if (pdfFile && pdfUrl) throw new HttpError(400, "A topic can use either an uploaded PDF or a PDF URL, not both.");
       if (videoFile && videoUrl) throw new HttpError(400, "A topic can use either an uploaded video or a video URL, not both.");
+      const order = Number(topic && topic.order);
       return {
         id,
         title: requireText(topic && topic.title, "Every module topic needs a title."),
-        content: text(topic && topic.content),
+        description: text(topic && topic.description).slice(0, 600),
+        content: text(topic && topic.content).slice(0, 60000),
+        order: Number.isFinite(order) && order > 0 ? order : index + 1,
         pdfFile,
         pdfUrl,
         videoFile,
@@ -439,9 +479,11 @@ function parseModule(body = {}) {
     }),
     importantQuestions: {
       type: questionType,
+      title: text(importantQuestions.title).slice(0, 150),
+      description: text(importantQuestions.description).slice(0, 1000),
       text: questionText,
-      pdfUrl: pdfFile ? `/api/important-question-files/${pdfFile.id}` : "",
-      pdfFile,
+      pdfUrl: questionPdf ? `/api/important-question-files/${questionPdf.id}` : questionUrl,
+      pdfFile: questionPdf,
     },
   };
 }
@@ -629,6 +671,8 @@ app.delete("/api/modules/:id", wrap(async (req, res) => {
   const moduleFileIds = new Set([
     ...module.files.map((file) => file.id),
     ...module.topics.flatMap((topic) => [topic.pdfFile && topic.pdfFile.id, topic.videoFile && topic.videoFile.id]),
+    module.notesFile && module.notesFile.id,
+    module.moduleVideoFile && module.moduleVideoFile.id,
   ].filter(Boolean));
   await Promise.all([...moduleFileIds].map((id) => deleteModuleFile(id)));
   if (module.importantQuestions && module.importantQuestions.pdfFile) {
@@ -636,6 +680,69 @@ app.delete("/api/modules/:id", wrap(async (req, res) => {
   }
   await module.deleteOne();
   res.json({ ok: true });
+}));
+
+// ----- Combined module PDF (real merge with pdf-lib) -----
+app.get("/api/capabilities", (req, res) => {
+  res.json({ pdfMerge: Boolean(PDFDocument) });
+});
+
+async function readGridFsBuffer(bucket, id) {
+  const chunks = [];
+  for await (const chunk of bucket.openDownloadStream(new mongoose.Types.ObjectId(id))) chunks.push(chunk);
+  return Buffer.concat(chunks);
+}
+
+// Order: module notes -> topic notes (topic order) -> additional module PDFs -> Important Questions (always last).
+// Only PDFs uploaded to this site can be merged; PDFs that are external links are reported as skipped.
+app.get("/api/modules/:id/combined-pdf", wrap(async (req, res) => {
+  if (!PDFDocument) throw new HttpError(501, "PDF merging is not enabled on this server. Run `npm install pdf-lib` and restart.");
+  const module = OBJECT_ID.test(req.params.id) ? await Module.findById(req.params.id) : null;
+  if (!module) throw new HttpError(404, "Module not found.");
+
+  const parts = [];
+  const skipped = [];
+  const addPart = (label, file, url, bucket) => {
+    if (file) parts.push({ label, id: file.id, bucket });
+    else if (url) skipped.push(label);
+  };
+  addPart("Module notes", module.notesFile, module.notesUrl, moduleFileBucket);
+  [...module.topics]
+    .sort((a, b) => (a.order || 0) - (b.order || 0))
+    .forEach((topic) => addPart(`Topic: ${topic.title}`, topic.pdfFile, topic.pdfUrl, moduleFileBucket));
+  module.files
+    .filter((file) => file.contentType === "application/pdf")
+    .forEach((file) => parts.push({ label: file.name, id: file.id, bucket: moduleFileBucket }));
+  const questions = module.importantQuestions || {};
+  addPart("Important Questions", questions.pdfFile, questions.pdfUrl && !questions.pdfFile ? questions.pdfUrl : "", importantQuestionsFileBucket);
+  if (questions.pdfFile) {
+    // addPart pushed it already; make sure it is the final entry
+    const index = parts.findIndex((part) => part.bucket === importantQuestionsFileBucket);
+    if (index !== parts.length - 1) parts.push(parts.splice(index, 1)[0]);
+  }
+  if (!parts.length) throw new HttpError(404, "This module has no uploaded PDFs to combine.");
+
+  const output = await PDFDocument.create();
+  for (const part of parts) {
+    let source;
+    try {
+      source = await PDFDocument.load(await readGridFsBuffer(part.bucket, part.id), { ignoreEncryption: true });
+    } catch (error) {
+      throw new HttpError(422, `Could not read “${part.label}” as a PDF, so the combined PDF was not created.`);
+    }
+    (await output.copyPages(source, source.getPageIndices())).forEach((page) => output.addPage(page));
+  }
+  const bytes = Buffer.from(await output.save());
+  const slug = (module.title || "module").normalize("NFKD").replace(/[^A-Za-z0-9]+/g, "_").replace(/^_+|_+$/g, "") || "module";
+  res.set({
+    "Content-Type": "application/pdf",
+    "Content-Length": bytes.length,
+    "Content-Disposition": `${req.query.download === "1" ? "attachment" : "inline"}; filename*=UTF-8''${encodeURIComponent(`${slug}_complete.pdf`)}`,
+    "X-Combined-Parts": String(parts.length),
+    "X-Combined-Skipped": String(skipped.length),
+    "Access-Control-Expose-Headers": "X-Combined-Parts, X-Combined-Skipped",
+  });
+  res.send(bytes);
 }));
 
 app.post("/api/module-files", wrap(async (req, res) => {
@@ -654,18 +761,19 @@ app.post("/api/module-files", wrap(async (req, res) => {
   if (type === "application/pdf" && !/\.pdf$/i.test(name)) {
     throw new HttpError(400, "PDF attachments must have a .pdf filename.");
   }
-  if (Number(req.get("content-length")) > MAX_VIDEO_BYTES) {
-    throw new HttpError(413, `Module attachments can be at most ${Math.round(MAX_VIDEO_BYTES / 1024 / 1024)} MB.`);
+  const moduleLimit = type === "application/pdf" ? MAX_PDF_BYTES : MAX_VIDEO_BYTES;
+  if (Number(req.get("content-length")) > moduleLimit) {
+    throw new HttpError(413, `${type === "application/pdf" ? "PDF files" : "Videos"} can be at most ${Math.round(moduleLimit / 1024 / 1024)} MB.`);
   }
   const upload = moduleFileBucket.openUploadStream(name, { metadata: { contentType: type } });
   let received = 0;
   await new Promise((resolve, reject) => {
     req.on("data", (chunk) => {
       received += chunk.length;
-      if (received > MAX_VIDEO_BYTES) {
+      if (received > moduleLimit) {
         req.unpipe(upload);
         upload.abort().catch(() => {});
-        reject(new HttpError(413, `Module attachments can be at most ${Math.round(MAX_VIDEO_BYTES / 1024 / 1024)} MB.`));
+        reject(new HttpError(413, `${type === "application/pdf" ? "PDF files" : "Videos"} can be at most ${Math.round(moduleLimit / 1024 / 1024)} MB.`));
       }
     });
     req.on("error", reject);
@@ -759,8 +867,8 @@ app.post("/api/important-question-files", wrap(async (req, res) => {
   requestedName = requestedName.replace(/\\/g, "/");
   const name = path.basename(requestedName).replace(/[\r\n"]/g, "").slice(0, 200);
   if (!/\.pdf$/i.test(name)) throw new HttpError(400, "Important Questions attachments must have a .pdf filename.");
-  if (Number(req.get("content-length")) > MAX_VIDEO_BYTES) {
-    throw new HttpError(413, `PDF files can be at most ${Math.round(MAX_VIDEO_BYTES / 1024 / 1024)} MB.`);
+  if (Number(req.get("content-length")) > MAX_PDF_BYTES) {
+    throw new HttpError(413, `PDF files can be at most ${Math.round(MAX_PDF_BYTES / 1024 / 1024)} MB.`);
   }
   const upload = importantQuestionsFileBucket.openUploadStream(name, {
     metadata: { contentType: "application/pdf" },
@@ -769,10 +877,10 @@ app.post("/api/important-question-files", wrap(async (req, res) => {
   await new Promise((resolve, reject) => {
     req.on("data", (chunk) => {
       received += chunk.length;
-      if (received > MAX_VIDEO_BYTES) {
+      if (received > MAX_PDF_BYTES) {
         req.unpipe(upload);
         upload.abort().catch(() => {});
-        reject(new HttpError(413, `PDF files can be at most ${Math.round(MAX_VIDEO_BYTES / 1024 / 1024)} MB.`));
+        reject(new HttpError(413, `PDF files can be at most ${Math.round(MAX_PDF_BYTES / 1024 / 1024)} MB.`));
       }
     });
     req.on("error", reject);

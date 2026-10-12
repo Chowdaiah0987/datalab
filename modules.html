@@ -5,138 +5,127 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Modules – Data Science Digital Laboratory</title>
   <meta name="description" content="Explore and manage data science learning modules and topics.">
-  <meta name="theme-color" content="#17324d">
+  <meta name="theme-color" content="#092F70">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="header.css">
-  <link rel="stylesheet" href="modules.css?v=20261011-classic">
+  <link rel="stylesheet" href="modules.css?v=20261011-redesign">
 </head>
 
 <body class="modules-page">
-  <main class="module-main">
-    <section class="module-dashboard" aria-labelledby="modulePageTitle">
+  <div class="mlayout">
+    <aside class="mlayout__side" id="moduleSidebar" aria-label="Modules and topics"></aside>
 
-      <header class="module-page-header">
-        <div class="module-page-heading">
-          <p class="module-eyebrow">LEARNING PATHWAY</p>
+    <main class="mlayout__main">
+      <header class="mhero">
+        <div class="mhero__text">
+          <p class="meyebrow">LEARNING PATHWAY</p>
           <h1 id="modulePageTitle">Modules</h1>
-          <p class="module-page-subtitle">Explore your learning pathway and learning resources.</p>
+          <p class="mhero__sub">Explore your learning pathway and learning resources.</p>
         </div>
-        <span class="module-portal-badge">Student Portal</span>
+        <div class="mhero__side">
+          <p class="mhero__motto" aria-hidden="true">Learn<br>Explore<br>Apply</p>
+          <details class="module-create">
+            <summary class="mbtn mbtn--gold"><span aria-hidden="true">+</span> Add Module</summary>
+
+            <form id="moduleForm" class="module-form" novalidate>
+              <div class="module-form__head">
+                <h2 id="moduleFormTitle">Add Module</h2>
+                <button type="button" class="module-form__close" data-cancel-add aria-label="Close form">×</button>
+              </div>
+
+              <fieldset class="mfs">
+                <legend>Module information</legend>
+                <div class="mrow mrow--number">
+                  <label class="module-field">
+                    <span>Module number *</span>
+                    <input id="moduleNumber" type="text" inputmode="numeric" maxlength="10" required placeholder="e.g. 1">
+                  </label>
+                  <label class="module-field">
+                    <span>Module title *</span>
+                    <input id="moduleTitle" type="text" maxlength="100" required placeholder="e.g. Data Extraction">
+                  </label>
+                </div>
+                <label class="module-field">
+                  <span>Short description * <small>(shown on module cards)</small></span>
+                  <textarea id="moduleDescription" rows="2" maxlength="300" required placeholder="One or two sentences about this module"></textarea>
+                </label>
+                <label class="module-field">
+                  <span>Full description</span>
+                  <textarea id="moduleFullDescription" rows="4" maxlength="5000" placeholder="A longer overview shown on the module page"></textarea>
+                </label>
+                <label class="module-field">
+                  <span>Cover image upload</span>
+                  <input id="moduleCover" type="file" accept="image/*">
+                </label>
+                <label class="module-field">
+                  <span>…or cover image URL</span>
+                  <input id="moduleCoverUrl" type="url" placeholder="https://…/cover.jpg">
+                </label>
+                <img id="moduleCoverPreview" class="module-cover-preview" alt="Cover preview" hidden>
+                <label id="moduleRemoveCoverRow" class="module-current-file" hidden>
+                  <input id="moduleRemoveCover" type="checkbox">
+                  <span>Remove existing cover image</span>
+                </label>
+                <label class="module-field">
+                  <span>Learning outcomes <small>(one per line)</small></span>
+                  <textarea id="moduleOutcomes" rows="5" maxlength="6000" placeholder="Understand the importance of data extraction&#10;Explore common sources of data"></textarea>
+                </label>
+              </fieldset>
+
+              <fieldset class="mfs">
+                <legend>Topics</legend>
+                <p class="module-field__hint">Add as many topics as the module needs. Lesson content supports <code># headings</code>, <code>- lists</code>, <code>```code```</code> and <code>![alt](image-url)</code>.</p>
+                <div id="moduleTopics" class="module-topics"></div>
+                <button type="button" id="addModuleTopic" class="mbtn mbtn--ghost">+ Add Topic</button>
+              </fieldset>
+
+              <fieldset class="mfs">
+                <legend>Module-wide resources</legend>
+                <div id="moduleNotesMount"></div>
+                <div id="moduleVideoMount"></div>
+              </fieldset>
+
+              <fieldset class="mfs">
+                <legend>Important Questions</legend>
+                <label class="module-field">
+                  <span>Title <small>(optional)</small></span>
+                  <input id="iqTitle" type="text" maxlength="150" placeholder="Important Questions">
+                </label>
+                <label class="module-field">
+                  <span>Description <small>(optional)</small></span>
+                  <textarea id="iqDescription" rows="2" maxlength="1000" placeholder="Short note about these questions"></textarea>
+                </label>
+                <div id="iqPdfMount"></div>
+                <label class="module-field">
+                  <span>Questions as text <small>(optional)</small></span>
+                  <textarea id="iqText" rows="5" maxlength="20000" placeholder="Enter important questions here…"></textarea>
+                </label>
+              </fieldset>
+
+              <p id="moduleFormMessage" class="module-message" role="status" aria-live="polite"></p>
+
+              <div class="module-form__actions">
+                <button id="saveModule" type="submit" class="mbtn mbtn--primary">Save Module</button>
+                <button id="cancelModule" type="button" class="mbtn mbtn--ghost" data-cancel-add>Cancel</button>
+              </div>
+            </form>
+          </details>
+        </div>
       </header>
 
-      <section class="module-summary" aria-label="Module overview">
-        <article class="module-summary-card">
-          <span class="module-summary-card__icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16M8 7h8M8 11h8"/></svg>
-          </span>
-          <span class="module-summary-card__value" id="totalModules">—</span>
-          <span class="module-summary-card__label">Total Modules</span>
-        </article>
-        <article class="module-summary-card">
-          <span class="module-summary-card__icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 12 9 5 9-5M3 16l9 5 9-5"/></svg>
-          </span>
-          <span class="module-summary-card__value" id="totalTopics">—</span>
-          <span class="module-summary-card__label">Topics</span>
-        </article>
-      </section>
-
-      <div class="module-toolbar">
-        <label class="module-search">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4.5 4.5"/></svg>
-          <input id="moduleSearch" type="search" placeholder="Search modules..." aria-label="Search modules" autocomplete="off">
-        </label>
-
-        <details class="module-create">
-          <summary class="module-add-button"><span aria-hidden="true">+</span> Add Module</summary>
-
-          <form id="moduleForm" class="module-form" enctype="multipart/form-data">
-            <label class="module-field">
-              <span>Module name</span>
-              <input id="moduleTitle" type="text" maxlength="100" required placeholder="e.g. Introduction to Data Science">
-            </label>
-
-            <label class="module-field">
-              <span>Short description</span>
-              <textarea id="moduleDescription" rows="3" maxlength="500" placeholder="What will learners study in this module?"></textarea>
-            </label>
-
-            <label class="module-field">
-              <span>Cover image (optional)</span>
-              <input id="moduleCover" type="file" accept="image/*">
-              <small>Choose an image to display on the module card.</small>
-            </label>
-
-            <img id="moduleCoverPreview" class="module-cover-preview" alt="Module cover preview" hidden>
-
-            <label id="moduleRemoveCoverRow" class="module-current-file" hidden>
-              <input id="moduleRemoveCover" type="checkbox">
-              <span>Remove existing cover image</span>
-            </label>
-
-            <fieldset class="module-topic-set">
-              <legend>Topics</legend>
-              <p class="module-field__hint">Add topic titles, notes, PDF files, and video lessons.</p>
-              <div id="moduleTopics" class="module-topics"></div>
-              <button type="button" id="addModuleTopic" class="module-secondary-button">+ Add Topic</button>
-            </fieldset>
-
-            <fieldset class="module-topic-set module-important-questions">
-              <legend>Important Questions</legend>
-              <p class="module-field__hint">Add questions as text, upload a PDF, or provide both.</p>
-
-              <label class="module-option">
-                <input id="importantQuestionsTextEnabled" type="checkbox">
-                <span>Add questions as text</span>
-              </label>
-
-              <label class="module-field" id="importantQuestionsTextField" hidden>
-                <span>Important Questions</span>
-                <textarea id="importantQuestionsText" rows="8" maxlength="20000" placeholder="Enter important questions here..."></textarea>
-              </label>
-
-              <label class="module-option">
-                <input id="importantQuestionsPdfEnabled" type="checkbox">
-                <span>Upload questions as PDF</span>
-              </label>
-
-              <div id="importantQuestionsPdfField" hidden>
-                <label class="module-field">
-                  <span>Important Questions PDF</span>
-                  <input id="importantQuestionsPdf" type="file" accept=".pdf,application/pdf">
-                  <small>Choose a PDF file only.</small>
-                </label>
-                <label id="importantQuestionsCurrentPdf" class="module-current-file" hidden>
-                  <input id="removeImportantQuestionsPdf" type="checkbox">
-                  <span></span>
-                </label>
-              </div>
-            </fieldset>
-
-            <p id="moduleFormMessage" class="module-message" role="status" aria-live="polite"></p>
-
-            <div class="module-form__actions">
-              <button id="saveModule" type="submit" class="module-add-button">Save Module</button>
-              <button id="cancelModuleEdit" type="button" class="module-secondary-button" hidden>Cancel Edit</button>
-            </div>
-          </form>
-        </details>
-      </div>
-
       <p id="moduleStatus" class="module-status" role="status" aria-live="polite">Loading modules...</p>
-
-      <section id="moduleList" class="module-list" aria-label="Saved modules"></section>
-
-    </section>
-  </main>
+      <section id="moduleList" class="module-list" aria-label="Modules"></section>
+    </main>
+  </div>
 
   <script src="shared.js?v=20261005-d2-topics-2"></script>
   <script src="header.js?v=20261007-profile-cache"></script>
   <script src="card-menu.js?v=20261010-module-actions"></script>
-  <script src="modules.js?v=20261011-classic"></script>
+  <script src="modules-common.js?v=20261011-redesign"></script>
+  <script src="modules.js?v=20261011-redesign"></script>
   <script src="quick-add.js?v=20261011-add"></script>
 </body>
 </html>

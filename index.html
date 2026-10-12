@@ -4,30 +4,47 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#1f3a5f">
-  <title>DS Lab – Experiments & Projects</title>
+  <title>Experiments – Data Science Digital Laboratory</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Source+Serif+4:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css?v=20261011-classic">
   <link rel="stylesheet" href="header.css?v=20261011-classic">
+  <link rel="stylesheet" href="experiments.css?v=20261012-redesign">
 </head>
-<body>
-  <header class="site-header experiments-header">
-
-    <div class="hero">
-      <h1 class="hero__tagline">Data Science Laboratory – Experiments &amp; Projects</h1>
+<body class="exp-page">
+  <header class="exp-hero">
+    <div class="exp-hero__inner">
+      <div class="exp-hero__text">
+        <p class="exp-hero__eyebrow">DATA SCIENCE LABORATORY</p>
+        <h1 class="exp-hero__title">Experiments <span>&amp; Projects</span></h1>
+        <p class="exp-hero__sub">Explore practical experiments, learn data analysis, and build your skills through hands-on practice.</p>
+      </div>
+      <svg class="exp-hero__art" viewBox="0 0 320 180" aria-hidden="true" focusable="false">
+        <rect x="26" y="18" width="268" height="150" rx="10" fill="#fffdf8" stroke="#1f3a5f" stroke-width="3"/>
+        <rect x="26" y="18" width="268" height="22" rx="10" fill="#1f3a5f"/>
+        <circle cx="42" cy="29" r="3.5" fill="#e3c47c"/><circle cx="54" cy="29" r="3.5" fill="#e3c47c" opacity=".7"/><circle cx="66" cy="29" r="3.5" fill="#e3c47c" opacity=".4"/>
+        <g fill="#1f3a5f"><rect x="52" y="112" width="26" height="40" rx="3"/><rect x="92" y="90" width="26" height="62" rx="3" opacity=".85"/><rect x="132" y="68" width="26" height="84" rx="3" opacity=".7"/></g>
+        <rect x="172" y="100" width="26" height="52" rx="3" fill="#a67c2e"/>
+        <polyline points="52,96 100,76 150,82 198,56 262,62" fill="none" stroke="#a67c2e" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <g fill="#a67c2e"><circle cx="100" cy="76" r="4.5"/><circle cx="150" cy="82" r="4.5"/><circle cx="198" cy="56" r="4.5"/><circle cx="262" cy="62" r="4.5"/></g>
+        <path d="M232 112h38M232 126h38M232 140h24" stroke="#d9d0bd" stroke-width="5" stroke-linecap="round"/>
+      </svg>
     </div>
   </header>
 
-  <main class="container">
-    <h2 class="section-title">List of Experiments</h2>
-
-    <div class="toolbar">
-      <input type="search" id="searchInput" class="search" placeholder="Search experiments..." aria-label="Search experiments">
+  <main class="container exp-container">
+    <div class="toolbar exp-toolbar">
+      <label class="exp-search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+        <input type="search" id="searchInput" class="search" placeholder="Search experiments..." aria-label="Search experiments">
+      </label>
       <div class="toolbar__side">
-        <span class="progress" id="progressValue" title="Completed sub-experiments">0%</span>
-        <span class="toolbar__label">Experiments</span>
-        <button type="button" class="btn btn--primary" id="openAddBtn">+ Add</button>
+        <span class="exp-count" aria-live="polite">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6M10 3v6l-5.5 9.5A2 2 0 0 0 6.2 21h11.6a2 2 0 0 0 1.7-2.5L14 9V3"/><path d="M7.5 15h9"/></svg>
+          <span id="experimentCount">0 Experiments</span>
+        </span>
+        <button type="button" class="btn btn--primary exp-add" id="openAddBtn">+ Add Experiment</button>
       </div>
     </div>
 
@@ -36,7 +53,7 @@
     <div id="emptyState" class="empty" hidden>
       <div class="empty__icon" aria-hidden="true">&#128202;</div>
       <p class="empty__title">No experiments added yet.</p>
-      <p class="empty__text">Click + Add to add your first DS Lab experiment.</p>
+      <p class="empty__text">Click + Add Experiment to add your first DS Lab experiment.</p>
     </div>
   </main>
 

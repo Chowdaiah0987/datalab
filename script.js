@@ -11,7 +11,7 @@ let refreshMainVideo = () => {};
 // ---------- DOM references ----------
 const list = document.getElementById("experimentList");
 const emptyState = document.getElementById("emptyState");
-const progressValue = document.getElementById("progressValue");
+const experimentCount = document.getElementById("experimentCount");
 const searchInput = document.getElementById("searchInput");
 const experimentModal = document.getElementById("experimentModal");
 const form = document.getElementById("experimentForm");
@@ -303,6 +303,11 @@ function detailsUrl(item, sub) {
   return sub ? `${base}&sub=${encodeURIComponent(sub.letter)}` : base;
 }
 
+function padNumber(value) {
+  const text = String(value ?? "").trim();
+  return /^\d+$/.test(text) ? text.padStart(2, "0") : text;
+}
+
 function renderExperiments() {
   const visible = searchExperiments().slice().sort((a, b) =>
     a.number.localeCompare(b.number, undefined, { numeric: true })
@@ -311,17 +316,20 @@ function renderExperiments() {
   visible.forEach((item) => list.appendChild(createCard(item)));
 
   emptyState.hidden = experiments.length > 0;
-  progressValue.textContent = `${getProgress()}%`;
+  const total = experiments.length;
+  const noun = total === 1 ? "Experiment" : "Experiments";
+  const searching = searchInput.value.trim() !== "";
+  experimentCount.textContent = searching && visible.length !== total ? `${visible.length} of ${total} ${noun}` : `${total} ${noun}`;
 
   if (experiments.length > 0 && visible.length === 0) {
-    const message = el("p", "", "No experiments match your search.");
-    message.style.cssText = "text-align:center;color:var(--muted)";
-    list.appendChild(message);
+    list.appendChild(el("p", "exp-nomatch", "No experiments match your search."));
   }
 }
 
 function createCard(item) {
   const card = el("article", "exp-card");
+  card.id = `experiment-${item.id}`;
+  card.dataset.id = item.id;
 
   const cover = el("div", "exp-card__cover");
   const image = el("img");
@@ -336,31 +344,33 @@ function createCard(item) {
   }
 
   const body = el("div", "exp-card__body");
-  body.append(
-    el("p", "exp-card__number", `Experiment ${item.number}`),
-    el("h3", "exp-card__title", item.title),
-    el("p", "exp-card__desc", item.shortDescription)
-  );
+  const head = el("div", "exp-card__head");
+  head.append(el("span", "exp-card__badge", padNumber(item.number)), el("span", "exp-card__number", `Experiment ${item.number}`));
+  const title = el("h3", "exp-card__title");
+  const titleLink = el("a", "", item.title);
+  titleLink.href = detailsUrl(item);
+  title.appendChild(titleLink);
+  body.append(head, title, el("p", "exp-card__desc", item.shortDescription));
 
-  // Read More sits under the image; sub-experiment buttons get their own row under the text
-  const readMore = el("a", "btn btn--primary btn--small exp-card__readmore", "Read More");
+  // Read More and the real sub-experiments, each linking straight to its own page
+  const actions = el("div", "exp-card__actions");
+  const readMore = el("a", "btn btn--primary exp-card__readmore");
   readMore.href = detailsUrl(item);
-  card.append(cover, body, readMore, createMenu(item.id));
-
-  // Only the sub-experiments that exist; no empty row when there are none
+  readMore.append(el("span", "", "Read More"), el("span", "exp-card__arrow", "→"));
+  actions.appendChild(readMore);
   if (item.subExperiments.length > 0) {
     const subs = el("div", "exp-card__subs");
     item.subExperiments.forEach((sub) => {
       // Visible text is "Exp A"; the internal letter/id (A, B, C...) is unchanged
-      const button = el("button", "sub-btn" + (sub.completed ? " sub-btn--done" : ""), `Exp ${sub.letter}`);
-      button.type = "button";
-      button.title = `${sub.title}${sub.completed ? " (completed)" : ""}`;
-      button.setAttribute("aria-label", `Open ${sub.title}`);
-      button.addEventListener("click", () => openPreview(item.id, sub.id));
-      subs.appendChild(button);
+      const link = el("a", "sub-btn" + (sub.completed ? " sub-btn--done" : ""), `Exp ${sub.letter}`);
+      link.href = detailsUrl(item, sub);
+      link.title = `${sub.title}${sub.completed ? " (completed)" : ""}`;
+      link.setAttribute("aria-label", `Open Experiment ${sub.id}: ${sub.title}`);
+      subs.appendChild(link);
     });
-    card.appendChild(subs);
+    actions.appendChild(subs);
   }
+  card.append(cover, body, actions, createMenu(item.id));
   return card;
 }
 
