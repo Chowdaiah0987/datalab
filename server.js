@@ -43,6 +43,17 @@ const d2TopicSchema = new Schema({
   order: { type: Number, default: 1 },
 }, { _id: false });
 
+const toolRefSchema = new Schema({
+  name: { type: String, required: true },
+  description: { type: String, default: "" },
+  url: { type: String, default: "" },
+}, { _id: false });
+
+const materialSchema = new Schema({
+  title: { type: String, required: true },
+  url: { type: String, required: true },
+}, { _id: false });
+
 const subExperimentSchema = new Schema({
   id: { type: String, required: true },
   letter: { type: String, required: true },
@@ -54,6 +65,8 @@ const subExperimentSchema = new Schema({
   cover: { type: String, default: "" },
   video: { type: String, default: "" },
   githubUrl: { type: String, default: "" },
+  tools: { type: [toolRefSchema], default: [] },
+  materials: { type: [materialSchema], default: [] },
   completed: { type: Boolean, default: true },
 }, { _id: false, id: false });
 
@@ -67,6 +80,8 @@ const experimentSchema = new Schema({
   cover: { type: String, required: true },
   video: { type: String, default: "" },
   githubUrl: { type: String, default: "" },
+  tools: { type: [toolRefSchema], default: [] },
+  materials: { type: [materialSchema], default: [] },
   subExperiments: { type: [subExperimentSchema], default: [] },
 }, { timestamps: true });
 
@@ -302,6 +317,27 @@ function formatD2Data(d2Heading, rawTopics, legacyText) {
   };
 }
 
+function parseToolRefs(list) {
+  return (Array.isArray(list) ? list : [])
+    .filter((item) => item && (text(item.name) || text(item.description) || text(item.url)))
+    .slice(0, 30)
+    .map((item) => ({
+      name: requireText(item.name, "Every tool needs a name."),
+      description: text(item.description).slice(0, 200),
+      url: httpUrl(item.url, "tool link"),
+    }));
+}
+
+function parseMaterials(list) {
+  return (Array.isArray(list) ? list : [])
+    .filter((item) => item && (text(item.title) || text(item.url)))
+    .slice(0, 50)
+    .map((item) => ({
+      title: requireText(item.title, "Every material needs a title."),
+      url: httpUrl(requireText(item.url, "Every material needs a link."), "material link"),
+    }));
+}
+
 function parseSubExperiment(sub, number, usedLetters) {
   const letter = text(sub && sub.letter).toUpperCase();
   if (!/^[A-Z0-9]{1,3}$/.test(letter)) throw new HttpError(400, "Sub-experiment letters must be 1-3 letters or digits.");
@@ -321,6 +357,8 @@ function parseSubExperiment(sub, number, usedLetters) {
     cover: optionalImage(sub.cover),
     video: text(sub.video),
     githubUrl: optionalGithub(sub.githubUrl),
+    tools: parseToolRefs(sub.tools),
+    materials: parseMaterials(sub.materials),
     completed: sub.completed !== false,
   };
 }
@@ -340,6 +378,8 @@ function parseExperiment(body = {}) {
     cover: requireText(optionalImage(body.cover), "A cover image is required."),
     video: text(body.video),
     githubUrl: optionalGithub(body.githubUrl),
+    tools: parseToolRefs(body.tools),
+    materials: parseMaterials(body.materials),
     subExperiments: subs.map((sub) => parseSubExperiment(sub || {}, number, usedLetters)),
   };
 }

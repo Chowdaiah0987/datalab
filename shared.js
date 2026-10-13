@@ -59,6 +59,8 @@ function normalizeSubExperiment(sub, parentNumber) {
     cover: sub.cover || "",
     video: sub.video || "",
     githubUrl: sub.githubUrl || "",
+    tools: Array.isArray(sub.tools) ? sub.tools : [],
+    materials: Array.isArray(sub.materials) ? sub.materials : [],
     completed: sub.completed !== false,
   };
 }
@@ -149,6 +151,8 @@ function normalizeExperiment(item) {
     cover: item.cover ?? item.coverImage ?? "",
     video: item.video || "",
     githubUrl: item.githubUrl ?? item.githubLink ?? "",
+    tools: Array.isArray(item.tools) ? item.tools : [],
+    materials: Array.isArray(item.materials) ? item.materials : [],
     subExperiments: Array.isArray(item.subExperiments)
       ? item.subExperiments.map((sub) => normalizeSubExperiment(sub, number))
       : [],

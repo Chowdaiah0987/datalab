@@ -1,6 +1,6 @@
 const MAX_IMAGE_WIDTH = 800;
 const MAX_PHOTO_WIDTH = 300;
-const FORM_ERROR_FIELDS = ["number", "name", "description", "cover", "github", "subs"];
+const FORM_ERROR_FIELDS = ["number", "name", "description", "cover", "github", "subs", "tools", "materials"];
 
 let experiments = [];
 let editingId = null;                    // id of the experiment being edited, or null when adding
@@ -24,6 +24,7 @@ const d2HeadingInput = document.getElementById("d2HeadingInput");
 const d2ContentInput = document.getElementById("d2ContentInput");
 const d2TopicsBuilder = document.getElementById("d2TopicsBuilder");
 const addD2TopicBtn = document.getElementById("addD2TopicBtn");
+d2HeadingInput.closest("label").before(createWritingGuide());
 const githubInput = document.getElementById("githubInput");
 const coverInput = document.getElementById("coverInput");
 const coverPreview = document.getElementById("coverPreview");
@@ -379,8 +380,11 @@ function createMenu(id) {
   menu.innerHTML = `
     <button type="button" class="menu__toggle" aria-label="Experiment options" aria-haspopup="true" aria-expanded="false">⋮</button>
     <div class="menu__list" hidden>
-      <button type="button" class="menu__item" data-action="edit">Edit</button>
-      <button type="button" class="menu__item menu__item--danger" data-action="delete">Delete</button>
+      <button type="button" class="menu__item" data-action="edit">Edit Experiment</button>
+      <button type="button" class="menu__item" data-action="cover">Change Cover Image</button>
+      <button type="button" class="menu__item" data-action="description">Edit Description</button>
+      <button type="button" class="menu__item" data-action="sub">Add Sub-Experiment</button>
+      <button type="button" class="menu__item menu__item--danger" data-action="delete">Delete Experiment</button>
     </div>`;
   const toggle = menu.querySelector(".menu__toggle");
   const menuList = menu.querySelector(".menu__list");
@@ -395,9 +399,21 @@ function createMenu(id) {
   menuList.addEventListener("click", (event) => {
     event.stopPropagation();
     const action = event.target.dataset.action;
+    if (!action) return;
     closeAllMenus();
-    if (action === "edit") openExperimentModal(id);
-    if (action === "delete") deleteExperiment(id);
+    if (action === "delete") { deleteExperiment(id); return; }
+    openExperimentModal(id);
+    if (action === "cover") {
+      coverInput.closest(".field").scrollIntoView({ block: "center" });
+      coverInput.click(); // opens the file chooser straight away
+    } else if (action === "description") {
+      shortInput.focus();
+      shortInput.scrollIntoView({ block: "center" });
+    } else if (action === "sub") {
+      document.getElementById("addSubBtn").click();
+      const last = subList.lastElementChild;
+      if (last) { last.scrollIntoView({ block: "center" }); last.querySelector("input").focus({ preventScroll: true }); }
+    }
   });
   return menu;
 }
@@ -458,6 +474,44 @@ function bindVideoControl(root, state) {
 }
 
 refreshMainVideo = bindVideoControl(document.getElementById("mainVideoField"), mainVideo);
+
+
+/* Writing rules shown above every long-content editor */
+function createWritingGuide() {
+  const guide = document.createElement("details");
+  guide.className = "write-guide";
+  guide.open = true;
+  guide.innerHTML = `
+    <summary>How to write the content (rules)</summary>
+    <ol class="write-guide__rules">
+      <li><strong>Subtopic</strong> – start a line with <code>## </code> and any title, e.g. <code>## Reading CSV Data</code>. It becomes a clickable subtopic. Everything you write below it, up to the next <code>##</code> line, belongs to that subtopic and is shown together when it is opened.</li>
+      <li><strong>Sections</strong> – use these exact headings inside a subtopic: <code>## Aim</code>, <code>## Program</code>, <code>## Output</code>, <code>## Result</code> (also Materials, Procedure, Algorithm, Theory, Syntax). They fill the matching tabs and are not counted as subtopics.</li>
+      <li><strong>Points</strong> – start lines with <code>- </code> for bullets or <code>1. </code> for numbers. Leave an empty line for a new paragraph.</li>
+      <li><strong>Code / syntax</strong> – put code between <code>\`\`\`python</code> and <code>\`\`\`</code> (also java, c, sql, js…). Indentation is kept and a Copy button is added.</li>
+      <li><strong>Output</strong> – put real output between <code>\`\`\`OUTPUT</code> and <code>\`\`\`</code>.</li>
+      <li><strong>Order</strong> – write the subtopic title first, then its Aim, Program, Output and Result. The next <code>##</code> subtopic title ends it.</li>
+    </ol>
+    <pre class="write-guide__example">## Reading CSV Data
+## Aim
+To read a CSV file.
+- Use read_csv
+## Program
+\`\`\`python
+import pandas as pd
+df = pd.read_csv("a.csv")
+\`\`\`
+## Output
+\`\`\`OUTPUT
+   a  b
+0  1  2
+\`\`\`
+## Result
+The file was read.
+
+## Writing CSV Data
+...</pre>`;
+  return guide;
+}
 
 function makeD2Topic(topic = {}, order = 1) {
   return {
@@ -636,6 +690,73 @@ function restoreD2Topics(topics = []) {
   serializeD2Builder();
 }
 
+// ---------- Tools / materials list editor ----------
+const TOOL_FIELDS = [
+  { key: "name", label: "Tool name", placeholder: "Tool name (e.g. Pandas)", max: 60 },
+  { key: "description", label: "Short description", placeholder: "Short description (e.g. Data Analysis Library)", max: 200 },
+  { key: "url", label: "Tool link (optional)", placeholder: "https://… (optional)", type: "url", max: 500 },
+];
+const MATERIAL_FIELDS = [
+  { key: "title", label: "Material title", placeholder: "Title (e.g. Lab notes PDF)", max: 120 },
+  { key: "url", label: "Material link", placeholder: "https://… link to the PDF, notes or dataset", type: "url", max: 1000 },
+];
+
+function isHttpUrl(value) {
+  try { return ["http:", "https:"].includes(new URL(value).protocol); } catch (error) { return false; }
+}
+
+function createListEditor(mount, { fields, addLabel, required }) {
+  mount.replaceChildren();
+  mount.classList.add("list-editor");
+  const rows = el("div", "list-editor__rows");
+  const add = el("button", "btn btn--ghost btn--small", `+ ${addLabel}`);
+  add.type = "button";
+  mount.append(rows, add);
+
+  function addRow(values = {}) {
+    const row = el("div", "list-editor__row");
+    fields.forEach((field) => {
+      const input = el("input");
+      input.type = field.type || "text";
+      input.placeholder = field.placeholder;
+      input.maxLength = field.max || 200;
+      input.value = values[field.key] || "";
+      input.dataset.key = field.key;
+      input.setAttribute("aria-label", field.label);
+      row.appendChild(input);
+    });
+    const remove = el("button", "btn btn--ghost btn--small", "Remove");
+    remove.type = "button";
+    remove.addEventListener("click", () => row.remove());
+    row.appendChild(remove);
+    rows.appendChild(row);
+    return row;
+  }
+  add.addEventListener("click", () => addRow().querySelector("input").focus());
+
+  const read = () => [...rows.children]
+    .map((row) => Object.fromEntries(fields.map((field) => [field.key, row.querySelector(`[data-key="${field.key}"]`).value.trim()])))
+    .filter((item) => Object.values(item).some(Boolean));
+
+  return {
+    set(items) { rows.replaceChildren(); (Array.isArray(items) ? items : []).forEach((item) => addRow(item)); },
+    read,
+    validate() {
+      for (const item of read()) {
+        if (!item[required]) return `Fill in the ${required === "name" ? "tool name" : "material title"} for every row.`;
+        if (fields.some((field) => field.type === "url" && item[field.key] && !isHttpUrl(item[field.key]))) {
+          return "Links must start with http:// or https://";
+        }
+        if (required === "title" && !item.url) return "Every material needs a link.";
+      }
+      return "";
+    },
+  };
+}
+
+const toolsEditor = createListEditor(document.getElementById("toolsEditor"), { fields: TOOL_FIELDS, addLabel: "Add Tool", required: "name" });
+const materialsEditor = createListEditor(document.getElementById("materialsEditor"), { fields: MATERIAL_FIELDS, addLabel: "Add Material", required: "title" });
+
 // ---------- Add / edit form ----------
 function openExperimentModal(id = null) {
   editingId = id;
@@ -644,6 +765,8 @@ function openExperimentModal(id = null) {
   d2TopicsBuilder.innerHTML = "";
   addD2Topic();
   subList.innerHTML = "";
+  toolsEditor.set([]);
+  materialsEditor.set([]);
   mainCover = "";
   mainVideo.file = null;
   mainVideo.key = "";
@@ -661,6 +784,8 @@ function openExperimentModal(id = null) {
       : [{ id: "legacy-topic-1", heading: "", type: "text", content: item.d2Content || "", order: 1 }];
     restoreD2Topics(d2Topics);
     githubInput.value = item.githubUrl;
+    toolsEditor.set(item.tools);
+    materialsEditor.set(item.materials);
     mainCover = item.cover;
     mainVideo.key = item.video;
     setPreview(coverPreview, uploadHint, item.cover);
@@ -708,6 +833,7 @@ function addSubBlock(data = {}) {
     <label class="check"><input type="checkbox" data-f="completed"> Mark as completed</label>
     <small class="error" data-sub-error></small>`;
 
+  block.querySelector('[data-f="d2Heading"]').closest("label").before(createWritingGuide());
   const field = (name) => block.querySelector(`[data-f="${name}"]`);
   field("letter").value = data.letter || nextLetter(subList.children.length);
   ["title", "shortDescription", "d2Heading", "d2Content", "githubUrl"].forEach((name) => {
@@ -732,6 +858,17 @@ function addSubBlock(data = {}) {
 
   block.video = { file: null, key: data.video || "" };
   bindVideoControl(block.querySelector("[data-video-field]"), block.video);
+
+  const addEditor = (title, fields, addLabel, required, key) => {
+    const wrap = el("div", "field");
+    const mount = el("div");
+    wrap.append(el("span", "", title), mount);
+    block.insertBefore(wrap, block.querySelector("[data-sub-error]"));
+    block[key] = createListEditor(mount, { fields, addLabel, required });
+    block[key].set(data[key === "toolsEditor" ? "tools" : "materials"]);
+  };
+  addEditor("Tools Used (optional)", TOOL_FIELDS, "Add Tool", "name", "toolsEditor");
+  addEditor("Materials (optional)", MATERIAL_FIELDS, "Add Material", "title", "materialsEditor");
 
   block.querySelector("[data-remove]").addEventListener("click", () => {
     block.remove();
@@ -758,6 +895,8 @@ function readSubBlock(block) {
     d2Content: block.querySelector('[data-f="d2Content"]').value, // kept exactly as typed
     cover: block.cover,
     githubUrl: value("githubUrl"),
+    tools: block.toolsEditor.read(),
+    materials: block.materialsEditor.read(),
     completed: block.querySelector('[data-f="completed"]').checked,
   };
 }
@@ -770,6 +909,7 @@ function validateSubBlock(block, usedLetters) {
   else if (!sub.title) message = "Enter the sub-experiment name.";
   else if (!sub.shortDescription) message = "Enter a short description (D1).";
   else if (sub.githubUrl && !isValidGithubUrl(sub.githubUrl)) message = "Use a link like https://github.com/username/project-name";
+  else message = block.toolsEditor.validate() || block.materialsEditor.validate();
 
   block.querySelector("[data-sub-error]").textContent = message;
   usedLetters.add(sub.letter);
@@ -789,6 +929,11 @@ function validateForm() {
     setError("github", "Use a link like https://github.com/username/project-name");
     valid = false;
   }
+
+  const toolsError = toolsEditor.validate();
+  if (toolsError) { setError("tools", toolsError); valid = false; }
+  const materialsError = materialsEditor.validate();
+  if (materialsError) { setError("materials", materialsError); valid = false; }
 
   // Sub-experiments are optional: only the blocks that exist are checked
   const usedLetters = new Set();
@@ -838,6 +983,8 @@ async function handleSubmit(event) {
       cover: mainCover,
       video: await resolveVideo(mainVideo),
       githubUrl: githubInput.value.trim(),
+      tools: toolsEditor.read(),
+      materials: materialsEditor.read(),
       subExperiments: [],
     };
     for (const block of [...subList.children]) {
