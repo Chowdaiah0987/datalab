@@ -313,10 +313,15 @@ function renderPanel({ experiment, sub, label }) {
   const source = sub || experiment;
   const groups = buildGroups(source);
   const topicCount = groups.length - 1 + (groups[0].title ? 1 : 0); // groups[1..] are subtopics
-  const tabNames = sub ? ["Description", "Program", "Output", "Result", "Materials"] : ["Overview", "Topics", "Tools", "Materials"];
   const tools = source.tools || [];
   const materials = source.materials || [];
   const rowGroupCount = groups.length - 1;
+  const hasSection = (name) => groups.some((group) => group.nodes.some((node) => node.dataset.section === name));
+  const hasMaterials = materials.length > 0 || hasSection("Materials");
+  // optional parts: a tab (or section) is only shown when it has something to show
+  const tabNames = sub
+    ? ["Description", ...["Program", "Output", "Result"].filter(hasSection), ...(hasMaterials ? ["Materials"] : [])]
+    : ["Overview", ...(rowGroupCount ? ["Topics"] : []), ...(tools.length ? ["Tools"] : []), ...(hasMaterials ? ["Materials"] : [])];
 
   const panel = el("section", "exp-panel");
   const bar = el("div", "exp-bar");
@@ -400,11 +405,13 @@ function renderPanel({ experiment, sub, label }) {
       description.appendChild(wrap);
     });
     out.push(description);
-    const topics = section(`Topics`);
-    topics.appendChild(rowGroupCount ? renderRows(experiment, sub, groups, 0, (n) => go({ tab: "Topics", topic: n })) : emptyNote("No topics have been added yet."));
-    out.push(topics);
-    out.push(renderTools(tools, "Tools Used"));
-    out.push(renderMaterials(materials, nodesFor("Materials", 0), "Materials"));
+    if (rowGroupCount) {
+      const topics = section(`Topics`);
+      topics.appendChild(renderRows(experiment, sub, groups, 0, (n) => go({ tab: "Topics", topic: n })));
+      out.push(topics);
+    }
+    if (tools.length) out.push(renderTools(tools, "Tools Used"));
+    if (hasMaterials) out.push(renderMaterials(materials, nodesFor("Materials", 0), "Materials"));
     const rest = groups[0].nodes.filter((node) => node.dataset.section !== "Description" && node.dataset.section !== "Materials");
     if (rest.length) {
       const extra = section("More details");
