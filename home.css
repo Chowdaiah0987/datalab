@@ -954,3 +954,68 @@
   .home-mini,
   .home-tool { transition: none; }
 }
+
+/* =========================================================
+   ROLE-BASED EXPLORE THE LABORATORY LAYOUT
+   Normal users: four laboratory cards use the available width.
+   Admins: four laboratory cards plus the Quick Actions card.
+   ========================================================= */
+
+/* Desktop: normal users get four equal cards and no Quick Actions. */
+html:not([data-role="admin"]) .home-main--dash .home-sections {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+html:not([data-role="admin"]) .home-main--dash .home-quick {
+  display: none !important;
+}
+
+/* Desktop admin layout: four cards + Quick Actions in column five. */
+html[data-role="admin"] .home-main--dash .home-sections {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) 270px;
+}
+
+html[data-role="admin"] .home-main--dash .home-quick {
+  display: flex !important;
+  grid-column: 5;
+  grid-row: 2;
+}
+
+/* Tablet / smaller laptop: two card columns; admin actions below. */
+@media (max-width: 1280px) {
+  html:not([data-role="admin"]) .home-main--dash .home-sections,
+  html[data-role="admin"] .home-main--dash .home-sections {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  html[data-role="admin"] .home-main--dash .home-quick {
+    display: grid !important;
+    grid-column: 1 / -1;
+    grid-row: auto;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px 12px;
+  }
+
+  html[data-role="admin"] .home-main--dash .home-quick__head {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Smaller tablets: Quick Actions use two columns. */
+@media (max-width: 900px) {
+  html[data-role="admin"] .home-main--dash .home-quick {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Phone: one laboratory card per row; admin actions stack vertically. */
+@media (max-width: 680px) {
+  html:not([data-role="admin"]) .home-main--dash .home-sections,
+  html[data-role="admin"] .home-main--dash .home-sections {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-role="admin"] .home-main--dash .home-quick {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

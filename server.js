@@ -788,16 +788,17 @@ app.post("/api/auth/logout", (req, res) => {
   res.json({ ok: true });
 });
 
-// ----- Authorization for every other API route -----
-//   not signed in            -> 401
-//   Normal User, read only   -> GET / HEAD allowed
-//   Normal User, any change  -> 403
-//   Admin                    -> everything
+// ----- Authorization for API routes -----
+// Public visitors may read learning content. Only an authenticated Admin may
+// create, edit, delete, or upload content. A signed-in normal user is read-only.
 app.use("/api", (req, res, next) => {
   const session = sessionFromRequest(req);
-  if (!session) return res.status(401).json({ error: "Please sign in to continue." });
+  if (["GET", "HEAD", "OPTIONS"].includes(req.method)) {
+    if (session) req.session = session;
+    return next();
+  }
+  if (!session) return res.status(401).json({ error: "Admin sign-in is required to change content." });
   req.session = session;
-  if (["GET", "HEAD", "OPTIONS"].includes(req.method)) return next();
   if (session.role !== "admin") {
     return res.status(403).json({ error: "View-only access: only an Admin can add, edit, delete or upload content." });
   }
@@ -1360,15 +1361,14 @@ app.use((req, res, next) => {
   next();
 });
 
-// Pages need a session. Not signed in -> login page. Signed in -> the page, with the permission helper added.
+// Public pages open without signing in. The injected helper exposes account state
+// in the UI; write operations remain protected by the API middleware above.
 const AUTH_INJECT = '<link rel="stylesheet" href="/auth.css"><script src="/auth.js"></script>';
 function sendPage(req, res, next, fileName) {
-  const session = sessionFromRequest(req);
   if (fileName === "login.html") {
     res.set("Cache-Control", "no-store");
     return res.sendFile(path.join(__dirname, "login.html"));
   }
-  if (!session) return res.redirect(302, `/login.html?next=${encodeURIComponent(req.originalUrl)}`);
   fs.readFile(path.join(__dirname, fileName), "utf8", (error, html) => {
     if (error) return next();
     res.set("Cache-Control", "no-store");
