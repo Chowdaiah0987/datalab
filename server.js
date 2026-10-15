@@ -1,6 +1,8 @@
 // Use public DNS so mongodb+srv:// addresses resolve on networks where Node's default DNS fails
 require("node:dns").setServers(["8.8.8.8", "1.1.1.1"]);
-const { createHash } = require("node:crypto");
+const crypto = require("node:crypto");
+const fs = require("node:fs");
+const { createHash } = crypto;
 require("dotenv").config();
 const path = require("path");
 const cors = require("cors");
@@ -12,6 +14,111 @@ const MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/dslab"
 const MAX_VIDEO_BYTES = (Number(process.env.MAX_VIDEO_MB) || 300) * 1024 * 1024;
 const MAX_PDF_BYTES = (Number(process.env.MAX_PDF_MB) || 50) * 1024 * 1024;
 const OBJECT_ID = /^[a-f\d]{24}$/i;
+
+// ---------- Authentication (Admin / Normal User) ----------
+// Admin credentials live ONLY in environment variables (Render -> Environment). Nothing is hardcoded.
+//   ADMIN_USERNAME        the admin username
+//   ADMIN_PASSWORD        the admin password (hashed with scrypt in memory at start-up), or instead
+//   ADMIN_PASSWORD_HASH   a ready-made hash: scrypt$<saltHex>$<hashHex>  (see README-login.txt)
+//   SESSION_SECRET        long random string used to sign the session cookie
+const ADMIN_USERNAME = String(process.env.ADMIN_USERNAME || "").trim();
+const SESSION_COOKIE = "dsl_session";
+const SESSION_TTL_MS = (Number(process.env.SESSION_HOURS) || 12) * 60 * 60 * 1000;
+let SESSION_SECRET = process.env.SESSION_SECRET || "";
+if (!SESSION_SECRET) {
+  SESSION_SECRET = crypto.randomBytes(48).toString("hex");
+  console.warn("SESSION_SECRET is not set: sessions will end whenever the server restarts. Set it in your environment.");
+}
+
+function scryptHash(password, saltHex = crypto.randomBytes(16).toString("hex")) {
+  const hash = crypto.scryptSync(String(password), Buffer.from(saltHex, "hex"), 64).toString("hex");
+  return `scrypt$${saltHex}$${hash}`;
+}
+
+let adminPasswordHash = "";
+if (process.env.ADMIN_PASSWORD_HASH && /^scrypt\$[a-f\d]+\$[a-f\d]{128}$/i.test(process.env.ADMIN_PASSWORD_HASH.trim())) {
+  adminPasswordHash = process.env.ADMIN_PASSWORD_HASH.trim();
+} else if (process.env.ADMIN_PASSWORD) {
+  adminPasswordHash = scryptHash(String(process.env.ADMIN_PASSWORD).trim());
+}
+const ADMIN_LOGIN_ENABLED = Boolean(ADMIN_USERNAME && adminPasswordHash);
+if (!ADMIN_LOGIN_ENABLED) {
+  console.warn("Admin login is DISABLED: set ADMIN_USERNAME and ADMIN_PASSWORD (or ADMIN_PASSWORD_HASH) in the environment.");
+} else {
+  console.log(`Admin login is enabled for username of length ${ADMIN_USERNAME.length}.`);
+}
+const DUMMY_HASH = scryptHash("dummy-password-for-constant-time-checks");
+
+function safeEqual(a, b) {
+  const left = crypto.createHash("sha256").update(String(a)).digest();
+  const right = crypto.createHash("sha256").update(String(b)).digest();
+  return crypto.timingSafeEqual(left, right);
+}
+
+function verifyScrypt(password, stored) {
+  const [, saltHex, hashHex] = stored.split("$");
+  const candidate = crypto.scryptSync(String(password), Buffer.from(saltHex, "hex"), 64);
+  const expected = Buffer.from(hashHex, "hex");
+  return candidate.length === expected.length && crypto.timingSafeEqual(candidate, expected);
+}
+
+// The real check always runs the full hash so a wrong username and a wrong password take the same time
+function verifyAdmin(username, password) {
+  if (!ADMIN_LOGIN_ENABLED) return false;
+  const userOk = safeEqual(username, ADMIN_USERNAME);
+  const passOk = verifyScrypt(password, userOk ? adminPasswordHash : DUMMY_HASH);
+  return userOk && passOk;
+}
+
+const b64url = (buffer) => Buffer.from(buffer).toString("base64url");
+function signSession(session) {
+  const body = b64url(JSON.stringify(session));
+  const mac = crypto.createHmac("sha256", SESSION_SECRET).update(body).digest("base64url");
+  return `${body}.${mac}`;
+}
+function readSessionToken(token) {
+  const [body, mac] = String(token || "").split(".");
+  if (!body || !mac) return null;
+  const expected = crypto.createHmac("sha256", SESSION_SECRET).update(body).digest("base64url");
+  if (mac.length !== expected.length || !crypto.timingSafeEqual(Buffer.from(mac), Buffer.from(expected))) return null;
+  try {
+    const session = JSON.parse(Buffer.from(body, "base64url").toString("utf8"));
+    if (!session || !["admin", "user"].includes(session.r) || !(session.e > Date.now())) return null;
+    return { role: session.r, name: String(session.n || ""), expires: session.e };
+  } catch (error) {
+    return null;
+  }
+}
+function parseCookies(header) {
+  const out = {};
+  String(header || "").split(";").forEach((part) => {
+    const index = part.indexOf("=");
+    if (index > 0) out[part.slice(0, index).trim()] = decodeURIComponent(part.slice(index + 1).trim());
+  });
+  return out;
+}
+const sessionFromRequest = (req) => readSessionToken(parseCookies(req.headers.cookie)[SESSION_COOKIE]);
+
+function cookieFlags(req, maxAgeSeconds) {
+  const secure = req.secure || String(req.headers["x-forwarded-proto"] || "").split(",")[0].trim() === "https";
+  return `Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAgeSeconds}${secure ? "; Secure" : ""}`;
+}
+
+// Slow down password guessing: 8 failed Admin attempts per IP per 15 minutes
+const failedLogins = new Map();
+const LOGIN_WINDOW_MS = 15 * 60 * 1000;
+const MAX_FAILED_LOGINS = 8;
+function loginBlocked(ip) {
+  const entry = failedLogins.get(ip);
+  if (!entry) return false;
+  if (entry.resetAt < Date.now()) { failedLogins.delete(ip); return false; }
+  return entry.count >= MAX_FAILED_LOGINS;
+}
+function recordFailedLogin(ip) {
+  const entry = failedLogins.get(ip);
+  if (!entry || entry.resetAt < Date.now()) failedLogins.set(ip, { count: 1, resetAt: Date.now() + LOGIN_WINDOW_MS });
+  else entry.count += 1;
+}
 
 // Optional dependency: PDF merging only works when `npm install pdf-lib` has been run.
 let PDFDocument = null;
@@ -618,12 +725,14 @@ async function deleteResourceFile(id) {
 
 // ---------- App ----------
 const app = express();
+app.set("trust proxy", 1); // Render sits behind a proxy: needed for secure cookies and the real client IP
 const wrap = (handler) => (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
 
 const configuredCorsOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(",").map((origin) => origin.trim()).filter(Boolean)
   : null;
 app.use(cors({
+  credentials: true,
   origin(origin, callback) {
     const isLocalDevelopmentOrigin = /^http:\/\/(?:localhost|127\.0\.0\.1):\d+$/.test(origin || "");
     const isAllowed = !origin ||
@@ -634,6 +743,75 @@ app.use(cors({
   },
 }));
 app.use(express.json({ limit: "30mb" })); // covers are stored as compressed image data
+
+// ----- Sign in / sign out -----
+app.get("/api/auth/me", (req, res) => {
+  const session = sessionFromRequest(req);
+  res.set("Cache-Control", "no-store");
+  res.json(session ? { authenticated: true, role: session.role, name: session.name } : { authenticated: false, role: null });
+});
+
+app.post("/api/auth/login", wrap(async (req, res) => {
+  const body = req.body || {};
+  const role = body.role === "admin" ? "admin" : "user";
+  const identifier = String(body.identifier ?? "").replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, 80);
+  const password = typeof body.password === "string" ? body.password : "";
+  if (!identifier) throw new HttpError(400, "Enter your username or email.");
+  if (!password.trim()) throw new HttpError(400, "Enter your password.");
+  if (password.length > 200) throw new HttpError(400, "The password is too long.");
+
+  let session;
+  if (role === "admin") {
+    if (!ADMIN_LOGIN_ENABLED) {
+      throw new HttpError(503, "Admin login is not set up on the server yet. In Render > Environment add ADMIN_USERNAME and ADMIN_PASSWORD, then redeploy.");
+    }
+    if (loginBlocked(req.ip)) throw new HttpError(429, "Too many failed attempts. Please wait a few minutes and try again.");
+    if (!verifyAdmin(identifier, password)) {
+      recordFailedLogin(req.ip);
+      throw new HttpError(401, "Invalid Admin username or password.");
+    }
+    failedLogins.delete(req.ip);
+    session = { r: "admin", n: "Admin" };
+  } else {
+    // Normal users: any non-empty username/email and password is accepted. Nothing is stored.
+    session = { r: "user", n: identifier };
+  }
+  session.e = Date.now() + SESSION_TTL_MS;
+  res.set("Set-Cookie", `${SESSION_COOKIE}=${signSession(session)}; ${cookieFlags(req, Math.floor(SESSION_TTL_MS / 1000))}`);
+  res.set("Cache-Control", "no-store");
+  res.json({ ok: true, role: session.r, name: session.n });
+}));
+
+app.post("/api/auth/logout", (req, res) => {
+  res.set("Set-Cookie", `${SESSION_COOKIE}=; ${cookieFlags(req, 0)}`);
+  res.set("Cache-Control", "no-store");
+  res.json({ ok: true });
+});
+
+// ----- Authorization for every other API route -----
+//   not signed in            -> 401
+//   Normal User, read only   -> GET / HEAD allowed
+//   Normal User, any change  -> 403
+//   Admin                    -> everything
+app.use("/api", (req, res, next) => {
+  const session = sessionFromRequest(req);
+  if (!session) return res.status(401).json({ error: "Please sign in to continue." });
+  req.session = session;
+  if (["GET", "HEAD", "OPTIONS"].includes(req.method)) return next();
+  if (session.role !== "admin") {
+    return res.status(403).json({ error: "View-only access: only an Admin can add, edit, delete or upload content." });
+  }
+  // Admin changes must come from this website (blocks cross-site requests that carry the cookie)
+  const origin = req.get("origin");
+  if (origin) {
+    let sameSite = false;
+    try { sameSite = new URL(origin).host === req.get("host"); } catch (error) { sameSite = false; }
+    if (!sameSite && !(configuredCorsOrigins && (configuredCorsOrigins.includes("*") || configuredCorsOrigins.includes(origin)))) {
+      return res.status(403).json({ error: "This request did not come from the website." });
+    }
+  }
+  next();
+});
 
 // ----- Experiments -----
 app.get("/api/experiments", wrap(async (req, res) => {
@@ -1176,10 +1354,38 @@ app.delete("/api/videos/:id", wrap(async (req, res) => {
 app.use("/api", (req, res) => res.status(404).json({ error: "Route not found" }));
 
 // ----- Website files -----
-app.use(express.static(__dirname, { index: "home.html" }));
+// Server files must never be downloadable
+app.use((req, res, next) => {
+  if (/^\/(?:server\.js|package(?:-lock)?\.json|node_modules|\.|README-login\.txt)/i.test(req.path)) return res.status(404).end();
+  next();
+});
+
+// Pages need a session. Not signed in -> login page. Signed in -> the page, with the permission helper added.
+const AUTH_INJECT = '<link rel="stylesheet" href="/auth.css"><script src="/auth.js"></script>';
+function sendPage(req, res, next, fileName) {
+  const session = sessionFromRequest(req);
+  if (fileName === "login.html") {
+    res.set("Cache-Control", "no-store");
+    return res.sendFile(path.join(__dirname, "login.html"));
+  }
+  if (!session) return res.redirect(302, `/login.html?next=${encodeURIComponent(req.originalUrl)}`);
+  fs.readFile(path.join(__dirname, fileName), "utf8", (error, html) => {
+    if (error) return next();
+    res.set("Cache-Control", "no-store");
+    res.type("html").send(html.includes("</head>") ? html.replace("</head>", `${AUTH_INJECT}</head>`) : AUTH_INJECT + html);
+  });
+}
+app.use((req, res, next) => {
+  if (req.method !== "GET" && req.method !== "HEAD") return next();
+  const page = req.path === "/" ? "/home.html" : req.path;
+  if (!/^\/[A-Za-z0-9_.-]+\.html$/.test(page)) return next();
+  if (!fs.existsSync(path.join(__dirname, page.slice(1)))) return next();
+  return sendPage(req, res, next, page.slice(1));
+});
+app.use(express.static(__dirname, { index: false }));
 app.get("*", (req, res, next) => {
   if (req.path.startsWith("/api/")) return next();
-  if (req.accepts("html")) return res.sendFile(path.join(__dirname, "home.html"));
+  if (req.accepts("html")) return sendPage(req, res, next, "home.html");
   return next();
 });
 

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in – Data Science Digital Laboratory</title>
+  <meta name="description" content="Sign in to the Data Science Digital Laboratory.">
+  <meta name="theme-color" content="#062a5c">
+  <link rel="stylesheet" href="login.css?v=20261015-login">
+</head>
+<body class="login-page">
+  <header class="login-top">
+    <a class="login-top__brand" href="login.html" aria-label="Data Science Digital Laboratory">
+      <svg class="flask" viewBox="0 0 64 64" aria-hidden="true"><use href="#flask"/></svg>
+      <span>Data Science Digital Laboratory</span>
+    </a>
+    <nav class="login-top__nav" aria-label="Tagline"><span>Learn</span><i>|</i><span>Explore</span><i>|</i><span>Experiment</span><i>|</i><span>Grow</span></nav>
+  </header>
+
+  <!-- decorative science background built from real shapes (not a flat picture) -->
+  <div class="login-art" aria-hidden="true">
+    <svg class="login-art__left" viewBox="0 0 420 640" preserveAspectRatio="xMinYMax meet">
+      <g fill="#5fa8ff" opacity=".28"><rect x="40" y="120" width="26" height="150"/><rect x="82" y="170" width="26" height="100"/><rect x="124" y="90" width="26" height="180"/><rect x="166" y="140" width="26" height="130"/><rect x="208" y="60" width="26" height="210"/></g>
+      <g stroke="#7bb8ff" stroke-width="1.5" fill="#9fd0ff" opacity=".45"><path d="M60 330 L150 290 L230 350 L300 300" fill="none"/><circle cx="60" cy="330" r="5"/><circle cx="150" cy="290" r="5"/><circle cx="230" cy="350" r="5"/><circle cx="300" cy="300" r="5"/></g>
+      <g transform="translate(-40 300)"><path d="M0 40 L190 10 L300 70 L300 190 L0 190Z" fill="#0f3d7a"/><path d="M14 52 L182 26 L282 76 L282 176 L14 176Z" fill="#1a63c7"/><g fill="#8fd0ff"><rect x="40" y="110" width="22" height="50"/><rect x="72" y="90" width="22" height="70"/><path d="M110 150 L150 100 L190 135 L230 80 L230 160 L110 160Z" opacity=".8"/></g></g>
+      <g transform="rotate(-8 100 520)">
+        <g><rect x="-30" y="410" width="360" height="62" rx="4" fill="#1e4fa8"/><text x="60" y="450" font-size="28" fill="#dfeaff" font-family="Segoe UI,Arial" font-weight="600">Python</text></g>
+        <g><rect x="-30" y="476" width="360" height="62" rx="4" fill="#157a66"/><text x="48" y="516" font-size="28" fill="#dffff6" font-family="Segoe UI,Arial" font-weight="600">Data Analysis</text></g>
+        <g><rect x="-30" y="542" width="370" height="62" rx="4" fill="#4b3aa6"/><text x="48" y="582" font-size="28" fill="#ece8ff" font-family="Segoe UI,Arial" font-weight="600">Machine Learning</text></g>
+        <g><rect x="-30" y="608" width="380" height="62" rx="4" fill="#9b2f45"/><text x="52" y="648" font-size="28" fill="#ffe6ea" font-family="Segoe UI,Arial" font-weight="600">Deep Learning</text></g>
+      </g>
+    </svg>
+    <svg class="login-art__right" viewBox="0 0 420 640" preserveAspectRatio="xMaxYMin meet">
+      <g stroke="#9fd0ff" stroke-width="1.4" fill="none" opacity=".5"><path d="M20 520 L120 440 L220 500 L330 380 L410 420"/><path d="M60 600 L160 540 L260 590 L380 500"/><path d="M120 440 L160 540 M220 500 L260 590 M330 380 L380 500"/></g>
+      <g fill="#bfe0ff" opacity=".7"><circle cx="20" cy="520" r="5"/><circle cx="120" cy="440" r="5"/><circle cx="220" cy="500" r="5"/><circle cx="330" cy="380" r="6"/><circle cx="410" cy="420" r="5"/><circle cx="160" cy="540" r="5"/><circle cx="260" cy="590" r="5"/><circle cx="380" cy="500" r="5"/></g>
+      <g transform="translate(120 20)" stroke="#e8f4ff" stroke-width="3" fill="none" opacity=".9" stroke-linecap="round">
+        <path d="M150 40 C100 -5 20 20 20 90 C-5 120 15 170 45 180 C40 220 90 240 120 215 L120 160"/>
+        <path d="M130 40 C180 -5 260 20 260 90 C285 120 265 170 235 180 C240 220 190 240 160 215 L160 160"/>
+        <path d="M80 60 L110 80 M70 120 L105 120 M60 170 L100 150 M200 60 L175 80 M210 120 L180 120 M220 170 L182 150"/>
+        <path d="M140 215 L140 290 M120 300 L140 290 L160 300"/>
+        <circle cx="80" cy="60" r="6" fill="#e8f4ff"/><circle cx="70" cy="120" r="6" fill="#e8f4ff"/><circle cx="60" cy="170" r="6" fill="#e8f4ff"/><circle cx="200" cy="60" r="6" fill="#e8f4ff"/><circle cx="210" cy="120" r="6" fill="#e8f4ff"/><circle cx="220" cy="170" r="6" fill="#e8f4ff"/>
+        <rect x="95" y="85" width="90" height="80" rx="8" fill="rgba(31,110,214,.55)" stroke="#e8f4ff"/>
+        <text x="140" y="140" text-anchor="middle" font-size="46" font-weight="700" fill="#fff" stroke="none" font-family="Segoe UI,Arial">AI</text>
+      </g>
+    </svg>
+  </div>
+
+  <main class="login-main">
+    <section class="login-card" aria-labelledby="loginTitle">
+      <svg class="login-card__flask" viewBox="0 0 64 64" aria-hidden="true"><use href="#flask"/></svg>
+      <h1 id="loginTitle">Data Science Digital Laboratory</h1>
+      <p class="login-card__sub">Sign in to access your learning laboratory</p>
+
+      <form id="loginForm" novalidate>
+        <fieldset class="roles">
+          <legend class="sr-only">Sign in as</legend>
+          <label class="role is-selected" id="roleUserCard">
+            <input type="radio" name="role" value="user" checked>
+            <span class="role__icon"><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="15" r="9"/><path d="M6 44c0-10 8-17 18-17s18 7 18 17z"/></svg></span>
+            <span class="role__text"><strong>Normal User</strong><small>View modules, experiments, tools and resources.</small></span>
+            <span class="role__dot" aria-hidden="true"></span>
+          </label>
+          <label class="role" id="roleAdminCard">
+            <input type="radio" name="role" value="admin">
+            <span class="role__icon"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 3 6 10v13c0 11 8 19 18 22 10-3 18-11 18-22V10z"/><path d="M15 24l7 7 12-14" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span class="role__text"><strong>Admin</strong><small>Add, edit and manage all content.</small></span>
+            <span class="role__dot" aria-hidden="true"></span>
+          </label>
+        </fieldset>
+
+        <label class="lfield" for="identifier"><span id="identifierLabel">Username / Email</span></label>
+        <div class="linput">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 7 8.5 6 8.5-6"/></svg>
+          <input id="identifier" name="identifier" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="80" placeholder="Enter your email or username" required>
+        </div>
+
+        <label class="lfield" for="password"><span>Password</span></label>
+        <div class="linput">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><circle cx="12" cy="15" r="1.2"/></svg>
+          <input id="password" name="password" type="password" autocomplete="current-password" maxlength="200" placeholder="Enter your password" required>
+          <button type="button" class="linput__toggle" id="togglePassword" aria-label="Show password" aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="slash" d="M4 4l16 16"/></svg>
+          </button>
+        </div>
+
+        <p id="loginMessage" class="login-message" role="alert" aria-live="assertive" hidden></p>
+
+        <button type="submit" id="loginBtn" class="login-btn">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h5a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-5"/><path d="M4 12h11M11 8l4 4-4 4"/></svg>
+          <span>Login</span>
+        </button>
+      </form>
+
+      <div class="login-card__foot">
+        <p>Explore <b>•</b> Learn <b>•</b> Practice <b>•</b> Build Your Skills</p>
+        <small>Data Science Digital Laboratory</small>
+      </div>
+    </section>
+  </main>
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="flask" viewBox="0 0 64 64"><path d="M24 6h16M27 6v18L10 52a6 6 0 0 0 5 9h34a6 6 0 0 0 5-9L37 24V6" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 44h26l7 12a2 2 0 0 1-2 3H14a2 2 0 0 1-2-3z" fill="currentColor"/><circle cx="27" cy="50" r="2.6" fill="#fff"/><circle cx="37" cy="54" r="2.2" fill="#fff"/></symbol>
+  </svg>
+  <script src="login.js?v=20261015-login"></script>
+</body>
+</html>

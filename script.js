@@ -22,8 +22,7 @@ const nameInput = document.getElementById("nameInput");
 const shortInput = document.getElementById("shortInput");
 const d2HeadingInput = document.getElementById("d2HeadingInput");
 const d2ContentInput = document.getElementById("d2ContentInput");
-const d2TopicsBuilder = document.getElementById("d2TopicsBuilder");
-const addD2TopicBtn = document.getElementById("addD2TopicBtn");
+let d2Builder; // created below, once the builder code is defined
 d2HeadingInput.closest("label").before(createWritingGuide());
 const githubInput = document.getElementById("githubInput");
 const coverInput = document.getElementById("coverInput");
@@ -476,219 +475,196 @@ function bindVideoControl(root, state) {
 refreshMainVideo = bindVideoControl(document.getElementById("mainVideoField"), mainVideo);
 
 
-/* Writing rules shown above every long-content editor */
+/* ---------- Guided "subtopic" builder (used by the experiment form and every sub-experiment) ----------
+   Each subtopic card has fixed boxes: Title, Aim, Points, Language + Program, Output, Result.
+   The boxes are saved as the same d2Topics the detail pages already understand, so nothing needs markdown. */
+const BUILDER_LANGUAGES = [["python", "Python"], ["sql", "SQL"], ["java", "Java"], ["c", "C"], ["cpp", "C++"], ["javascript", "JavaScript"], ["r", "R"], ["bash", "Bash / Shell"], ["text", "Plain text"]];
+const BUILDER_KINDS = {
+  aim: /^(?:aim|objectives?|purpose)$/i,
+  program: /^(?:program(?:\s+solution)?|solution|sample\s+program|source\s+code|code)$/i,
+  output: /^(?:sample\s+|expected\s+)?output$/i,
+  result: /^(?:result|results|conclusion|learning\s+outcomes?)$/i,
+};
+const BUILDER_OTHER_SECTIONS = /^(?:description|introduction|theory|syntax|general\s+syntax|requirements|procedure|algorithm|explanation|steps\s+involved|working\s+principle|advantages|applications|observations?|summary|key\s+points?|notes?|topics?|examples?|tools(?:\s+used)?|materials?|references|resources|downloads?)$/i;
+
+function builderKind(heading) {
+  const clean = String(heading || "").trim().replace(/\s*:\s*$/, "");
+  for (const [kind, pattern] of Object.entries(BUILDER_KINDS)) if (pattern.test(clean)) return kind;
+  return BUILDER_OTHER_SECTIONS.test(clean) ? "other" : "";
+}
+
+function builderStripFence(text) {
+  const match = /^\s*```[^\n]*\n([\s\S]*?)\n?```\s*$/.exec(String(text || ""));
+  return match ? match[1] : String(text || "").trim();
+}
+
 function createWritingGuide() {
   const guide = document.createElement("details");
   guide.className = "write-guide";
   guide.open = true;
   guide.innerHTML = `
-    <summary>How to write the content (rules)</summary>
+    <summary>How to fill this in (rules)</summary>
     <ol class="write-guide__rules">
-      <li><strong>Subtopic</strong> – start a line with <code>## </code> and any title, e.g. <code>## Reading CSV Data</code>. It becomes a clickable subtopic. Everything you write below it, up to the next <code>##</code> line, belongs to that subtopic and is shown together when it is opened.</li>
-      <li><strong>Sections</strong> – use these exact headings inside a subtopic: <code>## Aim</code>, <code>## Program</code>, <code>## Output</code>, <code>## Result</code> (also Materials, Procedure, Algorithm, Theory, Syntax). They fill the matching tabs and are not counted as subtopics.</li>
-      <li><strong>Points</strong> – start lines with <code>- </code> for bullets or <code>1. </code> for numbers. Leave an empty line for a new paragraph.</li>
-      <li><strong>Code / syntax</strong> – put code between <code>\`\`\`python</code> and <code>\`\`\`</code> (also java, c, sql, js…). Indentation is kept and a Copy button is added.</li>
-      <li><strong>Output</strong> – put real output between <code>\`\`\`OUTPUT</code> and <code>\`\`\`</code>.</li>
-      <li><strong>Order</strong> – write the subtopic title first, then its Aim, Program, Output and Result. The next <code>##</code> subtopic title ends it.</li>
-    </ol>
-    <pre class="write-guide__example">## Reading CSV Data
-## Aim
-To read a CSV file.
-- Use read_csv
-## Program
-\`\`\`python
-import pandas as pd
-df = pd.read_csv("a.csv")
-\`\`\`
-## Output
-\`\`\`OUTPUT
-   a  b
-0  1  2
-\`\`\`
-## Result
-The file was read.
-
-## Writing CSV Data
-...</pre>`;
+      <li><strong>Subtopic</strong> – press <em>+ Add Subtopic</em> for every topic (for example “Reading CSV Data”). Each one becomes a clickable row. Opening it shows <em>everything</em> you filled in that card, from its title to its result.</li>
+      <li><strong>Aim</strong> – one or two lines about what the subtopic does.</li>
+      <li><strong>Points / explanation</strong> – start a line with <code>- </code> for bullets or <code>1. </code> for numbers. A blank line starts a new paragraph. Use <code>**bold**</code> and <code>\`inline code\`</code> if needed. A line like <code>## Procedure</code> adds an extra heading.</li>
+      <li><strong>Program (syntax)</strong> – choose the language, then paste the full code. Spaces and indentation are kept, the code is colour-highlighted and gets a Copy button.</li>
+      <li><strong>Output</strong> – paste the real output you got when you ran the program. Nothing is invented.</li>
+      <li><strong>Result</strong> – the conclusion or what you learnt.</li>
+      <li>Leave any box empty and it is simply not shown. Use ↑ ↓ to change the order of subtopics.</li>
+    </ol>`;
   return guide;
 }
 
-function makeD2Topic(topic = {}, order = 1) {
-  return {
-    id: topic.id || `topic-${Date.now()}-${Math.random().toString(16).slice(2)}`,
-    heading: topic.heading || "",
-    type: topic.type === "code" ? "code" : "text",
-    content: topic.content || "",
-    language: topic.language || "python",
-    code: topic.code || "",
-    sampleOutput: topic.sampleOutput || "",
-    order,
-  };
-}
+function createSubtopicBuilder(mount, { introLabel = "Detailed description (optional)", introHint = "Text shown before the subtopics" } = {}) {
+  mount.classList.add("st-builder");
+  mount.innerHTML = "";
+  mount.appendChild(createWritingGuide());
+  const introField = el("label", "field");
+  introField.innerHTML = `<span>${introLabel}</span><textarea data-intro rows="4" placeholder="${introHint}"></textarea>`;
+  const intro = introField.querySelector("textarea");
+  const list = el("div", "st-cards");
+  const add = el("button", "btn btn--ghost");
+  add.type = "button";
+  add.textContent = "+ Add Subtopic";
+  mount.append(introField, list, add);
 
-function readD2TopicCard(card) {
-  const type = card.querySelector('[data-f="type"]').value === "code" ? "code" : "text";
-  const heading = card.querySelector('[data-f="heading"]').value.trim();
-  const text = card.querySelector('[data-f="content"]').value.trim();
-  const code = card.querySelector('[data-f="code"]').value;
-  const sampleOutput = card.querySelector('[data-f="sampleOutput"]').value;
-  return {
-    id: card.dataset.topicId || `topic-${Date.now()}-${Math.random().toString(16).slice(2)}`,
-    heading,
-    type,
-    content: type === "text" ? text : "",
-    language: card.querySelector('[data-f="language"]').value || "python",
-    code: type === "code" ? code : "",
-    sampleOutput: type === "code" ? sampleOutput : "",
-    order: Number(card.dataset.order || 1),
-  };
-}
-
-function readD2TopicsFromBuilder() {
-  return [...d2TopicsBuilder.querySelectorAll(".d2-topic")]
-    .map((card) => readD2TopicCard(card))
-    .filter((item) => item.heading || item.content || item.code || item.sampleOutput)
-    .map((item, index) => ({ ...item, order: index + 1 }));
-}
-
-function serializeD2Builder() {
-  const topics = readD2TopicsFromBuilder();
-  d2ContentInput.value = serializeD2Topics(topics);
-  return topics;
-}
-
-function validateD2Builder() {
-  let valid = true;
-  [...d2TopicsBuilder.querySelectorAll(".d2-topic")].forEach((card) => {
-    const topic = readD2TopicCard(card);
-    const error = card.querySelector("[data-topic-error]");
-    const hasAnyContent = Boolean(topic.heading || topic.content || topic.code || topic.sampleOutput);
-    if (!hasAnyContent) {
-      error.textContent = "";
-      return;
-    }
-    if (!topic.heading.trim() && topic.id !== "legacy-topic-1") {
-      error.textContent = "Add a heading for this topic.";
-      valid = false;
-      return;
-    }
-    if (topic.type === "text" && !topic.content.trim()) {
-      error.textContent = "Add text content for this topic.";
-      valid = false;
-      return;
-    }
-    if (topic.type === "code" && !topic.code.trim()) {
-      error.textContent = "Add Python code for this topic.";
-      valid = false;
-      return;
-    }
-    error.textContent = "";
+  const relabel = () => [...list.children].forEach((card, index) => {
+    card.querySelector(".d2-topic__label").textContent = `Subtopic ${index + 1}`;
   });
-  return valid;
-}
 
-function createD2TopicCard(topic = {}, order = 1) {
-  const card = el("div", "d2-topic");
-  const data = makeD2Topic(topic, order);
-  card.dataset.topicId = data.id;
-  card.dataset.order = String(order);
-  card.innerHTML = `
-    <div class="d2-topic__header">
-      <strong class="d2-topic__label">Topic ${order}</strong>
-      <div class="d2-topic__actions">
-        <button type="button" class="btn btn--ghost btn--small" data-action="up" aria-label="Move topic up">↑</button>
-        <button type="button" class="btn btn--ghost btn--small" data-action="down" aria-label="Move topic down">↓</button>
-        <button type="button" class="btn btn--ghost btn--small d2-topic__delete" data-action="delete">Delete</button>
+  function createCard(data = {}) {
+    const card = el("div", "d2-topic st-card");
+    const language = data.language || "python";
+    const options = BUILDER_LANGUAGES.map(([value, label]) => `<option value="${value}" ${value === language ? "selected" : ""}>${label}</option>`).join("");
+    card.innerHTML = `
+      <div class="d2-topic__header">
+        <strong class="d2-topic__label">Subtopic</strong>
+        <div class="d2-topic__actions">
+          <button type="button" class="btn btn--ghost btn--small" data-action="up" aria-label="Move subtopic up">↑</button>
+          <button type="button" class="btn btn--ghost btn--small" data-action="down" aria-label="Move subtopic down">↓</button>
+          <button type="button" class="btn btn--ghost btn--small d2-topic__delete" data-action="delete">Delete</button>
+        </div>
       </div>
-    </div>
-    <label class="field"><span>Heading</span><input type="text" data-f="heading" maxlength="120" value="${escapeHtml(data.heading)}"></label>
-    <label class="field"><span>Content Type</span>
-      <select data-f="type">
-        <option value="text" ${data.type === "text" ? "selected" : ""}>Normal Text</option>
-        <option value="code" ${data.type === "code" ? "selected" : ""}>Code</option>
-      </select>
-    </label>
-    <div data-content-row>
-      <label class="field"><span>Content</span><textarea data-f="content" rows="5" placeholder="Enter normal text, paragraphs, bullet points, or numbered items">${escapeHtml(data.content)}</textarea></label>
-    </div>
-    <div data-code-row hidden>
-      <label class="field"><span>Language</span><select data-f="language"><option value="python" ${data.language === "python" ? "selected" : ""}>Python</option><option value="javascript" ${data.language === "javascript" ? "selected" : ""}>JavaScript</option></select></label>
-      <label class="field"><span>Code</span><textarea data-f="code" rows="8" class="d2-code-editor" placeholder="Write your code here">${escapeHtml(data.code)}</textarea></label>
-      <label class="field"><span>Sample Output</span><textarea data-f="sampleOutput" rows="4" placeholder="Paste expected output here">${escapeHtml(data.sampleOutput)}</textarea></label>
-    </div>
-    <small class="error" data-topic-error></small>
-  `;
+      <label class="field"><span>Subtopic title *</span><input type="text" data-f="title" maxlength="120" placeholder="e.g. Reading Text/CSV Data" value="${escapeHtml(data.title || "")}"></label>
+      <label class="field"><span>Aim</span><textarea data-f="aim" rows="2" placeholder="What this subtopic does">${escapeHtml(data.aim || "")}</textarea></label>
+      <label class="field"><span>Points / explanation</span><textarea data-f="points" rows="4" placeholder="- first point&#10;- second point">${escapeHtml(data.points || "")}</textarea></label>
+      <div class="st-code-row">
+        <label class="field st-lang"><span>Program language</span><select data-f="language">${options}</select></label>
+        <label class="field st-code"><span>Program (syntax)</span><textarea data-f="code" rows="8" class="d2-code-editor" spellcheck="false" placeholder="Paste the complete code here">${escapeHtml(data.code || "")}</textarea></label>
+      </div>
+      <label class="field"><span>Output</span><textarea data-f="output" rows="4" class="d2-code-editor" spellcheck="false" placeholder="Paste the real output of the program">${escapeHtml(data.output || "")}</textarea></label>
+      <label class="field"><span>Result</span><textarea data-f="result" rows="2" placeholder="Conclusion / what was learnt">${escapeHtml(data.result || "")}</textarea></label>
+      <small class="error" data-topic-error></small>`;
 
-  const typeControl = card.querySelector('[data-f="type"]');
-  const contentRow = card.querySelector("[data-content-row]");
-  const codeRow = card.querySelector("[data-code-row]");
-  const syncType = () => {
-    const isCode = typeControl.value === "code";
-    contentRow.hidden = isCode;
-    codeRow.hidden = !isCode;
-  };
-  typeControl.addEventListener("change", syncType);
-  syncType();
-
-  card.querySelector('[data-action="delete"]').addEventListener("click", () => {
-    const remaining = [...d2TopicsBuilder.querySelectorAll(".d2-topic")];
-    if (remaining.length <= 1) {
-      card.querySelector('[data-f="heading"]').value = "";
-      card.querySelector('[data-f="content"]').value = "";
-      card.querySelector('[data-f="code"]').value = "";
-      card.querySelector('[data-f="sampleOutput"]').value = "";
-      card.querySelector('[data-topic-error]').textContent = "";
-      serializeD2Builder();
-      return;
-    }
-    card.remove();
-    [...d2TopicsBuilder.querySelectorAll(".d2-topic")].forEach((topicCard, index) => {
-      const label = topicCard.querySelector(".d2-topic__label");
-      label.textContent = `Topic ${index + 1}`;
-      topicCard.dataset.order = String(index + 1);
+    card.querySelector('[data-action="delete"]').addEventListener("click", () => { card.remove(); relabel(); });
+    card.querySelector('[data-action="up"]').addEventListener("click", () => {
+      if (card.previousElementSibling) { list.insertBefore(card, card.previousElementSibling); relabel(); }
     });
-    serializeD2Builder();
-  });
+    card.querySelector('[data-action="down"]').addEventListener("click", () => {
+      if (card.nextElementSibling) { list.insertBefore(card.nextElementSibling, card); relabel(); }
+    });
+    return card;
+  }
 
-  card.querySelector('[data-action="up"]').addEventListener("click", () => {
-    const cards = [...d2TopicsBuilder.querySelectorAll(".d2-topic")];
-    const index = cards.indexOf(card);
-    if (index <= 0) return;
-    const previous = cards[index - 1];
-    d2TopicsBuilder.insertBefore(card, previous);
-    cards.forEach((topicCard, i) => { topicCard.querySelector(".d2-topic__label").textContent = `Topic ${i + 1}`; topicCard.dataset.order = String(i + 1); });
-    serializeD2Builder();
-  });
+  function addCard(data = {}) {
+    const card = createCard(data);
+    list.appendChild(card);
+    relabel();
+    return card;
+  }
 
-  card.querySelector('[data-action="down"]').addEventListener("click", () => {
-    const cards = [...d2TopicsBuilder.querySelectorAll(".d2-topic")];
-    const index = cards.indexOf(card);
-    if (index === -1 || index >= cards.length - 1) return;
-    const next = cards[index + 1];
-    d2TopicsBuilder.insertBefore(next, card);
-    cards.forEach((topicCard, i) => { topicCard.querySelector(".d2-topic__label").textContent = `Topic ${i + 1}`; topicCard.dataset.order = String(i + 1); });
-    serializeD2Builder();
-  });
+  const readCard = (card) => {
+    const f = (name) => card.querySelector(`[data-f="${name}"]`);
+    return {
+      title: f("title").value.trim(),
+      aim: f("aim").value.trim(),
+      points: f("points").value.trim(),
+      language: f("language").value || "python",
+      code: f("code").value.replace(/\s+$/, ""),
+      output: f("output").value.replace(/\s+$/, ""),
+      result: f("result").value.trim(),
+    };
+  };
+  const hasContent = (d) => Boolean(d.title || d.aim || d.points || d.code || d.output || d.result);
 
-  card.addEventListener("input", serializeD2Builder);
-  return card;
+  function read() {
+    const topics = [];
+    const push = (topic) => topics.push({
+      id: `topic-${topics.length + 1}`, heading: "", type: "text", content: "", language: "python", code: "", sampleOutput: "",
+      ...topic, order: topics.length + 1,
+    });
+    if (intro.value.trim()) push({ content: intro.value.trim() });
+    [...list.children].map(readCard).filter(hasContent).forEach((d) => {
+      push({ heading: d.title });
+      if (d.aim) push({ heading: "Aim", content: d.aim });
+      if (d.points) push({ content: d.points });
+      if (d.code) push({ heading: "Program", type: "code", language: d.language, code: d.code });
+      if (d.output) push({ heading: "Output", content: `\`\`\`OUTPUT\n${d.output}\n\`\`\`` });
+      if (d.result) push({ heading: "Result", content: d.result });
+    });
+    return topics;
+  }
+
+  function validate() {
+    let message = "";
+    [...list.children].forEach((card) => {
+      const d = readCard(card);
+      const error = card.querySelector("[data-topic-error]");
+      error.textContent = "";
+      if (!hasContent(d)) return;
+      if (!d.title) error.textContent = "Give this subtopic a title.";
+      else if (builderKind(d.title)) error.textContent = `“${d.title}” is a section name. Use the ${/^out/i.test(d.title) ? "Output" : /^(?:res|con)/i.test(d.title) ? "Result" : /^(?:aim|obj|pur)/i.test(d.title) ? "Aim" : "matching"} box inside a subtopic, and give the subtopic its own title.`;
+      if (error.textContent && !message) { message = error.textContent; card.scrollIntoView({ block: "center" }); }
+    });
+    return message;
+  }
+
+  function restore(topics = []) {
+    list.innerHTML = "";
+    intro.value = "";
+    const join = (a, b) => (a && b ? `${a}\n\n${b}` : a || b);
+    const cardsData = [];
+    const introParts = [];
+    let current = null;
+    const sorted = (Array.isArray(topics) ? topics : []).slice().sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
+    sorted.forEach((topic) => {
+      const heading = String(topic.heading || "").replace(/^#{1,6}\s*/, "").trim();
+      const isCode = topic.type === "code";
+      const body = isCode ? String(topic.code || "") : String(topic.content || "");
+      const fenced = () => (isCode ? `\`\`\`${topic.language || "python"}\n${topic.code || ""}\n\`\`\`` : body);
+      const kind = heading ? builderKind(heading) : "none";
+      if (heading && kind === "") { // a custom heading starts a new subtopic
+        current = { title: heading, aim: "", points: "", language: "python", code: "", output: "", result: "" };
+        cardsData.push(current);
+        if (isCode) { current.code = body; current.language = topic.language || "python"; current.output = topic.sampleOutput || ""; }
+        else current.points = body;
+        return;
+      }
+      if (!current) { // text before the first subtopic belongs to the detailed description
+        introParts.push(heading ? `## ${heading}\n${fenced()}` : fenced());
+        return;
+      }
+      if (kind === "aim") current.aim = join(current.aim, body);
+      else if (kind === "program") {
+        current.code = join(current.code, isCode ? body : builderStripFence(body));
+        if (isCode) current.language = topic.language || current.language;
+        if (isCode && topic.sampleOutput) current.output = join(current.output, topic.sampleOutput);
+      } else if (kind === "output") current.output = join(current.output, isCode ? body : builderStripFence(body));
+      else if (kind === "result") current.result = join(current.result, body);
+      else current.points = join(current.points, heading ? `## ${heading}\n${fenced()}` : fenced());
+    });
+    intro.value = introParts.filter(Boolean).join("\n\n");
+    cardsData.forEach((data) => addCard(data));
+    if (!cardsData.length && !sorted.length) addCard();
+  }
+
+  add.addEventListener("click", () => addCard().querySelector('[data-f="title"]').focus());
+  restore([]);
+  return { read, validate, restore, add: addCard };
 }
 
-function addD2Topic(topic = {}, order = null) {
-  const cards = [...d2TopicsBuilder.querySelectorAll(".d2-topic")];
-  const nextOrder = order ?? cards.length + 1;
-  const card = createD2TopicCard(topic, nextOrder);
-  d2TopicsBuilder.appendChild(card);
-  serializeD2Builder();
-  return card;
-}
-
-function restoreD2Topics(topics = []) {
-  d2TopicsBuilder.innerHTML = "";
-  const safeTopics = Array.isArray(topics) && topics.length ? topics : [{ heading: "", type: "text", content: "", sampleOutput: "", code: "", language: "python" }];
-  safeTopics.forEach((topic, index) => addD2Topic(topic, index + 1));
-  serializeD2Builder();
-}
+d2Builder = createSubtopicBuilder(document.getElementById("d2TopicsBuilder"), { introLabel: "Detailed description (optional)", introHint: "Full explanation shown before the subtopics" });
 
 // ---------- Tools / materials list editor ----------
 const TOOL_FIELDS = [
@@ -762,8 +738,7 @@ function openExperimentModal(id = null) {
   editingId = id;
   form.reset();
   FORM_ERROR_FIELDS.forEach((field) => setError(field, ""));
-  d2TopicsBuilder.innerHTML = "";
-  addD2Topic();
+  d2Builder.restore([]);
   subList.innerHTML = "";
   toolsEditor.set([]);
   materialsEditor.set([]);
@@ -778,11 +753,10 @@ function openExperimentModal(id = null) {
     nameInput.value = item.title;
     shortInput.value = item.shortDescription;
     d2HeadingInput.value = item.d2Heading;
-    d2ContentInput.value = item.d2Content;
     const d2Topics = Array.isArray(item.d2Topics) && item.d2Topics.length
       ? item.d2Topics
       : [{ id: "legacy-topic-1", heading: "", type: "text", content: item.d2Content || "", order: 1 }];
-    restoreD2Topics(d2Topics);
+    d2Builder.restore(d2Topics);
     githubInput.value = item.githubUrl;
     toolsEditor.set(item.tools);
     materialsEditor.set(item.materials);
@@ -821,8 +795,8 @@ function addSubBlock(data = {}) {
       <label class="field"><span>Name</span><input type="text" data-f="title" maxlength="80"></label>
     </div>
     <label class="field"><span>Short Description (D1)</span><textarea data-f="shortDescription" rows="2" maxlength="300"></textarea></label>
-    <label class="field"><span>D2 Heading</span><input type="text" data-f="d2Heading" maxlength="80" placeholder="Long Description"></label>
-    <label class="field"><span>D2 Long Content</span><textarea data-f="d2Content" rows="6"></textarea></label>
+    <label class="field"><span>Long description heading (optional)</span><input type="text" data-f="d2Heading" maxlength="80" placeholder="Long Description"></label>
+    <div class="field"><span>Long description &amp; subtopics</span><div data-st-mount></div></div>
     <div class="field"><span>Cover Page (optional, main cover is used if empty)</span>
       <label class="upload upload--small"><img alt="Sub-experiment cover preview" hidden><span>Click to choose an image</span><input type="file" accept="image/*" hidden></label>
     </div>
@@ -833,10 +807,13 @@ function addSubBlock(data = {}) {
     <label class="check"><input type="checkbox" data-f="completed"> Mark as completed</label>
     <small class="error" data-sub-error></small>`;
 
-  block.querySelector('[data-f="d2Heading"]').closest("label").before(createWritingGuide());
+  block.stBuilder = createSubtopicBuilder(block.querySelector("[data-st-mount]"), { introLabel: "Long description (optional)", introHint: "Text shown before the subtopics" });
+  block.stBuilder.restore(Array.isArray(data.d2Topics) && data.d2Topics.length
+    ? data.d2Topics
+    : (data.d2Content ? [{ id: "legacy-topic-1", heading: "", type: "text", content: data.d2Content, order: 1 }] : []));
   const field = (name) => block.querySelector(`[data-f="${name}"]`);
   field("letter").value = data.letter || nextLetter(subList.children.length);
-  ["title", "shortDescription", "d2Heading", "d2Content", "githubUrl"].forEach((name) => {
+  ["title", "shortDescription", "d2Heading", "githubUrl"].forEach((name) => {
     field(name).value = data[name] || "";
   });
   field("completed").checked = data.completed !== false;
@@ -892,7 +869,8 @@ function readSubBlock(block) {
     title: value("title"),
     shortDescription: value("shortDescription"),
     d2Heading: value("d2Heading"),
-    d2Content: block.querySelector('[data-f="d2Content"]').value, // kept exactly as typed
+    d2Topics: block.stBuilder.read(),
+    d2Content: serializeD2Topics(block.stBuilder.read()),
     cover: block.cover,
     githubUrl: value("githubUrl"),
     tools: block.toolsEditor.read(),
@@ -909,7 +887,7 @@ function validateSubBlock(block, usedLetters) {
   else if (!sub.title) message = "Enter the sub-experiment name.";
   else if (!sub.shortDescription) message = "Enter a short description (D1).";
   else if (sub.githubUrl && !isValidGithubUrl(sub.githubUrl)) message = "Use a link like https://github.com/username/project-name";
-  else message = block.toolsEditor.validate() || block.materialsEditor.validate();
+  else message = block.stBuilder.validate() || block.toolsEditor.validate() || block.materialsEditor.validate();
 
   block.querySelector("[data-sub-error]").textContent = message;
   usedLetters.add(sub.letter);
@@ -956,12 +934,12 @@ async function handleMainCoverChange() {
 async function handleSubmit(event) {
   event.preventDefault();
   if (!validateForm()) return;
-  if (!validateD2Builder()) {
-    showToast("Fix the D2 topic content before saving.", true);
+  const builderError = d2Builder.validate();
+  if (builderError) {
+    showToast(builderError, true);
     return;
   }
-
-  serializeD2Builder();
+  const d2Topics = d2Builder.read();
   submitBtn.disabled = true;
   const newVideoKeys = [];
   // Newly chosen video files are uploaded to the server; existing keys are kept.
@@ -979,7 +957,8 @@ async function handleSubmit(event) {
       title: nameInput.value.trim(),
       shortDescription: shortInput.value.trim(),
       d2Heading: d2HeadingInput.value.trim(),
-      d2Content: d2ContentInput.value,
+      d2Content: serializeD2Topics(d2Topics),
+      d2Topics,
       cover: mainCover,
       video: await resolveVideo(mainVideo),
       githubUrl: githubInput.value.trim(),
@@ -1197,7 +1176,6 @@ async function handleProfileSubmit(event) {
 
 // ---------- Events ----------
 document.getElementById("openAddBtn").addEventListener("click", () => openExperimentModal());
-document.getElementById("addD2TopicBtn").addEventListener("click", () => addD2Topic());
 document.getElementById("addSubBtn").addEventListener("click", () => addSubBlock());
 document.querySelectorAll(".modal").forEach((modal) => {
   modal.querySelectorAll("[data-close]").forEach((el) => el.addEventListener("click", () => hideModal(modal)));

@@ -338,3 +338,11 @@ a.exp-tool:hover { border-color: var(--accent); box-shadow: 0 6px 16px rgba(8, 4
 .write-guide__rules li { margin-bottom: 6px; }
 .write-guide code { padding: 1px 5px; border-radius: 4px; background: #efe8d3; color: #082F5B; font-size: .88em; overflow-wrap: anywhere; }
 .write-guide__example { margin: 0 14px 14px; padding: 12px; border-radius: 8px; background: #0b2447; color: #e8eefc; font-size: .82rem; line-height: 1.5; overflow-x: auto; white-space: pre; }
+
+/* guided subtopic builder */
+.st-builder { display: grid; gap: 12px; }
+.st-cards { display: grid; gap: 14px; }
+.st-card { padding: 14px; border: 1px solid #d9d0bd; border-left: 4px solid #082F5B; border-radius: 8px; background: #fffefa; }
+.st-code-row { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 12px; align-items: start; }
+.st-card textarea.d2-code-editor { font-family: Consolas, "Courier New", monospace; font-size: .88rem; white-space: pre; overflow-x: auto; }
+@media (max-width: 640px) { .st-code-row { grid-template-columns: minmax(0, 1fr); } }
