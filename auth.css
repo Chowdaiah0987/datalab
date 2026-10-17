@@ -1,0 +1,30 @@
+/* Permission styling, added to every page by the server. The server is what really enforces permissions;
+   this file only hides controls a Normal User cannot use. */
+html:not([data-role="admin"]) .card-menu,
+html:not([data-role="admin"]) .exp-card .menu,
+html:not([data-role="admin"]) .home-card__menu,
+html:not([data-role="admin"]) .module-create,
+html:not([data-role="admin"]) #openAddBtn,
+html:not([data-role="admin"]) .id-card__edit,
+html:not([data-role="admin"]) #homeEditIdBtn,
+html:not([data-role="admin"]) #editIdBtn,
+html:not([data-role="admin"]) .dsl-logo-edit,
+html:not([data-role="admin"]) .home-quick__row[href*="action=add"],
+html:not([data-role="admin"]) #experimentModal,
+html:not([data-role="admin"]) #profileModal,
+html:not([data-role="admin"]) .admin-only { display: none !important; }
+
+.dsl-account { position: relative; display: inline-flex; margin-left: 8px; }
+.dsl-account__btn { display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 12px; border: 1px solid rgba(8, 47, 91, .28); border-radius: 999px; background: #fff; color: #082F5B; font-weight: 600; font-size: .85rem; line-height: 1; font-family: inherit; cursor: pointer; }
+.dsl-account__btn:hover { background: #eef3fa; }
+.dsl-account__badge { padding: 3px 8px; border-radius: 999px; background: #e7edf5; color: #082F5B; font-size: .72rem; letter-spacing: .03em; }
+html[data-role="admin"] .dsl-account__badge { background: #C18A19; color: #fff; }
+.dsl-account__menu { position: absolute; top: calc(100% + 8px); right: 0; z-index: 400; width: 240px; padding: 14px; border: 1px solid #ddd4bb; border-radius: 10px; background: #fffefa; box-shadow: 0 14px 32px rgba(8, 47, 91, .22); }
+.dsl-account__menu[hidden] { display: none; }
+.dsl-account__who { margin: 0 0 2px; color: #5d6673; font-size: .8rem; }
+.dsl-account__name { margin: 0 0 12px; color: #082F5B; font-weight: 700; overflow-wrap: anywhere; }
+.dsl-account__menu button { display: block; width: 100%; margin-top: 8px; padding: 9px 12px; border: 1px solid #082F5B; border-radius: 8px; background: #fff; color: #082F5B; font-weight: 600; font-size: .9rem; font-family: inherit; text-align: left; cursor: pointer; }
+.dsl-account__menu button:hover { background: #eef3fa; }
+.dsl-account__menu button.is-primary { background: #082F5B; color: #fff; }
+.dsl-account__menu button.is-primary:hover { background: #05223f; }
+@media (max-width: 560px) { .dsl-account__label { display: none; } }

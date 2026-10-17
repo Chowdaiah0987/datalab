@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a1a33">
+  <title>Experiments – Data Science Digital Laboratory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=20261011-classic">
+  <link rel="stylesheet" href="header.css?v=20261011-classic">
+  <link rel="stylesheet" href="experiments.css?v=20261012-redesign">
+  <link rel="stylesheet" href="premium.css?v=20261017-premium">
+</head>
+<body class="exp-page">
+  <header class="exp-hero">
+    <div class="exp-hero__inner">
+      <div class="exp-hero__text">
+        <h1 class="exp-hero__title">Data Science Laboratory <span>Experiments &amp; Projects</span></h1>
+        <p class="exp-hero__sub">Explore practical experiments, learn data analysis, and build your skills through hands-on practice.</p>
+      </div>
+      <svg class="exp-hero__art" viewBox="0 0 640 260" preserveAspectRatio="xMaxYMid slice" aria-hidden="true" focusable="false">
+        <rect width="640" height="260" fill="#efe9d6"/>
+        <g opacity=".55"><rect x="330" y="0" width="310" height="150" fill="#e4dcc3"/><rect x="350" y="18" width="270" height="8" fill="#d6cba9"/><rect x="350" y="62" width="270" height="8" fill="#d6cba9"/><rect x="350" y="106" width="270" height="8" fill="#d6cba9"/>
+          <g fill="#082F5B" opacity=".7"><rect x="360" y="30" width="14" height="30"/><rect x="376" y="34" width="10" height="26"/><rect x="388" y="28" width="16" height="32"/><rect x="520" y="74" width="12" height="30"/><rect x="534" y="70" width="16" height="34"/><rect x="552" y="76" width="10" height="28"/></g>
+          <g fill="#C18A19" opacity=".8"><rect x="408" y="32" width="12" height="28"/><rect x="570" y="72" width="14" height="32"/></g></g>
+        <rect x="0" y="206" width="640" height="54" fill="#cdb98a"/><rect x="0" y="206" width="640" height="6" fill="#b9a273"/>
+        <rect x="360" y="40" width="190" height="124" rx="8" fill="#082F5B"/><rect x="368" y="48" width="174" height="108" rx="4" fill="#fffefa"/>
+        <g stroke="#e4dcc3" stroke-width="1"><path d="M376 80h158M376 104h158M376 128h158"/></g>
+        <g fill="#082F5B"><rect x="384" y="104" width="18" height="40"/><rect x="410" y="88" width="18" height="56"/><rect x="436" y="112" width="18" height="32"/></g>
+        <rect x="462" y="74" width="18" height="70" fill="#C18A19"/>
+        <polyline points="386,98 418,78 446,92 472,62 524,70" fill="none" stroke="#C18A19" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="438" y="164" width="34" height="14" fill="#082F5B"/><rect x="418" y="176" width="74" height="6" rx="3" fill="#082F5B"/>
+        <path d="M200 206l30-70h200l30 70z" fill="#1d4b82"/><path d="M214 206l24-58h184l24 58z" fill="#0b3a6e"/>
+        <rect x="244" y="150" width="172" height="46" rx="3" fill="#fffefa" opacity=".95" transform="skewX(-0)"/>
+        <g fill="#082F5B"><rect x="258" y="176" width="14" height="14"/><rect x="278" y="168" width="14" height="22"/><rect x="298" y="160" width="14" height="30"/></g>
+        <polyline points="258,166 286,158 312,150 346,156 398,154" fill="none" stroke="#C18A19" stroke-width="3" stroke-linecap="round"/>
+        <rect x="180" y="204" width="280" height="8" rx="4" fill="#082F5B"/>
+        <g><rect x="500" y="170" width="70" height="36" fill="#9c3d2e"/><rect x="506" y="154" width="62" height="16" fill="#082F5B"/><rect x="512" y="140" width="54" height="14" fill="#C18A19"/></g>
+        <g><path d="M590 206c-6-26 2-46 18-58 4 22 0 44-18 58z" fill="#4b7b52"/><path d="M590 206c10-18 22-26 40-26-6 14-18 24-40 26z" fill="#5f9266"/><rect x="580" y="198" width="30" height="20" rx="3" fill="#b9a273"/></g>
+      </svg>
+    </div>
+  </header>
+
+  <main class="container exp-container">
+    <div class="toolbar exp-toolbar">
+      <label class="exp-search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+        <input type="search" id="searchInput" class="search" placeholder="Search experiments..." aria-label="Search experiments">
+      </label>
+      <div class="toolbar__side">
+        <span class="exp-count" aria-live="polite">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6M10 3v6l-5.5 9.5A2 2 0 0 0 6.2 21h11.6a2 2 0 0 0 1.7-2.5L14 9V3"/><path d="M7.5 15h9"/></svg>
+          <span id="experimentCount">0 Experiments</span>
+        </span>
+        <button type="button" class="btn btn--primary exp-add" id="openAddBtn">+ Add Experiment</button>
+      </div>
+    </div>
+
+    <section id="experimentList" class="list" aria-live="polite"></section>
+
+    <div id="emptyState" class="empty" hidden>
+      <div class="empty__icon" aria-hidden="true">&#128202;</div>
+      <p class="empty__title">No experiments added yet.</p>
+      <p class="empty__text">Click + Add Experiment to add your first DS Lab experiment.</p>
+    </div>
+  </main>
+
+  <div class="modal" id="experimentModal" hidden>
+    <div class="modal__backdrop" data-close></div>
+    <form class="modal__panel modal__panel--wide" id="experimentForm" novalidate role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <h2 id="modalTitle">Add Experiment</h2>
+
+      <div class="field-row field-row--letter">
+        <label class="field">
+          <span>Experiment Number</span>
+          <input type="text" id="numberInput" maxlength="4" placeholder="1">
+          <small class="error" data-error="number"></small>
+        </label>
+        <label class="field">
+          <span>Experiment Name</span>
+          <input type="text" id="nameInput" maxlength="80" placeholder="Data Collection">
+          <small class="error" data-error="name"></small>
+        </label>
+      </div>
+
+      <label class="field">
+        <span>Short Description (D1)</span>
+        <textarea id="shortInput" rows="2" maxlength="300" placeholder="One or two lines shown on the experiment card"></textarea>
+        <small class="error" data-error="description"></small>
+      </label>
+
+      <div class="field">
+        <span>Main Cover Page</span>
+        <label class="upload" for="coverInput">
+          <img id="coverPreview" alt="Cover preview" hidden>
+          <span id="uploadHint">Click to choose an image from your computer</span>
+        </label>
+        <input type="file" id="coverInput" accept="image/*" hidden>
+        <small class="error" data-error="cover"></small>
+      </div>
+
+      <label class="field">
+        <span>Long description heading (optional)</span>
+        <input type="text" id="d2HeadingInput" maxlength="80" placeholder="Enter custom heading (default: Long Description)">
+      </label>
+
+      <div class="field">
+        <span>Long description &amp; subtopics</span>
+        <div id="d2TopicsBuilder" aria-live="polite"></div>
+        <input type="hidden" id="d2ContentInput">
+      </div>
+
+      <div class="field">
+        <span>Video (Optional)</span>
+        <div class="video-field" id="mainVideoField">
+          <input type="file" accept="video/*">
+          <span data-video-status></span>
+          <button type="button" class="btn btn--ghost btn--small" data-video-remove hidden>Remove video</button>
+        </div>
+      </div>
+
+      <label class="field">
+        <span>GitHub Link (optional)</span>
+        <input type="url" id="githubInput" placeholder="https://github.com/username/project-name">
+        <small class="error" data-error="github"></small>
+      </label>
+
+      <div class="field">
+        <span>Tools Used (optional)</span>
+        <div id="toolsEditor"></div>
+        <small class="error" data-error="tools"></small>
+      </div>
+
+      <div class="field">
+        <span>Materials (optional)</span>
+        <div id="materialsEditor"></div>
+        <small class="error" data-error="materials"></small>
+      </div>
+
+      <div class="field">
+        <span>Sub-Experiments (optional)</span>
+        <div id="subList" class="sub-list"></div>
+        <button type="button" class="btn btn--ghost" id="addSubBtn">+ Add Sub-Experiment</button>
+        <small class="error" data-error="subs"></small>
+      </div>
+
+      <div class="modal__actions">
+        <button type="button" class="btn btn--ghost" data-close>Cancel</button>
+        <button type="submit" class="btn btn--primary" id="submitBtn">Add Experiment</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="modal" id="previewModal" hidden>
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__panel preview" role="dialog" aria-modal="true" aria-labelledby="previewTitle">
+      <button type="button" class="preview__close" data-close aria-label="Close preview">&#10005;</button>
+      <div class="preview__cover"><img id="previewCover" alt=""></div>
+      <div class="preview__info">
+        <p class="preview__label" id="previewLabel"></p>
+        <h2 id="previewTitle"></h2>
+        <p class="preview__desc" id="previewDesc"></p>
+        <div class="preview__actions">
+          <a class="btn btn--primary" id="previewReadMore" href="experiment.html">Read More</a>
+          <a class="btn btn--ghost btn--gh" id="previewGithub" href="#" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>GitHub</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="profileModal" hidden>
+    <div class="modal__backdrop" data-close></div>
+    <form class="modal__panel" id="profileForm" novalidate role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
+      <h2 id="profileModalTitle">Edit ID Card</h2>
+
+      <div class="field">
+        <span>Photo</span>
+        <div class="photo-edit">
+          <img id="profilePhotoPreview" alt="Photo preview">
+          <label class="btn btn--ghost" for="profilePhotoInput">Choose photo</label>
+          <input type="file" id="profilePhotoInput" accept="image/*" hidden>
+        </div>
+        <small class="error" data-error="profile-photo"></small>
+      </div>
+
+      <label class="field">
+        <span>Name</span>
+        <input type="text" id="profileName" maxlength="60">
+        <small class="error" data-error="profile-name"></small>
+      </label>
+
+      <label class="field">
+        <span>Roll No</span>
+        <input type="text" id="profileRoll" maxlength="20">
+        <small class="error" data-error="profile-roll"></small>
+      </label>
+
+      <div class="field-row">
+        <label class="field">
+          <span>Section</span>
+          <input type="text" id="profileSection" maxlength="10">
+          <small class="error" data-error="profile-section"></small>
+        </label>
+        <label class="field">
+          <span>Branch</span>
+          <input type="text" id="profileBranch" maxlength="20">
+          <small class="error" data-error="profile-branch"></small>
+        </label>
+      </div>
+
+      <label class="field">
+        <span>Assistant Professor</span>
+        <input type="text" id="profileProfessor" maxlength="60" placeholder="Enter Assistant Professor Name">
+        <small class="error" data-error="profile-assistantProfessor"></small>
+      </label>
+
+      <label class="field">
+        <span>GitHub Repo Link (optional)</span>
+        <input type="url" id="profileGithub" placeholder="https://github.com/username/repo-name">
+        <small class="error" data-error="profile-githubRepo"></small>
+      </label>
+
+      <div class="modal__actions">
+        <button type="button" class="btn btn--ghost" data-close>Cancel</button>
+        <button type="submit" class="btn btn--primary">Save Changes</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+
+  <script src="shared.js?v=20261005-d2-topics-2"></script>
+  <script src="header.js?v=20261011-classic"></script>
+  <script src="script.js?v=20261013-classic"></script>
+  <script src="quick-add.js?v=20261011-add"></script>
+</body>
+</html>

@@ -1,0 +1,567 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Explore the Data Science Digital Laboratory's modules, experiments, tools, and learning resources.">
+  <meta name="theme-color" content="#0a1a33">
+
+  <title>Home – Data Science Digital Laboratory</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css?v=20261011-classic">
+  <link rel="stylesheet" href="header.css?v=20261011-classic">
+  <link rel="stylesheet" href="home.css?v=20261017-viewer-layout">
+  <link rel="stylesheet" href="premium.css?v=20261017-premium">
+
+  <style>
+    /* Hide Admin-only elements until the Admin role is verified. */
+    [data-admin-only][hidden] {
+      display: none !important;
+    }
+
+    /* Viewer layout: four equal cards use the available width. */
+    .home-main--dash .home-sections {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      align-items: stretch;
+      gap: 16px;
+    }
+
+    .home-main--dash .home-section-title {
+      grid-column: 1 / -1;
+      margin: 0 0 2px;
+      text-align: left;
+    }
+
+    /* Reserve the fifth column only when Quick Actions is visible. */
+    .home-main--dash .home-sections:has(.home-quick:not([hidden])) {
+      grid-template-columns: repeat(4, minmax(0, 1fr)) 270px;
+    }
+
+    .home-main--dash .home-quick {
+      grid-column: 5;
+      grid-row: 2;
+    }
+
+    /* Card titles: prevent awkward word wrapping. */
+    .home-main--dash .home-card {
+      min-width: 0;
+    }
+
+    .home-main--dash .home-card__cover {
+      padding-left: 96px;
+      padding-right: 38px;
+    }
+
+    .home-main--dash .home-card__cover-copy {
+      position: relative;
+      z-index: 2;
+      min-width: 0;
+      overflow-wrap: normal;
+      word-break: normal;
+    }
+
+    .home-main--dash .home-card__cover-copy strong {
+      font-size: clamp(1rem, 1.15vw, 1.25rem);
+      line-height: 1.2;
+      overflow-wrap: normal;
+      word-break: normal;
+    }
+
+    .home-main--dash .home-card__cover-copy span {
+      letter-spacing: 0.08em;
+      line-height: 1.35;
+    }
+
+    .home-main--dash .home-card__art {
+      max-width: 48%;
+    }
+
+    .home-main--dash .home-quick[hidden] {
+      display: none !important;
+    }
+
+    /* Tablet: two cards per row. */
+    @media (max-width: 1280px) {
+      .home-main--dash .home-sections,
+      .home-main--dash .home-sections:has(.home-quick:not([hidden])) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .home-main--dash .home-quick {
+        grid-column: 1 / -1;
+        grid-row: auto;
+      }
+    }
+
+    /* Mobile: one card per row. */
+    @media (max-width: 680px) {
+      .home-main--dash .home-sections,
+      .home-main--dash .home-sections:has(.home-quick:not([hidden])) {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .home-main--dash .home-section-title {
+        text-align: left;
+      }
+
+      .home-main--dash .home-card__cover {
+        padding-left: 108px;
+        padding-right: 44px;
+      }
+
+      .home-main--dash .home-card__cover-copy strong {
+        font-size: 1.25rem;
+      }
+    }
+  </style>
+</head>
+
+<body class="home-page">
+
+  <!-- Header is inserted by header.js. -->
+
+  <main class="home-main home-main--dash">
+
+    <!-- HERO + STUDENT PROFILE -->
+    <section class="home-intro" aria-labelledby="home-title">
+
+      <div class="home-intro__text">
+        <h1 id="home-title" class="home-intro__title">DATA SCIENCE</h1>
+        <p class="home-intro__subtitle">Digital Laboratory</p>
+        <p class="home-eyebrow">Learn · Explore · Apply</p>
+
+        <p class="home-lead">
+          A place to build a strong foundation in data science through
+          structured topics, practical experiments, useful tools, and
+          curated learning resources.
+        </p>
+      </div>
+
+      <section class="home-profile" aria-labelledby="home-profile-title">
+        <div class="hero">
+          <h2 class="hero__heading" id="home-profile-title">Student Profile</h2>
+        </div>
+
+        <aside class="id-card home-id-card" id="homeIdCard" aria-label="Student profile">
+          <div class="id-card__strip"></div>
+
+          <div class="id-card__body">
+            <img class="id-card__photo" id="homeIdPhoto" alt="Student photo">
+
+            <dl class="id-card__details">
+              <div>
+                <dt>Name</dt>
+                <dd id="homeIdName">Loading profile...</dd>
+              </div>
+              <div>
+                <dt>Roll No</dt>
+                <dd id="homeIdRoll">Not added</dd>
+              </div>
+              <div>
+                <dt>Section</dt>
+                <dd id="homeIdSection">Not added</dd>
+              </div>
+              <div>
+                <dt>Branch</dt>
+                <dd id="homeIdBranch">Not added</dd>
+              </div>
+              <div>
+                <dt>Assistant Professor</dt>
+                <dd id="homeIdProfessor">Not added</dd>
+              </div>
+              <div>
+                <dt>GitHub Repo</dt>
+                <dd id="homeIdGithub">Not added</dd>
+              </div>
+            </dl>
+          </div>
+
+          <button
+            type="button"
+            class="id-card__edit"
+            id="homeEditIdBtn"
+            aria-label="Edit ID card details"
+            title="Edit ID card"
+          >&#9998;</button>
+        </aside>
+      </section>
+
+      <p class="home-quote" aria-hidden="true">
+        “Turn<br>Data into<br>Knowledge”
+      </p>
+    </section>
+
+
+    <!-- QUICK STATISTICS -->
+    <section class="home-stats" aria-label="Quick statistics">
+
+      <div class="home-stat home-stat--blue">
+        <span class="home-stat__icon" aria-hidden="true">
+          <svg viewBox="0 0 32 32">
+            <path d="M16 8c-3-2-8-2-12-1v17c4-1 9-1 12 1 3-2 8-2 12-1V7c-4-1-9-1-12 1zM16 8v17"/>
+          </svg>
+        </span>
+        <span class="home-stat__num" id="homeOverviewModules">–</span>
+        <span class="home-stat__label">Modules<br>Available</span>
+      </div>
+
+      <div class="home-stat home-stat--orange">
+        <span class="home-stat__icon" aria-hidden="true">
+          <svg viewBox="0 0 32 32">
+            <path d="M12 4h8M13.500 4v9L5 26a2 2 0 0 0 1.800 3h18.400A2 2 0 0 0 27 26L18.500 13V4M9 22h14"/>
+          </svg>
+        </span>
+        <span class="home-stat__num" id="homeOverviewExperiments">–</span>
+        <span class="home-stat__label">Experiments<br>Available</span>
+      </div>
+
+      <div class="home-stat home-stat--green">
+        <span class="home-stat__icon" aria-hidden="true">
+          <svg viewBox="0 0 32 32">
+            <path d="m20 5 7 7-3.500 3.500-7-7a8 8 0 0 0-10 10l5 5-4 4-6-6a8 8 0 0 1 10-10zM19 17l8 8-4 4-8-8"/>
+          </svg>
+        </span>
+        <span class="home-stat__num" id="homeOverviewTools">–</span>
+        <span class="home-stat__label">Tools<br>Available</span>
+      </div>
+
+      <div class="home-stat home-stat--purple">
+        <span class="home-stat__icon" aria-hidden="true">
+          <svg viewBox="0 0 32 32">
+            <path d="M3 6h8a5 5 0 0 1 5 5v16a5 5 0 0 0-5-5H3zM29 6h-8a5 5 0 0 0-5 5v16a5 5 0 0 1 5-5h8z"/>
+          </svg>
+        </span>
+        <span class="home-stat__num" id="homeOverviewResources">–</span>
+        <span class="home-stat__label">Resources<br>Available</span>
+      </div>
+
+    </section>
+
+
+    <!-- EXPLORE THE LABORATORY -->
+    <section class="home-sections" aria-label="Explore the laboratory">
+
+      <h2 class="home-section-title">Explore the Laboratory</h2>
+
+      <!-- MODULES -->
+      <article class="home-card">
+        <span class="home-card__number" aria-hidden="true">01</span>
+
+        <div class="home-card__cover home-card__cover--modules" aria-hidden="true">
+          <svg class="home-card__icon" viewBox="0 0 48 48">
+            <path d="M7 10.5A4.5 4.5 0 0 1 11.5 6H41v33H11.5A4.5 4.5 0 0 0 7 43.5z"/>
+            <path d="M7 10.5v33"/>
+            <path d="M14 15h19M14 22h19M14 29h13"/>
+          </svg>
+
+          <div class="home-card__cover-copy">
+            <span>Learn &amp; Grow</span>
+            <strong>Modules</strong>
+          </div>
+
+          <svg class="home-card__art" viewBox="0 0 250 92">
+            <path d="M40 78 120 36v38z" fill="#f4efe4"/>
+            <path d="M200 78 120 36v38z" fill="#e6dfcf"/>
+            <path d="M120 36v38" stroke="#b8903a" stroke-width="2"/>
+            <rect x="190" y="38" width="12" height="40" fill="#e8742a"/>
+            <rect x="204" y="28" width="12" height="50" fill="#f2b630"/>
+            <rect x="218" y="44" width="12" height="34" fill="#3a8fe0"/>
+          </svg>
+
+          <svg class="home-card__watermark" viewBox="0 0 120 120">
+            <path d="M18 24h84v76H18zM31 41h58M31 57h58M31 73h40"/>
+          </svg>
+        </div>
+
+        <div class="home-card__menu" data-menu-kind="modules">
+          <button type="button" class="home-card__menu-trigger" aria-label="Modules card options" aria-expanded="false" aria-haspopup="true">&#8942;</button>
+          <div class="home-card__dropdown" role="menu" hidden>
+            <button type="button" role="menuitem" data-card-action="edit">&#9998; Edit Card Text</button>
+            <button type="button" role="menuitem" data-card-action="reset">&#8635; Reset Text</button>
+          </div>
+        </div>
+
+        <div class="home-card__body">
+          <h2>Modules</h2>
+          <p class="home-card__count" id="homeCountModules" role="status">Loading count...</p>
+          <p>Follow core data science topics from data collection and preparation through analysis, modeling, and communication.</p>
+          <a class="home-card__link" href="modules.html">Explore Modules <span aria-hidden="true">&rarr;</span></a>
+        </div>
+      </article>
+
+
+      <!-- EXPERIMENTS -->
+      <article class="home-card">
+        <span class="home-card__number" aria-hidden="true">02</span>
+
+        <div class="home-card__cover home-card__cover--experiments" aria-hidden="true">
+          <svg class="home-card__icon" viewBox="0 0 48 48">
+            <path d="M18 6h12M21 6v13L9 39a3 3 0 0 0 2.6 4.5h24.8A3 3 0 0 0 39 39L27 19V6"/>
+            <path d="M14 33h20M18 26h12"/>
+          </svg>
+
+          <div class="home-card__cover-copy">
+            <span>Practice &amp; Apply</span>
+            <strong>Experiments</strong>
+          </div>
+
+          <svg class="home-card__art" viewBox="0 0 250 92">
+            <rect x="110" y="26" width="116" height="58" rx="5" fill="#0b1c2e"/>
+            <rect x="115" y="31" width="106" height="48" fill="#17324f"/>
+            <path d="M126 70V56m14 14V48m14 22V52m14 18V42" stroke="#3ad0c0" stroke-width="7"/>
+            <path d="M52 40h22M58 40v16L40 84h50L72 56V40" fill="#9ee6f0" opacity=".85" stroke="#d9f6fb" stroke-width="2"/>
+            <path d="M48 72h32l8 12H40z" fill="#3ad0c0"/>
+          </svg>
+
+          <svg class="home-card__watermark" viewBox="0 0 120 120">
+            <path d="M44 17h32M50 17v35L26 96a8 8 0 0 0 7 12h54a8 8 0 0 0 7-12L70 52V17M37 83h46"/>
+          </svg>
+        </div>
+
+        <div class="home-card__menu" data-menu-kind="experiments">
+          <button type="button" class="home-card__menu-trigger" aria-label="Experiments card options" aria-expanded="false" aria-haspopup="true">&#8942;</button>
+          <div class="home-card__dropdown" role="menu" hidden>
+            <button type="button" role="menuitem" data-card-action="edit">&#9998; Edit Card Text</button>
+            <button type="button" role="menuitem" data-card-action="reset">&#8635; Reset Text</button>
+          </div>
+        </div>
+
+        <div class="home-card__body">
+          <h2>Experiments</h2>
+          <p class="home-card__count" id="homeCountExperiments" role="status">Loading count...</p>
+          <p>Explore the laboratory's experiment list, practical activities, explanations, code, and supporting materials.</p>
+          <a class="home-card__link" href="index.html">Explore Experiments <span aria-hidden="true">&rarr;</span></a>
+        </div>
+      </article>
+
+
+      <!-- TOOLS -->
+      <article class="home-card">
+        <span class="home-card__number" aria-hidden="true">03</span>
+
+        <div class="home-card__cover home-card__cover--tools" aria-hidden="true">
+          <svg class="home-card__icon" viewBox="0 0 48 48">
+            <path d="m30 8 10 10-5 5-10-10a12 12 0 0 1-16 15l8 8-6 6-9-9a12 12 0 0 1 16-16zM28 26l13 13-6 6-13-13"/>
+          </svg>
+
+          <div class="home-card__cover-copy">
+            <span>Discover &amp; Build</span>
+            <strong>Tools</strong>
+          </div>
+
+          <svg class="home-card__art" viewBox="0 0 250 92">
+            <rect x="118" y="30" width="108" height="54" rx="5" fill="#1a0a16"/>
+            <rect x="123" y="35" width="98" height="44" fill="#2c1730"/>
+            <path d="M134 70V58m12 12V50m12 20V54m12 16V44" stroke="#f08a5d" stroke-width="7"/>
+            <circle cx="198" cy="52" r="10" fill="none" stroke="#ffd166" stroke-width="5"/>
+            <path d="m44 34 24 24M68 34 44 58" stroke="#e8e8ee" stroke-width="7" stroke-linecap="round"/>
+            <circle cx="82" cy="40" r="11" fill="#c9ccd6"/>
+          </svg>
+
+          <svg class="home-card__watermark" viewBox="0 0 120 120">
+            <path d="m70 17 30 30-12 12-30-30M61 39 25 75a14 14 0 0 0 20 20l36-36M34 83l10 10"/>
+          </svg>
+        </div>
+
+        <div class="home-card__menu" data-menu-kind="tools">
+          <button type="button" class="home-card__menu-trigger" aria-label="Tools card options" aria-expanded="false" aria-haspopup="true">&#8942;</button>
+          <div class="home-card__dropdown" role="menu" hidden>
+            <button type="button" role="menuitem" data-card-action="edit">&#9998; Edit Card Text</button>
+            <button type="button" role="menuitem" data-card-action="reset">&#8635; Reset Text</button>
+          </div>
+        </div>
+
+        <div class="home-card__body">
+          <h2>Tools</h2>
+          <p class="home-card__count" id="homeCountTools" role="status">Loading count...</p>
+          <p>Get acquainted with common programming environments and libraries used to work with data and build analyses.</p>
+          <a class="home-card__link" href="tools.html">Explore Tools <span aria-hidden="true">&rarr;</span></a>
+        </div>
+      </article>
+
+
+      <!-- RESOURCES -->
+      <article class="home-card">
+        <span class="home-card__number" aria-hidden="true">04</span>
+
+        <div class="home-card__cover home-card__cover--resources" aria-hidden="true">
+          <svg class="home-card__icon" viewBox="0 0 48 48">
+            <path d="M5 9h10a7 7 0 0 1 7 7v26a7 7 0 0 0-7-7H5zM43 9H33a7 7 0 0 0-7 7v26a7 7 0 0 1 7-7h10zM22 16v26m4-26v26"/>
+          </svg>
+
+          <div class="home-card__cover-copy">
+            <span>Learn More</span>
+            <strong>Resources</strong>
+          </div>
+
+          <svg class="home-card__art" viewBox="0 0 250 92">
+            <circle cx="176" cy="38" r="22" fill="#ffd166" opacity=".35"/>
+            <path d="M176 20a14 14 0 0 0-8 25v7h16v-7a14 14 0 0 0-8-25z" fill="#ffd166"/>
+            <rect x="40" y="70" width="110" height="14" rx="2" fill="#2d7bd8"/>
+            <rect x="50" y="56" width="96" height="14" rx="2" fill="#e04e4e"/>
+            <rect x="36" y="42" width="104" height="14" rx="2" fill="#3aa86b"/>
+          </svg>
+
+          <svg class="home-card__watermark" viewBox="0 0 120 120">
+            <path d="M14 23h38a14 14 0 0 1 14 14v62a14 14 0 0 0-14-14H14zM106 23H68v76a14 14 0 0 1 14-14h24zM27 42h25M27 56h25"/>
+          </svg>
+        </div>
+
+        <div class="home-card__menu" data-menu-kind="resources">
+          <button type="button" class="home-card__menu-trigger" aria-label="Resources card options" aria-expanded="false" aria-haspopup="true">&#8942;</button>
+          <div class="home-card__dropdown" role="menu" hidden>
+            <button type="button" role="menuitem" data-card-action="edit">&#9998; Edit Card Text</button>
+            <button type="button" role="menuitem" data-card-action="reset">&#8635; Reset Text</button>
+          </div>
+        </div>
+
+        <div class="home-card__body">
+          <h2>Resources</h2>
+          <p class="home-card__count" id="homeCountResources" role="status">Loading count...</p>
+          <p>Use a guided set of resource categories for reference material, datasets, documentation, and continued study.</p>
+          <a class="home-card__link" href="resources.html">Explore Resources <span aria-hidden="true">&rarr;</span></a>
+        </div>
+      </article>
+
+
+      <!-- QUICK ACTIONS: ADMIN ONLY -->
+      <aside
+        class="home-quick"
+        aria-labelledby="home-quick-title"
+        data-admin-only
+        hidden
+      >
+        <div class="home-quick__head">
+          <h3 id="home-quick-title">Quick Actions</h3>
+          <span class="home-quick__go" aria-hidden="true">&rarr;</span>
+        </div>
+
+        <a class="home-quick__row" href="modules.html?action=add">
+          <span class="home-quick__icon home-quick__icon--blue" aria-hidden="true">+</span>
+          <span class="home-quick__text">Add Module</span>
+          <span class="home-quick__chev" aria-hidden="true">&rsaquo;</span>
+        </a>
+
+        <a class="home-quick__row" href="index.html?action=add">
+          <span class="home-quick__icon home-quick__icon--orange" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M9 3h6M10 3v6L4 19a1.500 1.500 0 0 0 1.300 2.200h13.400A1.500 1.500 0 0 0 20 19l-6-10V3"/>
+            </svg>
+          </span>
+          <span class="home-quick__text">Add Experiment</span>
+          <span class="home-quick__chev" aria-hidden="true">&rsaquo;</span>
+        </a>
+
+        <a class="home-quick__row" href="tools.html?action=add">
+          <span class="home-quick__icon home-quick__icon--green" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="m15 4 5 5-2.500 2.500-5-5a6 6 0 0 0-8 7.500l4 4-3 3-4.500-4.500a6 6 0 0 1 8-8zM14 13l6.500 6.500-3 3L11 16"/>
+            </svg>
+          </span>
+          <span class="home-quick__text">Add Tools</span>
+          <span class="home-quick__chev" aria-hidden="true">&rsaquo;</span>
+        </a>
+
+        <a class="home-quick__row" href="resources.html?action=add">
+          <span class="home-quick__icon home-quick__icon--purple" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M2 5h6a3.500 3.500 0 0 1 3.500 3.500V21A3.500 3.500 0 0 0 8 17.500H2zM22 5h-6a3.500 3.500 0 0 0-3.500 3.500V21a3.500 3.500 0 0 1 3.500-3.500h6z"/>
+            </svg>
+          </span>
+          <span class="home-quick__text">Add Resources</span>
+          <span class="home-quick__chev" aria-hidden="true">&rsaquo;</span>
+        </a>
+      </aside>
+
+    </section>
+
+
+    <!-- RECENT EXPERIMENTS AND TOOLS -->
+    <section class="home-bottom" aria-label="Recent experiments and tools">
+
+      <div class="home-panel home-panel--experiments">
+        <div class="home-panel__head">
+          <h3>Recent Experiments</h3>
+          <a href="index.html" id="homeExperimentsViewAll">View All &rarr;</a>
+        </div>
+
+        <div class="home-mini-grid" id="homeRecentExperiments" aria-live="polite">
+          <p class="home-preview__state">Loading experiments...</p>
+        </div>
+      </div>
+
+      <div class="home-panel home-panel--tools">
+        <div class="home-panel__head">
+          <h3>Tools</h3>
+          <a href="tools.html" id="homeToolsViewAll">View All &rarr;</a>
+        </div>
+
+        <div class="home-mini-grid" id="homeToolsPreview" aria-live="polite">
+          <p class="home-preview__state">Loading tools...</p>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <script src="shared.js?v=20261005-d2-topics-2"></script>
+  <script src="header.js?v=20261011-classic"></script>
+  <script src="card-menu.js?v=20261017-menu"></script>
+  <script src="home-card-menu.js?v=20261017-menu"></script>
+  <script src="home-counts.js?v=20261011-dashboard"></script>
+  <script src="home-preview.js?v=20261011-preview"></script>
+
+  <!-- Admin-only visibility. Backend permissions must also be enforced. -->
+  <script>
+    (function () {
+      "use strict";
+
+      const adminOnlyElements = document.querySelectorAll("[data-admin-only]");
+
+      function applyRoleVisibility(isAdmin) {
+        adminOnlyElements.forEach(function (element) {
+          element.hidden = !isAdmin;
+        });
+      }
+
+      // Hide immediately to prevent a flash for guests/viewers.
+      applyRoleVisibility(false);
+
+      async function checkAdminRole() {
+        try {
+          const response = await fetch("/api/auth/me", {
+            credentials: "same-origin",
+            cache: "no-store"
+          });
+
+          if (!response.ok) {
+            applyRoleVisibility(false);
+            return;
+          }
+
+          const me = await response.json();
+
+          const isAdmin =
+            me.authenticated === true &&
+            String(me.role || "").toLowerCase() === "admin";
+
+          applyRoleVisibility(isAdmin);
+        } catch (error) {
+          // If authentication cannot be verified, fail closed.
+          applyRoleVisibility(false);
+        }
+      }
+
+      checkAdminRole();
+    })();
+  </script>
+
+</body>
+</html>
