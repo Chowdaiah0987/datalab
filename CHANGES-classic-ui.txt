@@ -1,0 +1,33 @@
+CLASSIC PREMIUM UI REDESIGN (visual layer only)
+================================================
+NEW
+  classic.css            theme loaded last on every page: tokens (ivory/cream/navy/charcoal/antique gold),
+                         serif headings (Cormorant Garamond) + Hanken Grotesk body, cards, buttons, forms,
+                         hero + cover photography, page banners, phone/tablet/desktop rules, reduced motion.
+  assets/img/            hero-home, hero-experiments, hero-modules, hero-tools, hero-resources,
+                         cover-modules/experiments/tools/resources/analytics/neural,
+                         banner-analytics, banner-neural, paper-grain  (local JPEGs, ~880 KB total).
+                         These are generated stand-ins, not stock photos: replace any file with a photo of
+                         the same name and the site uses it.
+MODIFIED
+  *.html (12 pages)      added the serif font to the existing Google Fonts link and one <link> to classic.css.
+  tests/mock-server.js   test-only: .jpg content type + sample modules/tools/resources data.
+UNCHANGED
+  every .js file, server.js, package.json, all existing .css files, ids, classes, routes, APIs.
+NOT SHIPPED
+  .env and node_modules (create your own .env; run npm install).
+
+FORM FIX (requested): delete buttons for topics
+  experiment-form.js  every topic editor now has a visible "Delete" button in its header bar (it was hidden inside the
+                      collapsed panel); the row buttons use a clear trash icon instead of the old ▤ glyph.
+                      Same existing remove logic is reused. classic.css has the matching styles.
+
+HOVER VIDEO PREVIEW AT 2x (requested)
+  script.js   Experiments cover hover preview now plays at 2x (speed re-applied on every load). Direct video links also work.
+  modules.js  Modules cards get the same hover preview (module video, else first topic video). Muted, looped, no controls,
+              one at a time; touch screens: tap the cover to play/pause. YouTube/Vimeo links are skipped (cannot play in <video>).
+  index.html, modules.html  script version strings bumped so browsers load the new files.
+  classic.css small stacking rules for the Modules cover.
+
+HOME: 2x hover preview on Recent Experiments covers
+  home-preview.js, classic.css, home.html (script version bumped)
