@@ -1,0 +1,230 @@
+:root {
+  --royal-bg: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22640%22 height=%22420%22 viewBox=%220 0 640 420%22 fill=%22none%22%3E%3Cg stroke=%22%239fbbe0%22 stroke-opacity=%22.55%22 stroke-width=%221%22%3E%3Cpath d=%22M40 80 150 40 260 110 380 60 500 130 600 70%22/%3E%3Cpath d=%22M150 40 170 170 260 110 330 210 380 60%22/%3E%3Cpath d=%22M170 170 90 250 210 300 330 210 450 280 500 130%22/%3E%3Cpath d=%22M450 280 560 230 600 70%22/%3E%3Cpath d=%22M210 300 250 380 380 360 450 280%22/%3E%3Cpath d=%22M90 250 40 80%22/%3E%3Cpath d=%22M560 230 500 130%22/%3E%3C/g%3E%3Cg fill=%22%23b9cfeb%22%3E%3Ccircle cx=%2240%22 cy=%2280%22 r=%224%22/%3E%3Ccircle cx=%22150%22 cy=%2240%22 r=%225%22/%3E%3Ccircle cx=%22260%22 cy=%22110%22 r=%224%22/%3E%3Ccircle cx=%22380%22 cy=%2260%22 r=%225%22/%3E%3Ccircle cx=%22500%22 cy=%22130%22 r=%224%22/%3E%3Ccircle cx=%22600%22 cy=%2270%22 r=%224%22/%3E%3Ccircle cx=%22170%22 cy=%22170%22 r=%224%22/%3E%3Ccircle cx=%22330%22 cy=%22210%22 r=%225%22/%3E%3Ccircle cx=%2290%22 cy=%22250%22 r=%224%22/%3E%3Ccircle cx=%22210%22 cy=%22300%22 r=%224%22/%3E%3Ccircle cx=%22450%22 cy=%22280%22 r=%225%22/%3E%3Ccircle cx=%22560%22 cy=%22230%22 r=%224%22/%3E%3Ccircle cx=%22250%22 cy=%22380%22 r=%224%22/%3E%3Ccircle cx=%22380%22 cy=%22360%22 r=%224%22/%3E%3C/g%3E%3Cg fill=%22%23e4cf9f%22%3E%3Ccircle cx=%22330%22 cy=%22210%22 r=%222.2%22/%3E%3Ccircle cx=%22150%22 cy=%2240%22 r=%222%22/%3E%3Ccircle cx=%22500%22 cy=%22130%22 r=%222%22/%3E%3C/g%3E%3C/svg%3E");
+  --royal-curves: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22720%22 height=%22360%22 viewBox=%220 0 720 360%22 fill=%22none%22%3E%3Cpath d=%22M0 300C90 240 140 280 220 210S360 130 440 170 600 90 720 40%22 stroke=%22%23a9c3e6%22 stroke-opacity=%22.6%22 stroke-width=%221.4%22/%3E%3Cpath d=%22M0 330C110 290 170 320 250 260S380 190 470 220 610 150 720 110%22 stroke=%22%23e2cc98%22 stroke-opacity=%22.8%22 stroke-width=%221.1%22/%3E%3Cg stroke=%22%23c5d8ef%22 stroke-width=%221%22%3E%3Cpath d=%22M60 360V250M120 360V280M180 360V230M240 360V270%22/%3E%3C/g%3E%3Cg fill=%22%23d7e5f6%22%3E%3Crect x=%2252%22 y=%22250%22 width=%2216%22 height=%22110%22 rx=%222%22/%3E%3Crect x=%22112%22 y=%22280%22 width=%2216%22 height=%2280%22 rx=%222%22/%3E%3Crect x=%22172%22 y=%22230%22 width=%2216%22 height=%22130%22 rx=%222%22/%3E%3Crect x=%22232%22 y=%22270%22 width=%2216%22 height=%2290%22 rx=%222%22/%3E%3C/g%3E%3C/svg%3E");
+  --royal-wave: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22900%22 height=%22220%22 viewBox=%220 0 900 220%22 fill=%22none%22 preserveAspectRatio=%22none%22%3E%3Cdefs%3E%3ClinearGradient id=%22w%22 x1=%220%22 y1=%220%22 x2=%220%22 y2=%221%22%3E%3Cstop offset=%220%22 stop-color=%22%230f2447%22 stop-opacity=%22.07%22/%3E%3Cstop offset=%221%22 stop-color=%22%230f2447%22 stop-opacity=%220%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d=%22M0 120C150 60 260 190 430 150S720 60 900 120V220H0Z%22 fill=%22url(%23w)%22/%3E%3Cpath d=%22M0 150C170 100 280 210 450 175S730 100 900 150%22 stroke=%22%23c9a85c%22 stroke-opacity=%22.7%22 stroke-width=%221.2%22/%3E%3Cpath d=%22M0 135C160 85 270 195 440 160S725 80 900 135%22 stroke=%22%230f2447%22 stroke-opacity=%22.28%22 stroke-width=%221.1%22/%3E%3C/svg%3E");
+  --royal-edge-l: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22140%22 height=%22900%22 viewBox=%220 0 140 900%22 fill=%22none%22%3E%3Cpath d=%22M0 60C70 150 20 300 70 420S40 700 0 780%22 stroke=%22%230f2447%22 stroke-opacity=%22.55%22 stroke-width=%221.4%22/%3E%3Cpath d=%22M0 90C90 190 40 320 96 440S60 720 0 820%22 stroke=%22%23c9a85c%22 stroke-width=%221.1%22/%3E%3Cpath d=%22M0 120C58 210 6 330 52 450S24 740 0 860%22 stroke=%22%230f2447%22 stroke-opacity=%22.25%22 stroke-width=%221%22/%3E%3C/svg%3E");
+  --royal-edge-r: url("data:image/svg+xml,%3Csvg transform=%22scale(-1,1)%22 xmlns=%22http://www.w3.org/2000/svg%22 width=%22140%22 height=%22900%22 viewBox=%220 0 140 900%22 fill=%22none%22%3E%3Cpath d=%22M0 60C70 150 20 300 70 420S40 700 0 780%22 stroke=%22%230f2447%22 stroke-opacity=%22.55%22 stroke-width=%221.4%22/%3E%3Cpath d=%22M0 90C90 190 40 320 96 440S60 720 0 820%22 stroke=%22%23c9a85c%22 stroke-width=%221.1%22/%3E%3Cpath d=%22M0 120C58 210 6 330 52 450S24 740 0 860%22 stroke=%22%230f2447%22 stroke-opacity=%22.25%22 stroke-width=%221%22/%3E%3C/svg%3E");
+  --royal-hero-art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22620%22 height=%22380%22 viewBox=%220 0 620 380%22 fill=%22none%22%3E%3Cdefs%3E%3ClinearGradient id=%22g%22 x1=%220%22 y1=%220%22 x2=%221%22 y2=%221%22%3E%3Cstop offset=%220%22 stop-color=%22%23fff%22/%3E%3Cstop offset=%221%22 stop-color=%22%23eaf2fc%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x=%22150%22 y=%2230%22 width=%22420%22 height=%22262%22 rx=%2212%22 fill=%22url(%23g)%22 stroke=%22%23c7d8ee%22/%3E%3Crect x=%22150%22 y=%2230%22 width=%22420%22 height=%2226%22 rx=%2212%22 fill=%22%23e8f0fa%22/%3E%3Ccircle cx=%22168%22 cy=%2243%22 r=%224%22 fill=%22%23c9a85c%22 fill-opacity=%22.8%22/%3E%3Ccircle cx=%22182%22 cy=%2243%22 r=%224%22 fill=%22%239fbbe0%22/%3E%3Ccircle cx=%22196%22 cy=%2243%22 r=%224%22 fill=%22%239fbbe0%22/%3E%3Cg fill=%22%23cfdff3%22%3E%3Crect x=%22172%22 y=%2276%22 width=%22120%22 height=%228%22 rx=%224%22/%3E%3Crect x=%22172%22 y=%2294%22 width=%2286%22 height=%228%22 rx=%224%22/%3E%3Crect x=%22172%22 y=%22112%22 width=%22140%22 height=%228%22 rx=%224%22/%3E%3C/g%3E%3Cg fill=%22%230f2447%22 fill-opacity=%22.75%22%3E%3Crect x=%22340%22 y=%22135%22 width=%2222%22 height=%2280%22 rx=%223%22/%3E%3Crect x=%22372%22 y=%22105%22 width=%2222%22 height=%22110%22 rx=%223%22/%3E%3Crect x=%22404%22 y=%22121%22 width=%2222%22 height=%2294%22 rx=%223%22/%3E%3Crect x=%22436%22 y=%22118%22 width=%2222%22 height=%2297%22 rx=%223%22/%3E%3Crect x=%22468%22 y=%22108%22 width=%2222%22 height=%22107%22 rx=%223%22/%3E%3C/g%3E%3Cpath d=%22M176 250C220 220 250 238 290 200S350 150 420 128 500 96 548 74%22 stroke=%22%23c9a85c%22 stroke-width=%222.4%22 stroke-linecap=%22round%22/%3E%3Cpath d=%22M110 292H610L590 316H130Z%22 fill=%22%23dfe9f7%22/%3E%3Cg%3E%3Crect x=%22470%22 y=%22318%22 width=%22130%22 height=%2216%22 rx=%223%22 fill=%22%230f2447%22/%3E%3Crect x=%22480%22 y=%22302%22 width=%22114%22 height=%2216%22 rx=%223%22 fill=%22%23cfdff3%22/%3E%3Crect x=%22466%22 y=%22286%22 width=%22122%22 height=%2216%22 rx=%223%22 fill=%22%23fff%22 stroke=%22%23c9a85c%22/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* =========================================================================
+   DS Lab — HOME: PREMIUM WHITE · ROYAL NAVY · SELECTIVE GOLD
+   Loaded last on home.html only. Visual layer only: no markup, ids, scripts,
+   links, auth or API behaviour are touched. Every rule is scoped to body.home-page.
+   Mix: ~80-85% white/ivory, ~10-15% navy, ~3-5% gold.
+   ========================================================================= */
+
+body.home-page {
+  --r-white: #ffffff;
+  --r-ivory: #fdfbf5;
+  --r-mist: #f4f8fd;
+  --r-navy: #0f2447;
+  --r-navy-2: #1b3560;
+  --r-text: #34476a;
+  --r-line: #e3eaf4;
+  --r-gold: #c9a85c;
+  --r-gold-d: #9a7a35;
+  --r-gold-soft: #f6efdc;
+  --card-border: rgba(201, 168, 92, .38);
+  --r-sh: 0 1px 2px rgba(15, 36, 71, .05), 0 10px 26px -14px rgba(15, 36, 71, .18);
+  --r-sh-hi: 0 2px 4px rgba(15, 36, 71, .06), 0 18px 34px -16px rgba(15, 36, 71, .28);
+  background-color: var(--r-white);
+  background-image: none;
+  color: var(--r-text);
+}
+
+/* Background: the shared, very subtle data-science drawing from royal.css (html::before). */
+body.home-page .home-main { position: relative; z-index: 2; padding-bottom: 48px; }
+
+/* ---------- Hero: white, soft blue light, navy heading, restrained gold ---------- */
+body.home-page .home-main--dash .home-intro {
+  position: relative;
+  background-color: var(--r-white);
+  background-image:
+    radial-gradient(ellipse 60% 90% at 88% 20%, rgba(150, 190, 240, .28), rgba(150, 190, 240, 0) 70%),
+    radial-gradient(ellipse 50% 70% at 6% 100%, rgba(150, 190, 240, .16), rgba(150, 190, 240, 0) 70%),
+    linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  box-shadow: var(--r-sh);
+  min-height: clamp(320px, 32vw, 400px);
+}
+/* soft gold hairline across the top of the hero only */
+body.home-page .home-main--dash .home-intro::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  z-index: 2;
+  background: linear-gradient(90deg, transparent, var(--r-gold) 18%, var(--r-gold) 82%, transparent);
+}
+body.home-page .home-intro__title {
+  color: var(--r-navy);
+  text-shadow: none;
+}
+body.home-page .home-intro__subtitle { color: var(--r-gold-d); }
+body.home-page .home-intro__subtitle::after { background: linear-gradient(90deg, var(--r-gold), transparent); }
+body.home-page .home-main--dash .home-intro .home-eyebrow { color: var(--r-gold-d); }
+body.home-page .home-main--dash .home-intro .home-lead { color: var(--r-text); }
+body.home-page .home-quote { color: var(--r-navy); font-family: var(--serif); font-style: italic; font-weight: 600; transform: none; }
+body.home-page .home-quote::after { background: var(--r-gold); width: 56px; height: 2px; }
+
+/* Student profile: white card, soft shadow, thin gold border, gold highlight */
+body.home-page .home-main--dash .home-profile {
+  background: #fff;
+  border: 1px solid var(--r-gold);
+  border-radius: 12px;
+  box-shadow: 0 0 0 5px rgba(201, 168, 92, .1), var(--r-sh-hi);
+}
+body.home-page .home-profile .hero__heading { color: var(--r-navy); }
+body.home-page .home-profile .id-card__photo { border: 2px solid var(--r-gold); box-shadow: 0 6px 14px -8px rgba(15, 36, 71, .4); }
+body.home-page .home-profile dt { color: #6a7a96; }
+body.home-page .home-profile dd { color: var(--r-navy); }
+body.home-page .id-card__edit { color: var(--r-navy); border-color: var(--r-line); background: #fff; }
+body.home-page .id-card__edit:hover { border-color: var(--r-gold); color: var(--r-gold-d); }
+
+/* ---------- Statistics: separate white cards ---------- */
+body.home-page .home-stats {
+  gap: 16px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+body.home-page .home-stat {
+  background: #fff;
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  box-shadow: var(--r-sh);
+  transition: box-shadow .25s, border-color .25s, transform .25s;
+}
+body.home-page .home-stat:hover { background: #fff; border-color: rgba(201, 168, 92, .6); box-shadow: var(--r-sh-hi); transform: translateY(-2px); }
+body.home-page .home-stat__icon { background: var(--r-mist) !important; color: var(--r-navy) !important; border-radius: 12px; }
+body.home-page .home-stat__icon svg { stroke: currentColor; }
+body.home-page .home-stat--orange .home-stat__icon { color: var(--r-navy) !important; }
+body.home-page .home-stat__num { color: var(--r-navy); }
+body.home-page .home-stat__label { color: var(--r-text); padding-left: 12px; border-left: 2px solid var(--r-gold); }
+
+/* ---------- Explore the Laboratory ---------- */
+body.home-page .home-main--dash .home-section-title { color: var(--r-navy); position: relative; padding-bottom: 12px; }
+body.home-page .home-main--dash .home-section-title::after {
+  content: ""; position: absolute; left: 0; bottom: 0; width: 56px; height: 2px; background: var(--r-gold);
+}
+body.home-page .home-main--dash .home-card {
+  background: #fff;
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  box-shadow: var(--r-sh);
+  overflow: hidden;
+}
+body.home-page .home-main--dash .home-card:hover { border-color: rgba(201, 168, 92, .55); box-shadow: var(--r-sh-hi); }
+body.home-page .home-main--dash .home-card__cover { border-bottom: 1px solid var(--r-line); }
+body.home-page .home-main--dash .home-card__number { border-color: rgba(255, 255, 255, .85); color: #fff; background: rgba(15, 36, 71, .55); }
+body.home-page .home-main--dash .home-card__body h2 { color: var(--r-navy); }
+body.home-page .home-card__count { color: var(--r-gold-d); }
+body.home-page .home-main--dash .home-card__body > p { color: var(--r-text); }
+/* equal heights, buttons pinned to the bottom edge */
+body.home-page .home-main--dash .home-card { display: flex; flex-direction: column; }
+body.home-page .home-main--dash .home-card__body { display: flex; flex-direction: column; flex: 1 1 auto; }
+body.home-page .home-main--dash .home-card__link { margin-top: auto; align-self: flex-start; }
+body.home-page .home-main--dash .home-card__link {
+  background: var(--r-navy);
+  color: #fff;
+  border: 1px solid var(--r-navy);
+  border-radius: 8px;
+  transition: background .2s, box-shadow .2s;
+}
+body.home-page .home-main--dash .home-card__link span { color: var(--r-gold); transition: transform .2s; display: inline-block; }
+body.home-page .home-main--dash .home-card__link:hover { background: var(--r-navy-2); border-color: var(--r-gold); box-shadow: 0 8px 16px -10px rgba(15, 36, 71, .6); }
+body.home-page .home-main--dash .home-card__link:hover span { transform: translateX(3px); }
+
+/* ---------- Quick actions, recent experiments, tools ---------- */
+body.home-page .home-quick,
+body.home-page .home-panel {
+  background: #fff;
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  box-shadow: var(--r-sh);
+}
+body.home-page .home-quick__head h3,
+body.home-page .home-panel__head h3 { color: var(--r-navy); }
+body.home-page .home-quick__go { background: var(--r-navy); color: var(--r-gold); }
+body.home-page .home-quick__row { border-radius: 10px; color: var(--r-navy); border-color: var(--r-line); }
+body.home-page .home-quick__row:hover { background: var(--r-ivory); }
+body.home-page .home-quick__text { color: var(--r-navy); }
+body.home-page .home-quick__chev { color: var(--r-gold-d); }
+body.home-page .home-quick__icon,
+body.home-page .home-quick__icon--blue,
+body.home-page .home-quick__icon--orange,
+body.home-page .home-quick__icon--green,
+body.home-page .home-quick__icon--purple { background: var(--r-mist); color: var(--r-gold-d); border-radius: 10px; }
+body.home-page .home-quick__icon--blue { background: var(--r-navy); color: var(--r-gold); }
+body.home-page .home-panel__head { border-bottom: 1px solid var(--r-line); padding-bottom: 10px; }
+body.home-page .home-panel__head a { color: var(--r-navy); font-weight: 700; }
+body.home-page .home-panel__head a:hover { color: var(--r-gold-d); }
+body.home-page .home-mini,
+body.home-page .home-tool {
+  background: #fff;
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  box-shadow: none;
+}
+body.home-page .home-mini:hover,
+body.home-page .home-tool:hover { border-color: rgba(201, 168, 92, .6); box-shadow: var(--r-sh-hi); }
+body.home-page .home-mini strong,
+body.home-page .home-tool strong { color: var(--r-navy); }
+body.home-page .home-mini small,
+body.home-page .home-tool small { color: #6a7a96; }
+body.home-page .home-mini__badge { color: var(--r-gold-d); }
+body.home-page .home-tool__logo,
+body.home-page .home-tool__logo--blank { background: var(--r-mist); color: var(--r-navy); }
+body.home-page .home-preview__state { color: var(--r-text); }
+
+/* card menus (admin edit text) */
+body.home-page .home-card__menu-trigger { color: var(--r-navy); border-color: rgba(201, 168, 92, .6); background: rgba(255, 255, 255, .95); }
+body.home-page .home-card__dropdown { background: #fff; border-color: var(--r-line); }
+body.home-page .home-card__dropdown button { color: var(--r-navy); }
+body.home-page .home-card__dropdown button:hover { background: var(--r-ivory); }
+
+/* focus ring: navy with gold halo */
+body.home-page :focus-visible { outline: 3px solid rgba(201, 168, 92, .85); outline-offset: 2px; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1280px) {
+  body.home-page .home-main--dash .home-intro::after { display: none; }
+}
+@media (max-width: 760px) {
+  body.home-page .home-stats { gap: 10px; }
+  body.home-page .home-stat { border-radius: 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.home-page .home-stat, body.home-page .home-card__link span { transition: none; }
+  body.home-page .home-stat:hover { transform: none; }
+}
+
+/* ---------- Student profile: compact, aligned label / value grid ---------- */
+body.home-page .home-main--dash .home-profile { max-width: 400px; }
+body.home-page .home-profile .hero { padding: 10px 48px 0 16px; }
+body.home-page .home-profile .hero__heading { font-size: .74rem; letter-spacing: .16em; text-transform: uppercase; font-family: var(--sans); color: var(--r-gold-d); }
+body.home-page .home-profile .id-card__body { grid-template-columns: 76px minmax(0, 1fr); gap: 14px; padding: 8px 16px 14px; align-items: center; }
+body.home-page .home-profile .id-card__photo { width: 76px; height: 96px; border-radius: 10px; }
+body.home-page .home-profile .id-card__details { grid-template-columns: 7.4rem minmax(0, 1fr); gap: 0 10px; align-items: baseline; }
+body.home-page .home-profile .id-card__details dt,
+body.home-page .home-profile .id-card__details dd { padding: 4px 0; border-bottom: 1px solid rgba(201, 168, 92, .2); line-height: 1.35; }
+body.home-page .home-profile .id-card__details > div:last-child dt,
+body.home-page .home-profile .id-card__details > div:last-child dd { border-bottom: 0; }
+body.home-page .home-profile .id-card__details dt { font-size: .74rem; letter-spacing: .01em; }
+body.home-page .home-profile .id-card__details dd { font-size: .84rem; }
+body.home-page .home-profile .id-card__edit { top: 6px; right: 8px; width: 32px; height: 32px; }
+
+/* ---------- Explore cards: light drawn covers, same family as Modules / Tools / Resources pages ---------- */
+body.home-page .home-main--dash .home-card__cover { isolation: isolate; background-color: var(--r-mist); }
+body.home-page .home-main--dash .home-card__cover::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: .38; background: var(--cover-art) right -6px center / auto 100% no-repeat; }
+body.home-page .home-main--dash .home-card__cover--modules { --cover-art: url("assets/img/art-modules.svg"); background-image: linear-gradient(135deg, #fff, #eaf2fc); }
+body.home-page .home-main--dash .home-card__cover--experiments { --cover-art: url("assets/img/art-experiments.svg"); background-image: linear-gradient(135deg, #fff, #eaf2fc); }
+body.home-page .home-main--dash .home-card__cover--tools { --cover-art: url("assets/img/art-tools.svg"); background-image: linear-gradient(135deg, #fff, #eaf2fc); }
+body.home-page .home-main--dash .home-card__cover--resources { --cover-art: url("assets/img/art-resources.svg"); background-image: linear-gradient(135deg, #fff, #eaf2fc); }
+body.home-page .home-main--dash .home-card__cover-copy strong { color: var(--r-navy); text-shadow: none; }
+body.home-page .home-main--dash .home-card__cover-copy span { color: var(--r-gold-d); }
+body.home-page .home-main--dash .home-card__icon { stroke: var(--r-navy); color: var(--r-navy); }
+body.home-page .home-main--dash .home-card__art, body.home-page .home-main--dash .home-card__watermark { display: none; }
+body.home-page .home-main--dash .home-card__number { border-color: var(--r-gold); color: var(--r-navy); background: #fff; }

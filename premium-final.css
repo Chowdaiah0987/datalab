@@ -1,0 +1,225 @@
+/* =========================================================================
+   DS Lab — PREMIUM FINAL LAYER  (linked LAST on every page, after unified.css)
+   Visual only: no markup, ids, scripts, routes, auth or API behaviour touched.
+
+   1. Page background  : assets/img/bg-page.jpg (supplied image) fixed behind every page.
+   2. Hero panels      : colour illustration (person + laptop dashboard + books +
+                         AI network + graphs) on the right, text stays readable.
+   3. Classic details  : serif headings, ornamented section titles, gold hairlines.
+   4. Cards / buttons  : soft lift, gold edge on hover, refined navy buttons.
+   5. Motion           : gentle page entrance (disabled for reduced-motion).
+   ========================================================================= */
+
+:root {
+  --pf-navy: #10264B;
+  --pf-royal: #082B65;
+  --pf-gold: #D6A43B;
+  --pf-gold-d: #9A7421;
+  --pf-ivory: #FBFAF6;
+  --pf-line: rgba(214, 164, 59, .38);
+  --pf-serif: "Cormorant Garamond", "Playfair Display", Georgia, "Times New Roman", serif;
+}
+
+/* ---------- 1. Page background: the supplied data-science image, fixed behind EVERY page ---------- */
+html::before {
+  background: linear-gradient(rgba(255,255,255,.66), rgba(255,255,255,.66)), #f7faff url("assets/img/bg-page.jpg") center bottom / cover no-repeat !important;
+  opacity: 1 !important;
+}
+@media (max-width: 900px) { html::before { background: linear-gradient(rgba(255,255,255,.66), rgba(255,255,255,.66)), #f7faff url("assets/img/bg-page.jpg") 22% bottom / cover no-repeat !important; } }
+@media print { html::before { display: none !important; } }
+
+/* Text that sits directly on the picture gets a soft white halo so it stays readable over the artwork */
+.home-section-title, .xp-crumbs ol, .xp-crumbs a, .xp-crumbs [aria-current],
+.xp-lesson-title h1, .xp-page .xp-shell > h1 {
+  text-shadow: 0 0 3px #fff, 0 0 8px #fff, 0 0 14px rgba(255, 255, 255, .95);
+}
+/* Login: the picture runs behind the whole page; the brand panel becomes a light frosted veil over it */
+body.login-page, body.login-page .login-shell { background: transparent !important; }
+body.login-page .login-brand {
+  background: linear-gradient(100deg, rgba(255, 255, 255, .90) 0%, rgba(255, 255, 255, .72) 55%, rgba(255, 255, 255, .30) 100%) !important;
+  -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
+}
+
+/* ---------- 2. Hero panels with the colour scene ---------- */
+body.home-page .home-main--dash .home-intro,
+.exp-page .exp-hero__inner,
+.mhero,
+.module-intro,
+body:has(#resourceList) .module-intro {
+  --hero-art: url("assets/img/hero-scene.svg");
+  background-color: #fff !important;
+  background-image:
+    var(--hero-art),
+    radial-gradient(ellipse 55% 100% at 78% 40%, rgba(150, 190, 240, .30), rgba(150, 190, 240, 0) 70%),
+    radial-gradient(ellipse 40% 80% at 0% 100%, rgba(214, 164, 59, .12), rgba(214, 164, 59, 0) 70%),
+    linear-gradient(180deg, #ffffff 0%, #f5f9ff 100%) !important;
+  background-repeat: no-repeat !important;
+  background-position: right 24px center, 0 0, 0 0, 0 0 !important;
+  background-size: auto 94%, auto, auto, auto !important;
+  border: 1px solid var(--pf-line) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 14px 40px rgba(16, 38, 75, .10), 0 2px 6px rgba(16, 38, 75, .05) !important;
+}
+/* Home: scene is a backdrop behind the profile card; a white fade keeps the headline crisp */
+body.home-page .home-main--dash .home-intro {
+  background-image:
+    linear-gradient(90deg, #fff 0%, rgba(255,255,255,.96) 40%, rgba(255,255,255,.55) 52%, rgba(255,255,255,0) 64%),
+    var(--hero-art),
+    radial-gradient(ellipse 55% 100% at 78% 40%, rgba(150, 190, 240, .30), rgba(150, 190, 240, 0) 70%),
+    linear-gradient(180deg, #ffffff 0%, #f5f9ff 100%) !important;
+  background-position: 0 0, right -24px center, 0 0, 0 0 !important;
+  background-size: 100% 100%, auto 108%, auto, auto !important;
+}
+body.home-page .home-quote { display: none; }
+.mhero { background-position: right 250px center, 0 0, 0 0, 0 0 !important; }
+
+/* keep long titles clear of the artwork */
+.exp-page .exp-hero__text, .mhero__text, .module-intro > *:first-child { max-width: min(56%, 620px); position: relative; z-index: 1; }
+
+/* Student Profile ID card: fitted royal white / navy / gold background (assets/img/profile-card-bg.webp, same 1.59 : 1 ratio as the card).
+   Card size, radius and content are unchanged; the artwork only sits behind them. */
+body.home-page .home-main--dash .home-profile {
+  background: #fff url("assets/img/profile-card-bg-light.webp") center / 100% 100% no-repeat !important;
+  border: 0 !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+}
+/* the artwork's clean centre replaces the inner white panel; heading moves to the light top-centre band; the old mortarboard ornament is dropped */
+body.home-page .home-profile .id-card__body { background: transparent !important; border: 0 !important; box-shadow: none !important; }
+body.home-page .home-profile .hero { text-align: center; padding-left: 46px !important; }
+body.home-page .home-profile .hero__heading { display: inline-block; text-shadow: 0 0 3px #fff, 0 0 8px #fff, 0 0 12px rgba(255,255,255,.9); }
+body.home-page .home-profile::after { display: none !important; }
+@media (max-width: 760px) { body.home-page .home-main--dash .home-profile { background-size: cover !important; } }
+
+/* ---------- 3. Classic typography + ornaments ---------- */
+h1, h2, .exp-hero__title, .mhero h1, .home-intro__title, .home-section-title {
+  font-family: var(--pf-serif);
+  letter-spacing: .01em;
+}
+.home-section-title, main h2.section-title, .xp-section__title {
+  display: flex; align-items: center; gap: 14px;
+  color: var(--pf-navy);
+}
+.home-section-title::after {
+  content: ""; flex: 1 1 auto; height: 1px;
+  background: linear-gradient(90deg, var(--pf-gold), rgba(214, 164, 59, 0));
+}
+.home-section-title::before {
+  content: ""; order: -1; width: 9px; height: 9px; transform: rotate(45deg);
+  background: var(--pf-gold); box-shadow: 0 0 0 4px rgba(214, 164, 59, .18);
+}
+.home-eyebrow, .mhero__eyebrow {
+  letter-spacing: .22em; text-transform: uppercase; font-weight: 700;
+}
+
+/* ---------- 4. Header: frosted, gold edge ---------- */
+.site-header, header.site-header, .hdr, body > header:first-of-type {
+  backdrop-filter: saturate(160%) blur(10px);
+  -webkit-backdrop-filter: saturate(160%) blur(10px);
+}
+
+/* ---------- 4b. Cards: soft lift + gold edge ---------- */
+.home-card, .exp-card, .mcard, .module-card, .library-card, .resource-card, .tool-card, .home-stat {
+  transition: transform .28s cubic-bezier(.2, .7, .2, 1), box-shadow .28s ease, border-color .28s ease;
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, .96), rgba(250, 252, 255, .96));
+}
+.home-card:hover, .exp-card:hover, .mcard:hover, .module-card:hover, .library-card:hover,
+.resource-card:hover, .tool-card:hover, .home-stat:hover {
+  transform: translateY(-4px);
+  border-color: var(--pf-gold) !important;
+  box-shadow: 0 18px 40px rgba(16, 38, 75, .14), 0 0 0 1px rgba(214, 164, 59, .35) !important;
+}
+
+/* ---------- 4c. Primary buttons: navy with gold sheen ---------- */
+.btn-primary, .exp-btn--primary, .home-card__link, button[type="submit"],
+.exp-card .exp-btn:not(.exp-btn--ghost), .mcard__btn {
+  background-image: linear-gradient(135deg, var(--pf-royal), var(--pf-navy)) !important;
+  transition: box-shadow .25s ease, transform .25s ease, filter .25s ease;
+}
+.btn-primary:hover, .exp-btn--primary:hover, .home-card__link:hover, button[type="submit"]:hover {
+  box-shadow: 0 8px 20px rgba(8, 43, 101, .28), inset 0 -2px 0 var(--pf-gold);
+  filter: brightness(1.06);
+}
+
+/* ---------- 4d. Small details ---------- */
+::selection { background: rgba(214, 164, 59, .35); color: var(--pf-navy); }
+html { scrollbar-color: #b8c7de #f3f6fb; scrollbar-width: thin; }
+body { background-color: #fbfcff !important; }
+
+/* ---------- 5. Gentle entrance ---------- */
+@keyframes pf-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: no-preference) {
+  body.home-page .home-intro, .exp-hero__inner, .mhero, .module-intro { animation: pf-rise .7s ease both; }
+  .home-stat, .home-card, .exp-card, .mcard { animation: pf-rise .6s ease both; }
+  .home-stat:nth-child(2), .home-card:nth-child(2), .exp-card:nth-child(2) { animation-delay: .06s; }
+  .home-stat:nth-child(3), .home-card:nth-child(3), .exp-card:nth-child(3) { animation-delay: .12s; }
+  .home-stat:nth-child(4), .home-card:nth-child(4), .exp-card:nth-child(4) { animation-delay: .18s; }
+}
+
+/* ---------- Responsive: artwork steps back so text always wins ---------- */
+@media (max-width: 1100px) {
+  body.home-page .home-main--dash .home-intro { background-position: 0 0, right -60px center, 0 0, 0 0 !important; background-size: 100% 100%, auto 80%, auto, auto !important; }
+  .exp-page .exp-hero__inner, .mhero, .module-intro { background-position: right -20px center, 0 0, 0 0, 0 0 !important; background-size: auto 78%, auto, auto, auto !important; }
+  .exp-page .exp-hero__text, .mhero__text, .module-intro > *:first-child { max-width: 62%; }
+}
+@media (max-width: 760px) {
+  /* Home: the profile card fills the hero on phones, so the page background carries the artwork */
+  body.home-page .home-main--dash .home-intro {
+    background-image: linear-gradient(180deg, #ffffff 0%, #f5f9ff 100%) !important;
+    background-position: 0 0 !important; background-size: auto !important;
+  }
+  .exp-page .exp-hero__inner, .mhero, .module-intro {
+    background-position: center bottom -4px, 0 0, 0 0, 0 0 !important;
+    background-size: auto 44%, auto, auto, auto !important;
+    padding-bottom: 170px !important;
+  }
+  .exp-page .exp-hero__text, .mhero__text, .module-intro > *:first-child { max-width: 100%; }
+}
+@media print { .home-intro, .exp-hero__inner, .mhero, .module-intro { background-image: none !important; } }
+
+/* ---------- Resources: elegant empty state (CSS-only, shown when the list has no cards) ---------- */
+#resourceList:empty {
+  display: flex !important; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 220px; padding: 150px 20px 36px; text-align: center; position: relative;
+  background: #fff url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96' fill='none' stroke='%232F65A5' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><path d='M24 10h34l16 16v58H24z' fill='%23EAF3FF'/><path d='M58 10v16h16'/><path d='M34 44h30M34 56h30M34 68h18' stroke='%23D6A43B'/></svg>") center 40px / 84px no-repeat;
+  border: 1px dashed var(--pf-line); border-radius: 18px;
+  box-shadow: 0 6px 20px rgba(16, 38, 75, .06);
+}
+#resourceList:empty::after {
+  content: "No resources have been added yet.";
+  font-family: var(--pf-serif); font-size: 1.35rem; font-weight: 600; color: var(--pf-navy);
+}
+
+/* ---------- 2b. Home hero: light, airy white / pale-blue / gold ---------- */
+/* Same layout, text, ID card and illustration. The illustration is veiled to a softer tone, the books-and-laptop
+   photo (assets/img/hero-books.png) is faded into the bottom-left corner, and fine gold lines frame the card. */
+body.home-page .home-main--dash .home-intro {
+  background-color: #fff !important;
+  background-image:
+    url("assets/img/hero-waves.svg"),
+    url("assets/img/hero-books.png"),
+    linear-gradient(90deg, #fff 0%, rgba(255,255,255,.94) 38%, rgba(255,255,255,.5) 52%, rgba(255,255,255,0) 64%),
+    linear-gradient(90deg, rgba(255,255,255,0) 46%, rgba(255,255,255,.52) 58%, rgba(255,255,255,.52) 100%),
+    var(--hero-art),
+    radial-gradient(ellipse 60% 110% at 82% 35%, rgba(190, 214, 245, .45), rgba(190, 214, 245, 0) 70%),
+    radial-gradient(ellipse 45% 70% at 12% 100%, rgba(231, 196, 106, .10), rgba(231, 196, 106, 0) 70%),
+    linear-gradient(180deg, #ffffff 0%, #f1f6fc 100%) !important;
+  background-repeat: no-repeat !important;
+  background-position: 0 0, left -22px bottom -16px, 0 0, 0 0, right -24px center, 0 0, 0 0, 0 0 !important;
+  background-size: 100% 100%, auto 46%, 100% 100%, 100% 100%, auto 108%, auto, auto, auto !important;
+  border-color: rgba(214, 164, 59, .45) !important;
+  box-shadow: 0 16px 44px rgba(16, 38, 75, .08), 0 1px 3px rgba(16, 38, 75, .05) !important;
+}
+@media (max-width: 1100px) {
+  body.home-page .home-main--dash .home-intro {
+    background-position: 0 0, left -22px bottom -16px, 0 0, 0 0, right -60px center, 0 0, 0 0, 0 0 !important;
+    background-size: 100% 100%, auto 40%, 100% 100%, 100% 100%, auto 80%, auto, auto, auto !important;
+  }
+}
+@media (max-width: 760px) {
+  body.home-page .home-main--dash .home-intro {
+    background-image: url("assets/img/hero-waves.svg"), linear-gradient(180deg, #ffffff 0%, #f1f6fc 100%) !important;
+    background-position: 0 0, 0 0 !important; background-size: 100% 100%, auto !important;
+  }
+}
+@media print { body.home-page .home-main--dash .home-intro { background-image: none !important; } }

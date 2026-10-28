@@ -1,0 +1,36 @@
+BANNER BACKGROUND + CLEARER CARDS
+=================================
+Background
+  assets/img/bg-page.jpg   REPLACED with Pastel_Global_Learning_Technology_Banner (1810x869, ~270 KB)
+  bg-cards.css  (NEW, linked last on every page, after compact-ui.css)
+     - banner is fixed behind every page; veil reduced from 66% white to 10% so the picture is clearly visible
+     - phones keep the laptop in view (crop shifted left)
+
+Cards (home, experiments, modules, tools, resources, topic pages)
+  - solid white "glass" panels + white frame ring + stronger shadow, so artwork never shows through text
+  - gold border + lift on hover
+  - titles darker/bolder, descriptions darker + larger (1rem, 1.6 line-height), meta text AA-contrast
+  - gold labels/pills use a darker gold (#7a5710) on warm tint; "unavailable" links no longer faint grey
+  - section headings that sat on the picture ("Explore the Laboratory", breadcrumbs) are now frosted pills
+  - ghost line-art behind the home card titles toned down; tools/resources keep their illustrated headers
+  - hero lead text / eyebrow / ID-card labels darker
+  To undo: remove the bg-cards.css <link> line from the HTML pages.
+No markup, ids, scripts, routes, auth or API code changed.
+
+HERO CARDS (unified)
+  hero-unified.css (NEW, linked last on every page) + assets/img/hero-{home,modules,experiments,tools,resources}-bg.webp
+  Modules / Experiments / Tools / Resources heroes: same height, gold frame, title/subtitle/eyebrow sizes,
+  text on the clear left, own picture on the right; the old SVG art and "Learn Explore Apply" motto are hidden so nothing overlaps.
+  Phones: text on top, picture underneath.
+  Home: new banner as hero background; title text moved right so it clears the books; ID card unchanged.
+
+CATEGORY COLOURS + CLEAN ID CARD + LIGHT BACKGROUND
+  category-colors.css (NEW, linked last on every page); every page except Home/Login has <body data-cat="...">:
+     Modules = blue (modules, module, topic)   Experiments = gold (index, experiment, experiment-topic, topic-lesson, experiment-form)
+     Tools = teal (tools)                      Resources = purple (resources)
+  Tokens --c --c-d --c-l --c-t --c-b drive: hero frame, listing cards, buttons, badges/numbers, pills, icons, panels,
+  topic / sub-topic / nested rows, sidebar, breadcrumbs, pagers, form panels + inputs focus, header nav active tab.
+  Home sets the colour per card/stat/panel (Recent Experiments = gold, Tools = teal).
+  Page background: white veil raised to ~66% so the banner is soft.
+  ID card: picture removed -> clean cream card, gold border, gold "Student Profile" heading.
+  To undo: remove the category-colors.css <link> (and data-cat is harmless).

@@ -1,0 +1,38 @@
+BACKGROUND IMAGE + HEADER / LOGIN CHECK
+=======================================
+Background
+  assets/img/bg-page.jpg   NEW  the supplied image (optimised, 1672x941)
+  premium-final.css        html::before now uses bg-page.jpg, fixed behind EVERY page (home, experiments, modules,
+                           tools, resources, experiment/topic/lesson pages, forms, login). Phones shift the crop left
+                           so the laptop stays visible. Headings that sit directly on the artwork get a soft white halo.
+                           Login: the brand panel is now a light frosted veil so the picture runs across the whole page.
+
+Header / login / Viewer / Admin
+  Tested in a real browser (guest, Viewer, Admin; every main page): Login link, login form (validation, wrong Admin
+  password, show/hide password, ?next= redirect), Viewer + Admin badges, dropdown (Escape / outside click), Logout,
+  nav links, server 403 for Viewer edits, Admin-only controls hidden for guests / shown for Admin.
+  FIXED  Home page: the Viewer / Admin button did nothing and there was no way to log out from Home.
+         It now opens the same dropdown (Logout; Admin also gets Edit ID Card).      (auth.js, auth.css)
+  FIXED  Admin "Edit ID Card" from the dropdown also works on Home (uses #homeEditIdBtn).   (auth.js)
+
+Tests added
+  tests/auth-header-check.js, tests/admin-buttons-check.js  (run against: node tests/mock-server.js 3200 --auth)
+  tests/mock-server.js     new --auth mode: cookie login/logout like server.js, injects auth.js/auth.css
+
+Note: .env has Windows (CRLF) line endings. server.js trims the values so it is fine on the server.
+
+STUDENT PROFILE ID CARD BACKGROUND
+  assets/img/profile-card-bg.png   standalone 1760x1107 image (4x the card, same 1.59:1 ratio, transparent rounded corners)
+  assets/img/profile-card-bg.webp  same image, used by the site (155 KB)
+  premium-final.css  card uses it; card size / radius / photo / details unchanged. The inner white panel is made transparent so
+                     the artwork's clean centre shows, the "Student Profile" heading is centred in the light top band,
+                     and the old mortarboard ornament that overlapped the card is hidden.
+
+HOME HERO CARD - LIGHT THEME
+  home-hero.css (NEW, linked last in home.html) + assets/img/hero-light-left|mid|right.webp (cut from the supplied reference).
+  White / pale-blue / gold hero with the laptop + books on the left and the network graphic on the right, gold rounded frame,
+  navy title, gold italic subtitle, text kept clear of the laptop; stacks on tablets/phones. Markup, ids and scripts unchanged.
+
+HERO SIZE + LIGHT ID CARD
+  home-hero.css: hero is 410px tall (was 500), smaller title, wider lead text (2 lines), tighter padding.
+  assets/img/profile-card-bg-light.webp/.png (NEW): the ID-card artwork re-toned to white / pale blue / gold; premium-final.css points to it.

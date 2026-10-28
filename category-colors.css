@@ -1,0 +1,240 @@
+/* =========================================================================
+   DS Lab — CATEGORY COLOURS  (linked LAST on every page). Visual only.
+     Modules = blue   Experiments = gold   Tools = teal   Resources = purple
+   Each page carries data-cat on <body>; the home page sets the colour per card.
+   Everything below reads the five tokens --c --c-d --c-l --c-t --c-b, so a
+   category keeps its colour on list pages, detail pages, topics, sub-topics,
+   forms and nested sections.
+   ========================================================================= */
+
+/* ---------- tokens ---------- */
+[data-cat="modules"], .home-card:has(.home-card__cover--modules), .home-stat--blue {
+  --c:#2f6fe4; --c-d:#1a49a8; --c-l:#f1f6ff; --c-t:#dbe8ff; --c-b:#aac6f5; --c-rgb:47,111,228;
+}
+[data-cat="experiments"], .home-card:has(.home-card__cover--experiments), .home-stat--orange, .home-panel--experiments {
+  --c:#c98a0c; --c-d:#8a5a00; --c-l:#fffaea; --c-t:#fdebb8; --c-b:#efcf84; --c-rgb:201,138,12;
+}
+[data-cat="tools"], .home-card:has(.home-card__cover--tools), .home-stat--green, .home-panel--tools {
+  --c:#0f9d8a; --c-d:#0a6b5e; --c-l:#effbf8; --c-t:#cdf1ea; --c-b:#9bdcd0; --c-rgb:15,157,138;
+}
+[data-cat="resources"], .home-card:has(.home-card__cover--resources), .home-stat--purple {
+  --c:#7a4fd6; --c-d:#53309f; --c-l:#f6f1ff; --c-t:#e4d9fb; --c-b:#c9b8f1; --c-rgb:122,79,214;
+}
+
+/* ---------- LIGHT page background ---------- */
+html::before {
+  background:
+    linear-gradient(rgba(255,255,255,.66), rgba(255,255,255,.66)),
+    #f7faff url("assets/img/bg-page.jpg") center bottom / cover no-repeat !important;
+}
+@media (max-width: 900px) {
+  html::before {
+    background:
+      linear-gradient(rgba(255,255,255,.70), rgba(255,255,255,.70)),
+      #f7faff url("assets/img/bg-page.jpg") 22% bottom / cover no-repeat !important;
+  }
+}
+
+/* ---------- ID card: clean cream card, no picture (like the reference) ---------- */
+body.home-page .home-main--dash .home-profile {
+  background: #f9f6ee !important;
+  background-image: none !important;
+  border: 1.5px solid #e6d5a6 !important;
+  border-radius: 18px !important;
+  box-shadow: 0 14px 30px -14px rgba(16,38,75,.40), 0 2px 6px rgba(16,38,75,.08) !important;
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+}
+body.home-page .home-profile .hero { text-align: left !important; padding: 20px 60px 2px 28px !important; background: none !important; }
+body.home-page .home-profile .hero::before, body.home-page .home-profile .hero::after { display: none !important; }
+body.home-page .home-profile .hero__heading {
+  color: #8a6a22 !important; text-shadow: none !important; font-weight: 700 !important;
+}
+body.home-page .home-profile .id-card__photo {
+  border: 2px solid #fff !important; border-radius: 14px !important;
+  box-shadow: 0 8px 18px -8px rgba(16,38,75,.5), 0 0 0 1px #e6d5a6 !important;
+}
+body.home-page .home-profile .id-card__details dt { color: #6b6a66 !important; font-weight: 500; }
+body.home-page .home-profile .id-card__details dd { color: #0f1d3a !important; font-weight: 700; }
+body.home-page .home-profile .id-card__details dd a { color: #0f1d3a !important; text-decoration: underline; }
+
+/* ---------- hero cards: category frame + eyebrow ---------- */
+body.exp-page .exp-hero__inner, body.modules-page .mhero,
+body:has(#toolList) .module-intro, body:has(#resourceList) .module-intro {
+  border: 2px solid var(--c) !important;
+  box-shadow: 0 14px 30px -14px rgba(var(--c-rgb), .55), 0 2px 6px rgba(16,38,75,.08) !important;
+}
+.meyebrow, .module-intro .home-eyebrow, .exp-hero__sub em, body.exp-page .exp-hero__title span { color: var(--c-d) !important; }
+
+/* ---------- listing cards (experiments, modules, tools, resources, home) ---------- */
+.exp-card, .mcard, .library-card, .home-main--dash .home-card {
+  background-image: linear-gradient(165deg, var(--c-l) 0%, #fff 58%) !important;
+  border: 1.5px solid var(--c-b) !important;
+  box-shadow: 0 0 0 4px rgba(255,255,255,.7), 0 10px 24px -12px rgba(var(--c-rgb), .55) !important;
+  border-radius: 18px !important;
+}
+.exp-card:hover, .mcard:hover, .library-card:hover, .home-main--dash .home-card:hover {
+  border-color: var(--c) !important;
+  box-shadow: 0 0 0 4px rgba(255,255,255,.85), 0 18px 32px -14px rgba(var(--c-rgb), .65) !important;
+}
+.home-card:not(.library-card) > .home-card__cover {
+  background-image: linear-gradient(160deg, var(--c-t), var(--c-l)) !important;
+}
+/* module / tool / resource covers keep their own artwork; it is tinted in the category colour */
+.mcard__cover, .library-card__cover {
+  background-color: var(--c-t) !important; background-blend-mode: multiply;
+}
+.exp-card__title a:hover, .mcard__title a:hover { color: var(--c-d) !important; }
+
+/* ---------- buttons ---------- */
+.btn--primary, .mbtn--primary, .exp-card__readmore, .mcard__more, .home-card__link,
+.xp-btn--primary, .mpager__link--next, .ef-save, button[type="submit"].btn, .module-form__actions .btn--primary {
+  background: linear-gradient(135deg, var(--c), var(--c-d)) !important;
+  border-color: var(--c-d) !important; color: #fff !important;
+  box-shadow: 0 8px 16px -8px rgba(var(--c-rgb), .8) !important;
+}
+.btn--primary:hover, .mbtn--primary:hover, .exp-card__readmore:hover, .mcard__more:hover, .home-card__link:hover, .xp-btn--primary:hover {
+  filter: brightness(1.08); transform: translateY(-1px);
+}
+.home-card__link span { color: #fff !important; }
+.library-card__link { color: var(--c-d) !important; text-decoration-color: var(--c) !important; }
+.xp-btn--outline, .mbtn--ghost, .mbtn--tiny, .mchipbtn, .exp-card__actions .btn:not(.btn--primary) {
+  color: var(--c-d) !important; border: 1.5px solid var(--c-b) !important; background: var(--c-l) !important;
+}
+.xp-btn--outline:hover, .mbtn--ghost:hover, .mchipbtn:hover { border-color: var(--c) !important; background: var(--c-t) !important; }
+
+/* ---------- badges, numbers, pills ---------- */
+.exp-card__badge, .mcard__badge, .msb__badge, .mdhero__badge, .mtopic__badge, .xp-num-badge, .xp-eyebrow--badge,
+.mpanel__count, .mtopichead__pos, .home-card__number {
+  background: var(--c) !important; color: #fff !important; border-color: var(--c-d) !important;
+}
+.home-card__number { background: #fff !important; color: var(--c-d) !important; border: 1.5px solid var(--c) !important; }
+.mcard__pill, .home-mini__badge, .home-tool__cat, .mtopichead__badges > * {
+  background: var(--c-t) !important; color: var(--c-d) !important; border: 1px solid var(--c-b) !important;
+}
+.library-card__meta, .library-card__cover span, .home-card__cover-copy span { color: var(--c-d) !important; }
+.exp-card__number { color: var(--c-d) !important; }
+
+/* ---------- icons ---------- */
+.mres__icon, .xp-icon, .home-card__icon, .home-stat__icon, .ef-plus, .ef-upload-icon, .mpanel__title svg,
+.xp-card__title svg, .ef-panel-title svg, .mabout svg, .home-card__menu-trigger {
+  color: var(--c-d) !important; stroke: currentColor;
+}
+.mres__icon, .xp-icon, .home-stat__icon, .ef-plus { background: var(--c-t) !important; border-radius: 12px; }
+.home-stat__icon svg { color: var(--c-d) !important; }
+.home-stat { background: linear-gradient(165deg, var(--c-l), #fff 70%) !important; }
+.home-stat__num { color: var(--c-d) !important; }
+.home-stat { border-color: var(--c-b) !important; }
+
+/* ---------- panels, headings, details (detail pages / topics / sub-topics / forms) ---------- */
+.mpanel, .xp-card, .ef-panel, .lesson-content-card, .mtopichead, .mdhero, .xp-hero--card,
+.ef-pagehead, .ef-subs-panel, .ef-tools-panel, .ef-topic-list-panel, .ef-resource-panel, .home-panel {
+  background-image: linear-gradient(180deg, var(--c-l) 0, #fff 120px) !important;
+  background-color: rgba(255,255,255,.98) !important;
+  border: 1.5px solid var(--c-b) !important;
+  border-top: 4px solid var(--c) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 0 0 4px rgba(255,255,255,.65), 0 12px 26px -14px rgba(var(--c-rgb), .5) !important;
+}
+.mtopichead, .mdhero, .xp-hero--card { border: 2px solid var(--c) !important; border-top-width: 5px !important; }
+.mpanel__title, .xp-card__title, .ef-panel-title, .mpanel__head h2, .home-panel__head h3 { color: var(--c-d) !important; }
+.mpanel__head, .home-panel__head { border-bottom-color: var(--c-b) !important; }
+.mdhero h1, .mtopichead h1, .xp-hero--card h1, .ef-pagehead h1 { color: #0b1d44 !important; }
+
+/* topic / sub-topic / nested rows */
+.mtopic, .xp-topic-row, .xp-topic-card, .xp-link-row, .home-mini, .home-tool {
+  background-image: linear-gradient(90deg, var(--c-l), #fff 55%) !important;
+  border: 1.5px solid var(--c-b) !important;
+  border-left: 5px solid var(--c) !important;
+  border-radius: 14px !important;
+}
+.mtopic:hover, .xp-topic-row:hover, .xp-topic-card:hover, .xp-link-row:hover, .home-mini:hover, .home-tool:hover {
+  background-image: linear-gradient(90deg, var(--c-t), var(--c-l) 70%) !important; border-color: var(--c) !important;
+}
+.xp-topic-row__title, .xp-topic-card__body h3, .mtopic h3 { color: #0b1d44 !important; }
+.xp-topic-row__meta { color: var(--c-d) !important; }
+.mtopic > a:last-child, .mtopic__go, .mtopic .mbtn { background: var(--c) !important; color: #fff !important; }
+
+/* ---------- sidebar (modules & topics) ---------- */
+.msb__toggle { background: linear-gradient(135deg, var(--c), var(--c-d)) !important; }
+.msb__row:hover, .msb__link:hover, .msb__module.is-open > .msb__row, .msb__module.is-active > .msb__row, .msb__link.is-active {
+  background: var(--c-t) !important; border-color: var(--c) !important;
+}
+.msb__topic-link:hover, .msb__topic-link.is-active { color: var(--c-d) !important; background: var(--c-l) !important; }
+.msb { border-color: var(--c-b) !important; }
+
+/* ---------- breadcrumbs + links ---------- */
+.mcrumbs a, .xp-crumbs a, .ef-crumb a, .mcrumbs__home { color: var(--c-d) !important; }
+.mcrumbs [aria-current], .xp-crumbs [aria-current] { color: #0b1d44 !important; }
+
+/* ---------- forms ---------- */
+.module-field input:focus, .module-field textarea:focus, .module-field select:focus,
+.ef-field input:focus, .ef-field textarea:focus, .ef-field select:focus, .exp-page input:focus, .library-main input:focus,
+.msb__search input:focus {
+  outline: 3px solid rgba(var(--c-rgb), .28) !important; border-color: var(--c) !important;
+}
+input[type="checkbox"], input[type="radio"], progress { accent-color: var(--c); }
+.ef-preview-tag, .ef-subs-head { color: var(--c-d) !important; }
+.ef-subs-head, .ef-panel-title { border-bottom-color: var(--c-b) !important; }
+
+/* ---------- header navigation keeps each category's colour ---------- */
+.dsl-nav a.is-active, .dsl-header nav a[aria-current="page"] { background: var(--nav-t, #fdf6e5) !important; }
+.dsl-nav a[href="modules.html"], .dsl-header nav a[href="modules.html"] { --nav-c:#1a49a8; --nav-t:#dbe8ff; }
+.dsl-nav a[href="index.html"],   .dsl-header nav a[href="index.html"]   { --nav-c:#8a5a00; --nav-t:#fdebb8; }
+.dsl-nav a[href="tools.html"],   .dsl-header nav a[href="tools.html"]   { --nav-c:#0a6b5e; --nav-t:#cdf1ea; }
+.dsl-nav a[href="resources.html"], .dsl-header nav a[href="resources.html"] { --nav-c:#53309f; --nav-t:#e4d9fb; }
+.dsl-nav a[href="modules.html"] svg, .dsl-nav a[href="index.html"] svg, .dsl-nav a[href="tools.html"] svg, .dsl-nav a[href="resources.html"] svg,
+.dsl-header nav a[href="modules.html"] svg, .dsl-header nav a[href="index.html"] svg, .dsl-header nav a[href="tools.html"] svg, .dsl-header nav a[href="resources.html"] svg { color: var(--nav-c) !important; }
+
+/* ---------- home: panel + section headings ---------- */
+.home-section-title { border-color: #c5d3ec !important; }
+
+/* ---------- responsive: keep the same look, lighter frames on small screens ---------- */
+@media (max-width: 760px) {
+  .exp-card, .mcard, .library-card, .home-main--dash .home-card, .mpanel, .xp-card, .ef-panel { border-radius: 16px !important; }
+  .mtopic, .xp-topic-row, .xp-topic-card { border-left-width: 4px !important; }
+}
+
+/* ---------- higher-specificity pass (older layers use !important on these) ---------- */
+body[data-cat] .mbtn--primary, body[data-cat] .mcard__more, body[data-cat] .btn--primary,
+body[data-cat] .exp-card__readmore, body[data-cat] .xp-btn--primary, body[data-cat] .mpager__link--next,
+body[data-cat] .ef-primary, body[data-cat] .ef-blue-button {
+  background: linear-gradient(135deg, var(--c), var(--c-d)) !important; border: 1px solid var(--c-d) !important; color: #fff !important;
+}
+body[data-cat] .msb__badge, body[data-cat] .mtopic__go, body[data-cat] .module-topic__number, body[data-cat] .exp-row__badge,
+body[data-cat] .exp-card__badge, body[data-cat] .mcard__badge, body[data-cat] .mdhero__badge, body[data-cat] .xp-num-badge {
+  background: var(--c) !important; color: #fff !important; border-color: var(--c-d) !important;
+}
+body[data-cat] .mtopic__go { background: linear-gradient(135deg, var(--c), var(--c-d)) !important; }
+
+body[data-cat] .mabout { border: 0 !important; box-shadow: none !important; background: none !important; }
+body[data-cat] .meyebrow, body[data-cat] .module-intro .home-eyebrow, body[data-cat] .exp-hero__title span { color: var(--c-d) !important; }
+body[data-cat] .ef-pagehead { padding: 16px 22px !important; display: flex; align-items: center; gap: 16px; }
+body[data-cat] .ef-pagehead .ef-plus { width: 52px; height: 52px; display: grid; place-items: center; flex: none; font-size: 1.6rem; }
+
+/* ---------- forms: category-coloured headings, letters, numbers ---------- */
+body[data-cat] .ef-panel-title, body[data-cat] .ef-subs-head, body[data-cat] .ef-topic-list-panel > h2 {
+  background: linear-gradient(90deg, var(--c-t), var(--c-l)) !important;
+  border: 0 !important; border-radius: 10px; padding: 8px 12px;
+}
+body[data-cat] .ef-topic-letter, body[data-cat] .ef-topic-summary-number { background: var(--c) !important; color: #fff !important; }
+body[data-cat] .ef-upload-icon { background: var(--c-t) !important; }
+body[data-cat] .ef-radio-row input { accent-color: var(--c); }
+body[data-cat] .ef-subs-panel, body[data-cat] .ef-topic-list-panel { padding-bottom: 14px; }
+/* the lessons use the Tools colour for the "tools used" chips inside experiments */
+.xp-tool, .xp-tools-used .xp-link-row, .ef-tools-panel label { --c:#0f9d8a; --c-d:#0a6b5e; --c-l:#effbf8; --c-t:#cdf1ea; --c-b:#9bdcd0; --c-rgb:15,157,138; }
+
+/* ---------- topic pages, pagers, secondary buttons, labels ---------- */
+body[data-cat] .msb__topic-link.is-current { background: var(--c-t) !important; color: var(--c-d) !important; font-weight: 700; box-shadow: inset 3px 0 0 var(--c); }
+body[data-cat] .msb__topic-link.is-current svg { stroke: var(--c-d) !important; }
+body[data-cat] .mpager__link { background: var(--c-l) !important; border: 1.5px solid var(--c-b) !important; color: var(--c-d) !important; box-shadow: none !important; }
+body[data-cat] .mpager__link strong { color: #0b1d44 !important; }
+body[data-cat] .mpager__label { color: var(--c-d) !important; opacity: 1 !important; }
+body[data-cat] .mpager__link:hover { border-color: var(--c) !important; background: var(--c-t) !important; }
+body[data-cat] .mpager__link--next { background: linear-gradient(135deg, var(--c), var(--c-d)) !important; border-color: var(--c-d) !important; }
+body[data-cat] .mpager__link--next strong, body[data-cat] .mpager__link--next .mpager__label { color: #fff !important; }
+body[data-cat] .mbtn:not(.mbtn--primary), body[data-cat] .mpanel .mbtn:not(.mbtn--primary) {
+  background: var(--c-l) !important; color: var(--c-d) !important; border: 1.5px solid var(--c-b) !important; box-shadow: none !important;
+}
+body[data-cat] .mtopichead__pos { background: var(--c-t) !important; color: var(--c-d) !important; border: 1px solid var(--c-b) !important; border-radius: 999px; padding: 3px 12px; font-weight: 700; }
+body[data-cat] .library-card__meta, body[data-cat] .library-card__cover span, body[data-cat] .home-eyebrow { color: var(--c-d) !important; }
+body[data-cat] .ef-subs-panel > div, body[data-cat] .ef-subs-box { background: var(--c-l) !important; border-color: var(--c-b) !important; }

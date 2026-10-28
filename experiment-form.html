@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#071a35">
+  <title>Add Experiment – Data Science Digital Laboratory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Cormorant+Garamond:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css"><link rel="stylesheet" href="header.css?v=20261021-header"><link rel="stylesheet" href="premium.css?v=20261017-premium"><link rel="stylesheet" href="experiments-overhaul.css?v=20261018-recursive-topic-fix"><link rel="stylesheet" href="experiments-premium.css?v=20261018-premium-1"><link rel="stylesheet" href="experiment-form-premium.css?v=20261021-header">
+  <link rel="stylesheet" href="classic.css?v=20261023-topichead">
+  <link rel="stylesheet" href="header-royal.css?v=20261027-royal">
+  <link rel="stylesheet" href="royal.css?v=20261027-royal">
+  <link rel="stylesheet" href="unified.css?v=20261027-unified">
+  <link rel="stylesheet" href="premium-final.css?v=20261027-light">
+  <link rel="stylesheet" href="compact-ui.css?v=20261027-compact">
+  <link rel="stylesheet" href="bg-cards.css?v=20261028-bgcards">
+  <link rel="stylesheet" href="hero-unified.css?v=20261028-hero">
+  <link rel="stylesheet" href="category-colors.css?v=20261028-cat">
+<link rel="stylesheet" href="polish-final.css?v=20261028-menufix">
+<link rel="stylesheet" href="header-hero-compact.css?v=20261028-compact4">
+</head>
+<body data-cat="experiments" class="exp-form-page">
+  <main class="ef-shell">
+    <nav class="ef-crumb" aria-label="Breadcrumb"><a href="home.html">Home</a><span>›</span><a href="index.html">Experiments</a><span>›</span><strong id="crumbCurrent">Add Experiment</strong></nav>
+    <header class="ef-pagehead"><span class="ef-plus">＋</span><div><h1 id="pageTitle">Add Experiment</h1><p>Create a new experiment with topics, sub-topics and learning materials.</p></div></header>
+    <form id="experimentFormPage" novalidate data-admin-only>
+      <div class="ef-topgrid">
+        <section class="ef-panel ef-basic">
+          <h2 class="ef-panel-title"><span>▤</span> Basic Information</h2>
+          <div class="ef-fields-two">
+            <label class="ef-field"><span>Experiment Number <b>*</b></span><input id="number" maxlength="12" required placeholder="e.g., 1, 2, 3.1"><small data-error="number"></small></label>
+            <label class="ef-field"><span>Experiment Name <b>*</b></span><input id="title" maxlength="100" required placeholder="e.g., Web Scraping using BeautifulSoup"><small data-error="title"></small></label>
+          </div>
+          <div class="ef-fields-cover">
+            <label class="ef-field"><span>Short Description (D1) <b>*</b></span><textarea id="shortDescription" maxlength="300" rows="4" required placeholder="Enter a short description (shown on cover page)..."></textarea><small class="ef-counter" id="shortCounter">0/300</small><small data-error="shortDescription"></small></label>
+            <div class="ef-field"><span>Cover Image <em class="ef-optional">(optional)</em></span><label class="ef-upload ef-cover-upload" for="coverFile"><span class="ef-upload-icon">▧</span><strong id="coverLabel">Upload Cover Image</strong><small>JPG, PNG (Max 2MB)</small><img id="coverPreview" alt="Cover preview" hidden></label><input id="coverFile" type="file" accept="image/jpeg,image/png" hidden><small data-error="cover"></small></div>
+          </div>
+          <label class="ef-field"><span>Long Description (D2) <b>*</b></span><textarea id="longDescription" maxlength="2000" rows="5" required placeholder="Enter a detailed description about this experiment..."></textarea><small class="ef-counter" id="longCounter">0/2000</small><small data-error="longDescription"></small></label>
+        <label class="ef-field"><span>GitHub Link (optional)</span><input type="url" id="githubInput" placeholder="https://github.com/username/project-name"></label>
+        </section>
+        <div class="ef-rightstack">
+          <section class="ef-panel ef-resource-panel" data-resource="mainPdf"><h2 class="ef-panel-title"><span>▣</span> Material PDF <i title="PDF up to 10 MB">ⓘ</i></h2><div class="ef-radio-row"><label><input type="radio" name="mainPdfMode" value="upload" checked> Upload File</label><label><input type="radio" name="mainPdfMode" value="url"> Use URL</label></div><div class="ef-resource-body"><label class="ef-upload" for="mainPdfFile"><span class="ef-upload-icon ef-pdf">PDF</span><strong id="mainPdfLabel">Upload PDF File</strong><small>PDF (Max 10MB)</small></label><input id="mainPdfFile" type="file" accept="application/pdf,.pdf" hidden><input class="ef-url-input" id="mainPdfUrl" type="url" placeholder="https://example.com/file.pdf" hidden></div><small class="ef-status" id="mainPdfStatus"></small></section>
+          <section class="ef-panel ef-resource-panel" data-resource="mainVideo"><h2 class="ef-panel-title"><span>▣</span> Video <i title="MP4/WebM up to 100 MB">ⓘ</i></h2><div class="ef-radio-row"><label><input type="radio" name="mainVideoMode" value="upload" checked> Upload File</label><label><input type="radio" name="mainVideoMode" value="url"> Use URL</label></div><div class="ef-resource-body"><label class="ef-upload" for="mainVideoFile"><span class="ef-upload-icon ef-video">▶</span><strong id="mainVideoLabel">Upload Video File</strong><small>MP4, WebM (Max 100MB)</small></label><input id="mainVideoFile" type="file" accept="video/mp4,video/webm" hidden><input class="ef-url-input" id="mainVideoUrl" type="url" placeholder="https://example.com/video.mp4" hidden></div><small class="ef-status" id="mainVideoStatus"></small></section>
+          <div class="ef-rightbottom">
+            <section class="ef-panel ef-topic-list-panel"><h2 class="ef-panel-title"><span>▣</span> Direct Topics <small>(only when no sub-experiments)</small></h2><div id="mainTopicsList" class="ef-topic-mini-list"></div><button type="button" class="ef-blue-button ef-wide" id="addMainTopic">＋ Add Topic</button><small data-error="topics"></small></section>
+            <section class="ef-panel ef-tools-panel"><h2 class="ef-panel-title"><span>🔧</span> Tools <small>(Select tools used in this experiment)</small></h2><div id="toolsGrid" class="ef-tools-grid"></div></section>
+          </div>
+        </div>
+      </div>
+      <section class="ef-panel ef-main-lessons"><div class="ef-subs-head"><div><h2 class="ef-panel-title"><span>▤</span> Direct Topic Lesson Content</h2><p>Use this section only when the experiment has no Exp A / Exp B children. When sub-experiments exist, add 1A.1, 1A.2, etc. inside each child card.</p></div></div><div id="mainTopicEditors" class="ef-main-topic-editors"></div></section>
+      <section class="ef-panel ef-subs-panel"><div class="ef-subs-head"><div><h2 class="ef-panel-title"><span>▰</span> Sub-experiments <small>(Optional)</small></h2><p>Experiment 1 contains Exp A / 1A and Exp B / 1B. Each child contains its own topics (1A.1, 1A.2; 1B.1, 1B.2) and lesson content.</p><p id="hierarchyHint" hidden>Hierarchy mode is active: topics and lesson content belong inside each sub-experiment below.</p></div><button type="button" class="ef-blue-button" id="addSubExperiment">＋ Add Another Sub-experiment</button></div><div id="subExperimentsList" class="ef-sub-list"></div></section>
+      <footer class="ef-actions"><a class="ef-button ef-back" href="index.html">← Back to Experiments</a><span class="ef-action-spacer"></span><button class="ef-button" type="button" id="saveDraft">▤ Save Draft</button><button class="ef-button" type="button" id="previewExperiment">◉ Preview</button><button class="ef-button ef-primary" type="submit" id="saveExperiment">▣ Save Experiment</button></footer>
+      <p id="formMessage" class="ef-message" role="status" aria-live="polite"></p>
+    </form>
+  </main>
+  <div class="ef-preview-modal" id="formPreviewModal" hidden><button class="ef-preview-backdrop" type="button" data-preview-close aria-label="Close preview"></button><section class="ef-preview-box" role="dialog" aria-modal="true" aria-labelledby="formPreviewTitle"><button type="button" class="ef-preview-close" data-preview-close aria-label="Close">×</button><span class="ef-preview-tag">Experiment Preview</span><h2 id="formPreviewTitle"></h2><p id="formPreviewText"></p><div id="formPreviewTopics"></div><button type="button" class="ef-blue-button" data-preview-close>Return to editing</button></section></div>
+  <script src="shared.js?v=20261018-recursive-topic-fix"></script><script src="header.js?v=20261027-royal"></script><script src="experiments-core.js?v=20261018-premium-1"></script><script src="experiment-form.js?v=20261023-fast"></script><script src="experiment-form-ui.js?v=20261018-premium-1"></script>
+</body></html>

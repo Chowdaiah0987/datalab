@@ -1,0 +1,178 @@
+/* =========================================================================
+   DS Lab — SITE-WIDE PREMIUM THEME: WHITE · ROYAL NAVY · SELECTIVE GOLD
+   Loaded last on every page except Home (which has home-royal.css). Visual layer only.
+   Approx. 80-85% white/ivory, 10-15% navy, 3-5% gold, with pale data-science line
+   drawings (assets/img/bg-datascience.svg, art-*.svg) as the page background.
+   ========================================================================= */
+
+/* ---------- 1. Tokens: re-point the whole classic palette to white / navy / gold ---------- */
+:root {
+  --c-ivory: #ffffff;
+  --c-cream: #f4f8fd;
+  --c-paper: #ffffff;
+  --c-line: #e3eaf4;
+  --c-line-strong: #c9d8ec;
+  --c-navy: #0f2447;
+  --c-navy-deep: #0a1a36;
+  --c-navy-soft: #1b3560;
+  --c-char: #34476a;
+  --c-muted: #5d6f8f;
+  --c-gold: #c9a85c;
+  --c-gold-hi: #d9bd7a;
+  --c-gold-deep: #9a7a35;
+  --c-gold-soft: #f6efdc;
+  --r-gold-line: rgba(201, 168, 92, .55);
+  --card-border: rgba(201, 168, 92, .38);
+  --sh-1: 0 1px 2px rgba(15, 36, 71, .05), 0 10px 26px -14px rgba(15, 36, 71, .18);
+  --sh-2: 0 2px 4px rgba(15, 36, 71, .06), 0 18px 34px -16px rgba(15, 36, 71, .28);
+  --r-lg: 14px;
+  --r-md: 10px;
+}
+
+/* ---------- 2. Page: white, with data-science line drawings fixed behind everything ---------- */
+body, body.exp-page, body.exp-detail, body.exp-form-page, body.exp-topic-page, body.modules-page, body.home-page,
+body.xp-page, body.login-page {
+  background-color: #fff !important;
+  background-image: none !important;
+  color: var(--c-char);
+}
+html::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    url("assets/img/bg-datascience.svg") center / cover no-repeat;
+  opacity: .5; /* very subtle */
+}
+/* the old photographic washes behind banners are replaced by the drawings */
+body.xp-page::before, body.exp-form-page::before, body.modules-page:not(:has(.mhero))::before, body.exp-page::before { content: none !important; }
+
+/* thin gold hairline under section headings */
+h1, h2, h3, h4 { color: var(--c-navy-deep); }
+
+/* ---------- 3. Hero panels: bright white, navy type, gold accent, line-art on the right ---------- */
+.exp-page .exp-hero__inner, .mhero, .module-intro,
+body:has(#resourceList) .module-intro {
+  position: relative;
+  background-color: #fff !important;
+  background-image:
+    var(--hero-art, none),
+    radial-gradient(ellipse 60% 100% at 90% 10%, rgba(150, 190, 240, .26), rgba(150, 190, 240, 0) 70%),
+    radial-gradient(ellipse 45% 80% at 0% 100%, rgba(201, 168, 92, .10), rgba(201, 168, 92, 0) 70%),
+    linear-gradient(180deg, #fff 0%, #f8fbff 100%) !important;
+  background-repeat: no-repeat !important;
+  background-position: right 28px center, 0 0, 0 0, 0 0 !important;
+  background-size: auto 88%, auto, auto, auto !important;
+  border: 1px solid var(--c-line) !important;
+  border-radius: 14px !important;
+  box-shadow: var(--sh-1) !important;
+  overflow: hidden;
+}
+.exp-page .exp-hero__inner::before, .mhero::before, .module-intro::before {
+  content: "" !important;
+  position: absolute; inset: 0 0 auto 0; height: 2px; z-index: 2;
+  background: linear-gradient(90deg, transparent, var(--c-gold) 18%, var(--c-gold) 82%, transparent);
+}
+.exp-page .exp-hero__inner { --hero-art: url("assets/img/art-experiments.svg"); }
+.mhero { --hero-art: url("assets/img/art-modules.svg"); background-position: right 300px center, 0 0, 0 0, 0 0 !important; min-height: 150px; }
+.module-intro { --hero-art: url("assets/img/art-tools.svg"); }
+body:has(#resourceList) .module-intro { --hero-art: url("assets/img/art-resources.svg"); }
+
+.exp-hero__title, .mhero h1, .module-intro h1 { color: var(--c-navy) !important; text-shadow: none !important; }
+.exp-hero__title span { color: var(--c-gold-deep) !important; }
+.exp-hero__sub, .mhero__sub, .module-intro .home-lead { color: var(--c-char) !important; }
+.meyebrow, .module-intro .home-eyebrow { color: var(--c-gold-deep) !important; }
+.mhero__motto { color: var(--c-gold-deep); }
+
+/* ---------- 4. Cards and panels ---------- */
+.exp-card, .mcard, .library-card, .msb, .mpanel, .mdhero, .module-topic, .mtopic, .xp-card, .xp-sub-card, .xp-topic-row,
+.exp-panel, .exp-info, .exp-toolbar, .ef-panel, .module-form, .login-card, .exp-detail-hero, .exp-detail-section, .empty {
+  background: #fff !important;
+  border-color: var(--card-border) !important;
+  box-shadow: var(--sh-1);
+}
+.exp-card, .mcard, .library-card, .msb, .mpanel, .mdhero, .exp-info, .exp-panel, .ef-panel, .module-form, .xp-card, .exp-detail-hero, .exp-detail-section { border-radius: 14px !important; }
+.exp-card:hover, .mcard:hover, .library-card:hover, .xp-sub-card:hover, .xp-topic-row:hover, .mtopic:hover {
+  border-color: var(--r-gold-line) !important; box-shadow: var(--sh-2);
+}
+.exp-info, .xp-card.xp-hero { border-top: 2px solid var(--c-gold) !important; }
+.library-card__cover { border-bottom: 1px solid var(--c-line); }
+/* light drawn covers instead of dark photos (uploaded images still win) */
+#toolList .library-card__cover, #resourceList .library-card__cover {
+  background-color: var(--c-cream);
+  background-repeat: no-repeat; background-position: right 8px center, 0 0; background-size: auto 92%, auto;
+  color: var(--c-navy);
+}
+#toolList .library-card__cover { background-image: url("assets/img/art-tools.svg"), linear-gradient(135deg, #fff, #eef4fc); }
+#resourceList .library-card__cover { background-image: url("assets/img/art-resources.svg"), linear-gradient(135deg, #fff, #eef4fc); }
+.library-card__cover:not(:has(img)) > strong { color: var(--c-navy) !important; text-shadow: none !important; }
+.library-card__cover:not(:has(img)) > span { color: var(--c-gold-deep) !important; text-shadow: none !important; }
+/* module cards: light drawn fallback covers, cycling through the four drawings (uploaded covers still win) */
+.mcard .mcard__cover { background-color: var(--c-cream); background-repeat: no-repeat; background-position: center, 0 0; background-size: auto 88%, auto; }
+.mcard:nth-child(4n+1) .mcard__cover { background-image: url("assets/img/art-modules.svg"), linear-gradient(135deg, #fff, #eaf2fc); }
+.mcard:nth-child(4n+2) .mcard__cover { background-image: url("assets/img/art-tools.svg"), linear-gradient(135deg, #fff, #eaf2fc); }
+.mcard:nth-child(4n+3) .mcard__cover { background-image: url("assets/img/art-experiments.svg"), linear-gradient(135deg, #fff, #eaf2fc); }
+.mcard:nth-child(4n) .mcard__cover { background-image: url("assets/img/art-resources.svg"), linear-gradient(135deg, #fff, #eaf2fc); }
+.mcard__badge { background: var(--c-navy) !important; color: #fff !important; box-shadow: 0 0 0 1px var(--c-gold); }
+.exp-card__cover { background: var(--c-cream) !important; }
+.exp-page .exp-card:nth-child(n) .exp-card__cover--empty { background-blend-mode: normal; }
+.exp-bar, .ef-panel-title, .exp-detail-section h2 { background: var(--c-cream) !important; border-color: var(--c-line) !important; }
+
+/* ---------- 5. Buttons, badges, search, forms ---------- */
+.btn--primary, .mbtn:not(.mbtn--gold), .exp-add, .exp-card__readmore, .mcard__more, .msb__toggle, .xp-btn--dark, .ef-blue-button, .login-btn {
+  background: var(--c-navy) !important; border-color: var(--c-navy) !important; color: #fff !important;
+}
+.btn--primary:hover, .exp-add:hover, .exp-card__readmore:hover, .mcard__more:hover, .login-btn:hover { background: var(--c-navy-soft) !important; border-color: var(--c-gold) !important; }
+.mbtn--gold { background: var(--c-gold-soft) !important; border: 1px solid var(--c-gold) !important; color: var(--c-navy) !important; }
+.mbtn--gold:hover { background: #fff !important; }
+.msb__badge, .exp-card__badge, .mtopic__go, .mdhero__badge, .exp-material__kind, .exp-row__badge, .module-topic__number, .xp-num-badge { background: var(--c-navy) !important; color: #fff !important; }
+.exp-search .search, .search input, .msb__search { background: #fff !important; border-color: var(--c-line-strong) !important; }
+.exp-count { background: var(--c-gold-soft) !important; color: var(--c-gold-deep) !important; border-color: var(--r-gold-line) !important; }
+input:focus, textarea:focus, select:focus { border-color: var(--c-gold) !important; box-shadow: 0 0 0 3px rgba(201, 168, 92, .2) !important; }
+:focus-visible { outline-color: rgba(201, 168, 92, .9) !important; }
+a { text-decoration-color: rgba(201, 168, 92, .6); }
+
+/* ---------- 6. Sign-in page ---------- */
+.login-brand {
+  background-color: #fff !important;
+  background-image: url("assets/img/art-experiments.svg"), radial-gradient(ellipse 80% 70% at 80% 10%, rgba(150, 190, 240, .28), rgba(150, 190, 240, 0) 70%), linear-gradient(180deg, #fff, #f6faff) !important;
+  background-repeat: no-repeat !important; background-position: center 26%, 0 0, 0 0 !important; background-size: min(420px, 80%) auto, auto, auto !important;
+  border-right: 1px solid var(--r-gold-line);
+}
+.login-brand h1, .login-brand h2 { color: var(--c-navy) !important; }
+.login-brand p, .login-brand li { color: var(--c-char) !important; }
+.role.is-selected { border-color: var(--c-gold) !important; background: var(--c-gold-soft) !important; }
+
+/* ---------- 7. Responsive ---------- */
+@media (max-width: 900px) {
+  .exp-page .exp-hero__inner, .mhero, .module-intro { background-position: right -30px bottom -10px, 0 0, 0 0, 0 0 !important; background-size: auto 60%, auto, auto, auto !important; }
+}
+@media (max-width: 760px) {
+  .exp-page .exp-hero__inner, .module-intro, body:has(#resourceList) .module-intro { --hero-art: none; }
+}
+@media (max-width: 560px) {
+  .exp-page .exp-hero__inner, .mhero, .module-intro { background-size: auto 46%, auto, auto, auto !important; }
+  html::before { opacity: .7; }
+}
+
+/* sign-in brand column on white */
+.login-brand__logo { color: var(--c-navy) !important; }
+.login-brand__logo small { color: var(--c-gold-deep) !important; }
+.login-brand__logo .flask { color: var(--c-navy); }
+.login-brand__plot { display: none !important; }
+.login-brand__copy p { color: var(--c-char) !important; }
+
+/* ---------- Topic page header: same bright hero as every other page ---------- */
+.mtopichead {
+  position: relative; overflow: hidden;
+  background-color: #fff !important;
+  background-image: url("assets/img/art-modules.svg"), radial-gradient(ellipse 60% 100% at 90% 10%, rgba(150, 190, 240, .26), rgba(150, 190, 240, 0) 70%), linear-gradient(180deg, #fff, #f8fbff) !important;
+  background-repeat: no-repeat !important; background-position: right 28px center, 0 0, 0 0 !important; background-size: auto 86%, auto, auto !important;
+  border: 1px solid var(--card-border) !important; border-radius: 14px !important; box-shadow: var(--sh-1) !important;
+}
+.mtopichead::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 2px; background: linear-gradient(90deg, transparent, var(--c-gold) 18%, var(--c-gold) 82%, transparent); }
+.modules-page .mtopichead h1, .mtopichead h1 { color: var(--c-navy) !important; text-shadow: none !important; }
+.mtopichead__pos, .mtopichead__desc { color: var(--c-char) !important; }
+@media (max-width: 760px) { .mtopichead { background-size: auto 0, auto, auto !important; } }

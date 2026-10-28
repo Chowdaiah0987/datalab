@@ -1,0 +1,73 @@
+/* =========================================================================
+   DS Lab — UNIFIED HERO CARDS (linked LAST, after bg-cards.css). Visual only.
+   Modules / Experiments / Tools / Resources share ONE hero layout:
+   same height, same rounded gold frame, text on the clear left side,
+   page-specific picture on the right. Home keeps its own layout (ID card).
+   ========================================================================= */
+:root { --uh-h: clamp(250px, 22vw, 300px); --uh-text: 52%; }
+
+body.exp-page .exp-hero__inner,
+body.modules-page .mhero,
+body:has(#toolList) .module-intro,
+body:has(#resourceList) .module-intro {
+  height: var(--uh-h) !important; min-height: 0 !important;
+  padding: 24px 44px !important;
+  display: flex !important; flex-direction: column !important; justify-content: center !important; align-items: flex-start !important;
+  gap: 10px !important;
+  background-color: #fbfdff !important;
+  background-repeat: no-repeat !important;
+  background-size: cover !important;
+  border: 2px solid #c9a24a !important; border-radius: 22px !important;
+  overflow: hidden; position: relative;
+}
+body.exp-page .exp-hero__inner   { background-image: url("assets/img/hero-experiments-bg.webp") !important; background-position: right bottom !important; }
+body.modules-page .mhero         { background-image: url("assets/img/hero-modules-bg.webp") !important;     background-position: right 88% !important; }
+body:has(#toolList) .module-intro     { background-image: url("assets/img/hero-tools-bg.webp") !important;   background-position: right 88% !important; }
+body:has(#resourceList) .module-intro { background-image: url("assets/img/hero-resources-bg.webp") !important; background-position: right 88% !important; }
+
+/* text always in the clear left part, never over the picture */
+body.exp-page .exp-hero__text, body.modules-page .mhero__text,
+body:has(#toolList) .module-intro > *, body:has(#resourceList) .module-intro > * {
+  max-width: min(var(--uh-text), 560px) !important; margin: 0 !important; padding-left: 0 !important; position: relative; z-index: 2;
+}
+body:has(#toolList) .module-intro, body:has(#resourceList) .module-intro { padding-left: 44px !important; }
+body.exp-page .exp-hero__art, body.modules-page .mhero__motto { display: none !important; }
+body.modules-page .mhero__side { position: relative; z-index: 2; width: auto !important; margin: 0 !important; }
+
+/* same title / subtitle / eyebrow scale on all four */
+body.exp-page .exp-hero__title, body.modules-page .mhero h1,
+body:has(#toolList) .module-intro h1, body:has(#resourceList) .module-intro h1 {
+  font-size: clamp(1.9rem, 2.8vw, 2.5rem) !important; line-height: 1.1 !important; color: #071a3d !important;
+}
+body.exp-page .exp-hero__sub, body.modules-page .mhero__sub,
+body:has(#toolList) .module-intro .home-lead, body:has(#resourceList) .module-intro .home-lead {
+  font-size: 1rem !important; line-height: 1.5 !important; max-width: 46ch !important; color: #263b61 !important; margin: 0 !important;
+}
+body.modules-page .meyebrow, body:has(#toolList) .module-intro .home-eyebrow, body:has(#resourceList) .module-intro .home-eyebrow {
+  font-size: .78rem !important; margin: 0 !important; color: #7a5710 !important;
+}
+/* buttons inside heroes: same size, never over the art */
+body.modules-page .mhero .mbtn, .module-intro .btn, .module-intro button, .exp-hero__inner .btn { white-space: nowrap; }
+
+/* HOME hero: new banner as the card background (layout + ID card unchanged) */
+body.home-page .home-main--dash .home-intro {
+  background-image: url("assets/img/hero-home-bg.webp") !important;
+  background-color: #fdfcf8 !important;
+  background-size: auto 100% !important; background-position: left bottom !important; background-repeat: no-repeat !important;
+}
+/* keep the text clear of the books / notebook on the left of the picture */
+body.home-page .home-intro__text { margin-left: clamp(0px, 19vw, 300px) !important; max-width: 400px !important; }
+body.home-page .home-main--dash .home-intro .home-lead { max-width: 400px !important; }
+
+@media (max-width: 760px) {
+  :root { --uh-h: auto; }
+  body.exp-page .exp-hero__inner, body.modules-page .mhero,
+  body:has(#toolList) .module-intro, body:has(#resourceList) .module-intro {
+    height: auto !important; min-height: 230px !important; padding: 20px 18px 150px !important;
+    background-size: auto 62%, auto !important; background-position: right bottom !important;
+    background-color: #fbfdff !important;
+  }
+  body:has(#toolList) .module-intro, body:has(#resourceList) .module-intro { padding-left: 18px !important; }
+  body.exp-page .exp-hero__text, body.modules-page .mhero__text,
+  body:has(#toolList) .module-intro > *, body:has(#resourceList) .module-intro > * { max-width: 100% !important; }
+}

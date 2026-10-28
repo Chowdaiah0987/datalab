@@ -1,0 +1,23 @@
+FINAL PREMIUM POLISH
+====================
+New file: polish-final.css  (linked last on all 12 pages, after category-colors.css). Visual only; no HTML structure, JS, API, auth or route changed.
+
+- Home hero: "DATA SCIENCE" title no longer runs under the Student Profile card; mobile hero text no longer indented.
+- Heroes (Experiments/Modules/Tools/Resources): eyebrow text uses the page's category colour (blue/gold/teal/purple); soft white halo for legibility;
+  on phones a fade keeps text off the illustration.
+- Background art kept, veil raised so it no longer competes with content.
+- Tools / Resources cards: category chip on cover, category pill, outlined "Visit website" button; hover lift.
+- All cards: consistent radius, subtle lift on hover (off for reduced-motion / touch).
+- Buttons: hover / press feedback, disabled state. Forms: category-colour focus ring, :user-invalid styling.
+- Loading / empty / error status messages styled; menus and dropdowns share one look.
+- Keyboard focus ring (category colour) on every interactive element.
+- Experiment detail hero: Download / GitHub buttons no longer sit inside an empty outlined bar.
+- Mobile: code/tables scroll inside themselves, 42px touch targets, no horizontal overflow (checked 390px and 1366px).
+- .env removed from this zip (your own test tests/experiments-navigation-check.js requires that); keep your local copy.
+
+COMPACT HEADER + HOME HERO  (header-hero-compact.css, linked last on all pages)
+- Header 78px -> 63px (57px on phones); white, navy text, 1px gold bottom rule; side curves removed; logo / nav / profile-or-Login aligned; refined hover;
+  active nav item tinted in its own theme colour (Home gold-ivory, Modules blue, Experiments gold, Tools teal, Resources purple); labels visible from 940px.
+- Home hero 381px -> 273px; ID card 600x333 -> 420x225, photo 96x118 -> 74x90, tighter rows (all fields kept); art cluster stays on the left with a soft fade behind the text.
+- Hero headings on Home / Modules / Experiments / Tools / Resources enlarged (up to 3.1rem) with larger descriptions.
+- Tablet keeps two columns down to 861px; phones stack.

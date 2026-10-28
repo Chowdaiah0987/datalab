@@ -1,0 +1,953 @@
+
+/* =========================================================
+   DS LAB — COMMON HEADER
+   Theme: Royal White + Navy Blue + Gold
+   Home: Login / Viewer / Admin only
+   Other pages: Photo + Name + Viewer / Admin
+   ========================================================= */
+
+:root {
+  --dsl-header-h: 78px;
+  --dsl-navy: #142a47;
+  --dsl-navy-hover: #0d1d33;
+  --dsl-muted: #66758a;
+}
+
+html.dsl-inner {
+  --dsl-header-h: 78px;
+}
+
+/* ---------- Header bar ---------- */
+
+.dsl-header {
+  --dsl-avatar: 40px;
+  --dsl-profile-gap: 10px;
+
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  overflow: visible;
+  background: var(--surface, #fff);
+  border-bottom: 1px solid var(--line, #e2e7ee);
+  box-shadow: 0 2px 8px rgba(28, 39, 51, 0.07);
+}
+
+.dsl-header::before {
+  content: "";
+  display: block;
+  height: 4px;
+  background: var(--accent, #19385b);
+  border-bottom: 1px solid var(--gold, #a67c2e);
+}
+
+/* Three-column layout keeps navigation centred. */
+
+.dsl-header__inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 20px;
+  max-width: 1320px;
+  height: calc(var(--dsl-header-h) - 5px);
+  margin: 0 auto;
+  padding: 0 24px;
+  overflow: visible;
+  box-sizing: border-box;
+}
+
+/* ---------- Left: logo and title ---------- */
+
+.dsl-brand {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-self: start;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.dsl-brand__link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  color: var(--ink, #142a47);
+  text-decoration: none;
+}
+
+.dsl-logo {
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  object-fit: contain;
+}
+
+.dsl-brand__text {
+  display: grid;
+  min-width: 0;
+  line-height: 1.15;
+}
+
+.dsl-brand__text strong,
+.dsl-brand__text small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dsl-brand__text strong {
+  font-family: var(--font-head, "Playfair Display", Georgia, serif);
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.dsl-brand__text small {
+  color: var(--gold-dark, #7d5c1d);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.dsl-logo-edit {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid var(--line, #e2e7ee);
+  border-radius: 50%;
+  background: var(--surface, #fff);
+  color: var(--accent-dark, #19385b);
+  font-size: 0.7rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.dsl-brand:hover .dsl-logo-edit,
+.dsl-logo-edit:focus-visible {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .dsl-logo-edit {
+    opacity: 0.85;
+  }
+}
+
+/* ---------- Centre: navigation ---------- */
+
+.dsl-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.dsl-nav a {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: 2px;
+  color: var(--ink, #142a47);
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.2s, color 0.2s;
+}
+
+.dsl-nav__icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.dsl-nav a.is-active .dsl-nav__icon {
+  stroke: var(--gold-dark, #7d5c1d);
+}
+
+.dsl-nav a:hover {
+  background: var(--accent-soft, #f1f4f8);
+  color: var(--accent-dark, #19385b);
+}
+
+.dsl-nav a.is-active {
+  color: var(--accent-dark, #19385b);
+}
+
+.dsl-nav a.is-active::after {
+  content: "";
+  position: absolute;
+  right: 16px;
+  bottom: 3px;
+  left: 16px;
+  height: 2px;
+  background: var(--gold, #a67c2e);
+}
+
+/* ---------- Right: profile and hamburger ---------- */
+
+.dsl-right {
+  display: flex;
+  align-items: center;
+  justify-self: end;
+  gap: 10px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.dsl-userarea {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  min-width: 0;
+}
+
+.dsl-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  min-width: 0;
+}
+
+.dsl-controls:empty {
+  display: none;
+}
+
+/* ---------- Profile button ---------- */
+
+.dsl-profile {
+  display: flex;
+  align-items: center;
+  gap: var(--dsl-profile-gap);
+  max-width: 100%;
+  padding: 4px 12px 4px 4px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: none;
+  color: var(--ink, #142a47);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.dsl-profile:hover {
+  background: var(--accent-soft, #f1f4f8);
+  border-color: var(--line, #e2e7ee);
+}
+
+.dsl-avatar {
+  width: var(--dsl-avatar);
+  height: var(--dsl-avatar);
+  flex-shrink: 0;
+  border: 2px solid var(--gold, #a67c2e);
+  border-radius: 50%;
+  background: var(--line, #e2e7ee);
+  object-fit: cover;
+}
+
+.dsl-profile__name {
+  min-width: 0;
+  max-width: 18ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.92rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+/* ---------- Mobile hamburger ---------- */
+
+.dsl-burger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--line, #e2e7ee);
+  border-radius: 4px;
+  background: var(--surface, #fff);
+  color: var(--ink, #142a47);
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.dsl-burger:hover {
+  background: var(--accent-soft, #f1f4f8);
+}
+
+/* ---------- Keyboard focus ---------- */
+
+.dsl-header a:focus-visible,
+.dsl-header button:focus-visible,
+.dsl-modal button:focus-visible,
+.dsl-modal label:focus-within {
+  outline: 2px solid var(--gold, #a67c2e);
+  outline-offset: 2px;
+}
+
+/* =========================================================
+   HOME PAGE
+   Hide profile and dropdown; display only Login / Viewer / Admin
+   ========================================================= */
+
+.dsl-header--home .dsl-profile,
+.dsl-header--home .dsl-menu,
+.dsl-header--home .dsl-account__menu {
+  display: none !important;
+}
+
+.dsl-header--home .dsl-right {
+  justify-self: end;
+  min-width: 0;
+}
+
+.dsl-header--home .dsl-userarea {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.dsl-header--home .dsl-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+  gap: 0;
+}
+
+/* Home role button and guest Login button */
+
+.dsl-header--home .dsl-home-role,
+.dsl-header--home .dsl-controls a.dsl-account__login {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 92px;
+  height: 44px;
+  margin: 0;
+  padding: 0 22px;
+  border: 1px solid #c69b43;
+  border-radius: 15px;
+  background: #19385b;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(20, 42, 71, 0.12);
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.dsl-header--home .dsl-home-role {
+  cursor: default;
+}
+
+.dsl-header--home .dsl-home-role:hover,
+.dsl-header--home .dsl-controls a.dsl-account__login:hover {
+  background: #102944;
+  border-color: #dfbd70;
+  box-shadow: 0 6px 16px rgba(20, 42, 71, 0.17);
+}
+
+.dsl-header--home .dsl-controls a.dsl-account__login:active {
+  transform: translateY(1px);
+}
+
+.dsl-header--home .dsl-home-role:focus-visible,
+.dsl-header--home .dsl-controls a.dsl-account__login:focus-visible {
+  outline: 2px solid #c69b43;
+  outline-offset: 3px;
+}
+
+/* Home must not inherit the inner-page profile pill. */
+
+.dsl-header--home .dsl-userarea:hover {
+  background: transparent;
+  border-color: transparent;
+}
+
+/* =========================================================
+   INNER PAGES
+   Avatar on the left; name and role badge on the right
+   ========================================================= */
+
+.dsl-header--inner .dsl-userarea {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  align-content: center;
+  column-gap: var(--dsl-profile-gap);
+  row-gap: 2px;
+  max-width: 100%;
+  padding: 4px 16px 4px 4px;
+  border: 1px solid var(--line, #e2e7ee);
+  border-radius: 28px;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.dsl-header--inner .dsl-profile {
+  display: contents;
+}
+
+.dsl-header--inner .dsl-avatar {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+}
+
+.dsl-header--inner .dsl-profile__name {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: end;
+  line-height: 1.2;
+}
+
+.dsl-header--inner .dsl-controls {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: start;
+  justify-self: start;
+  margin: 0;
+}
+
+/* Signed-in users can open the profile menu. */
+
+html:not([data-auth="guest"]) .dsl-header--inner .dsl-userarea {
+  cursor: pointer;
+}
+
+html:not([data-auth="guest"]) .dsl-header--inner .dsl-userarea:hover {
+  background: var(--accent-soft, #f1f4f8);
+  border-color: var(--line, #e2e7ee);
+}
+
+html[data-auth="guest"] .dsl-header--inner .dsl-profile {
+  cursor: default;
+}
+
+/* ---------- Inner-page Login link ---------- */
+
+.dsl-header--inner .dsl-controls a.dsl-account__login {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  margin: 0;
+  padding: 0 14px;
+  border: 1px solid var(--accent-dark, #19385b);
+  border-radius: 999px;
+  background: var(--accent, #19385b);
+  color: #fff;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.dsl-header--inner .dsl-controls a.dsl-account__login:hover {
+  background: var(--accent-dark, #102944);
+}
+
+/* ---------- Viewer / Admin role badges ---------- */
+
+.dsl-role {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  margin: 0;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: filter 0.2s;
+}
+
+.dsl-role:hover {
+  filter: brightness(0.96);
+}
+
+.dsl-role--viewer {
+  background: #e6ecf3;
+  border-color: #c3cedb;
+  color: #34465c;
+}
+
+.dsl-role--admin {
+  background: var(--brass, #c18a19);
+  border-color: var(--gold, #a67c2e);
+  color: #1b1405;
+}
+
+/* =========================================================
+   PROFILE DROPDOWN
+   ========================================================= */
+
+.dsl-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 60;
+  box-sizing: border-box;
+  display: grid;
+  gap: 10px;
+  width: min(290px, calc(100vw - 24px));
+  padding: 14px 16px;
+  border: 1px solid var(--line, #e2e7ee);
+  border-radius: 16px;
+  background: #fff;
+  color: var(--dsl-navy);
+  box-shadow: 0 12px 32px rgba(20, 42, 71, 0.18);
+}
+
+.dsl-menu[hidden] {
+  display: none !important;
+}
+
+.dsl-menu__who {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.dsl-menu__label {
+  margin: 0;
+  color: var(--dsl-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.dsl-menu__value {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.dsl-menu__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--dsl-navy);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--dsl-navy);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.dsl-menu__btn:hover {
+  background: #eef2f7;
+}
+
+.dsl-menu__btn--primary {
+  background: var(--dsl-navy);
+  color: #fff;
+}
+
+.dsl-menu__btn--primary:hover {
+  background: var(--dsl-navy-hover);
+}
+
+.dsl-menu__btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.dsl-menu__msg {
+  min-height: 0;
+  margin: 0;
+  color: var(--danger, #b3261e);
+  font-size: 0.8rem;
+}
+
+.dsl-menu__msg:empty {
+  display: none;
+}
+
+/* =========================================================
+   LOGO EDITOR DIALOG
+   ========================================================= */
+
+.dsl-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(20, 42, 71, 0.55);
+}
+
+.dsl-modal__panel {
+  display: grid;
+  gap: 14px;
+  width: 100%;
+  max-width: 380px;
+  padding: 24px;
+  border: 1px solid var(--line, #e2e7ee);
+  border-top: 3px solid var(--gold, #a67c2e);
+  border-radius: var(--radius, 12px);
+  background: var(--surface, #fff);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+
+.dsl-modal__panel h2 {
+  font-family: var(--font-head, "Playfair Display", Georgia, serif);
+  font-size: 1.2rem;
+}
+
+.dsl-modal__preview {
+  justify-self: center;
+  width: 110px;
+  height: 110px;
+  padding: 8px;
+  border: 1px dashed var(--line, #e2e7ee);
+  border-radius: 6px;
+  background: var(--bg, #f5f7fa);
+  object-fit: contain;
+}
+
+.dsl-modal__row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.dsl-modal__msg {
+  min-height: 1.1em;
+  color: var(--danger, #b3261e);
+  font-size: 0.85rem;
+}
+
+/* Dialog buttons */
+
+.dsl-modal .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 16px;
+  border: 1px solid var(--line, #e2e7ee);
+  border-radius: var(--radius, 8px);
+  background: var(--surface, #fff);
+  color: var(--ink, #142a47);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.dsl-modal .btn:hover {
+  background: var(--accent-soft, #f1f4f8);
+  border-color: var(--accent, #19385b);
+}
+
+.dsl-modal .btn--primary {
+  border-color: var(--accent-dark, #19385b);
+  background: var(--accent, #19385b);
+  color: #fff;
+}
+
+.dsl-modal .btn--primary:hover {
+  background: var(--accent-dark, #102944);
+}
+
+.dsl-modal .btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ---------- Read More page sizing ---------- */
+
+@media (min-width: 901px) and (min-height: 560px) {
+  body.detail-page .detail__left,
+  body.detail-page .detail__panel {
+    max-height: calc(100vh - 110px - var(--dsl-header-h));
+  }
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 1024px) {
+  .dsl-header__inner {
+    gap: 10px;
+    padding: 0 16px;
+  }
+
+  .dsl-nav a {
+    padding: 8px 10px;
+    font-size: 0.9rem;
+  }
+
+  .dsl-nav a.is-active::after {
+    right: 10px;
+    left: 10px;
+  }
+
+  .dsl-brand__text strong {
+    font-size: 1.05rem;
+  }
+}
+
+/* Symbols-only navigation at tablet width. */
+
+@media (min-width: 821px) and (max-width: 1024px) {
+  .dsl-nav a {
+    padding: 8px 12px;
+  }
+
+  .dsl-nav__icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .dsl-nav__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .dsl-header--inner .dsl-profile__name {
+    max-width: 14ch;
+  }
+
+  .dsl-header--inner .dsl-userarea {
+    padding-right: 12px;
+  }
+}
+
+/* =========================================================
+   MOBILE — HAMBURGER NAVIGATION
+   ========================================================= */
+
+@media (max-width: 820px) {
+  :root {
+    --dsl-header-h: 70px;
+  }
+
+  html.dsl-inner {
+    --dsl-header-h: 78px;
+  }
+
+  .dsl-header__inner {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .dsl-burger {
+    display: inline-flex;
+  }
+
+  .dsl-right {
+    align-items: center;
+  }
+
+  /* Allow the inner profile pill to fit without clipping. */
+
+  .dsl-header--inner .dsl-header__inner {
+    height: auto;
+    min-height: calc(var(--dsl-header-h) - 5px);
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+
+  .dsl-nav {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    left: 0;
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+    padding: 8px 16px 14px;
+    border-bottom: 1px solid var(--line, #e2e7ee);
+    background: var(--surface, #fff);
+    box-shadow: 0 10px 20px rgba(28, 39, 51, 0.12);
+  }
+
+  .dsl-nav.is-open {
+    display: flex;
+  }
+
+  .dsl-nav a {
+    padding: 12px 14px;
+  }
+
+  .dsl-nav a.is-active {
+    background: var(--accent-soft, #f1f4f8);
+  }
+
+  .dsl-nav a.is-active::after {
+    display: none;
+  }
+
+  /* Keep the dropdown inside the viewport. */
+
+  .dsl-menu {
+    position: fixed;
+    top: calc(var(--dsl-header-h) + 4px);
+    right: 12px;
+    width: min(290px, calc(100vw - 24px));
+  }
+
+  /* Compact Home button on smaller screens. */
+
+  .dsl-header--home .dsl-home-role,
+  .dsl-header--home .dsl-controls a.dsl-account__login {
+    min-width: 76px;
+    height: 38px;
+    padding: 0 16px;
+    border-radius: 12px;
+    font-size: 0.82rem;
+  }
+}
+
+/* =========================================================
+   SMALL PHONES
+   ========================================================= */
+
+@media (max-width: 560px) {
+  .dsl-header__inner {
+    padding: 0 12px;
+  }
+
+  .dsl-right {
+    gap: 8px;
+  }
+
+  .dsl-logo {
+    width: 40px;
+    height: 40px;
+  }
+
+  .dsl-brand__text strong {
+    font-size: 1rem;
+  }
+
+  .dsl-brand__text small {
+    font-size: 0.64rem;
+  }
+
+  .dsl-header {
+    --dsl-avatar: 32px;
+  }
+
+  .dsl-header--inner .dsl-userarea {
+    column-gap: 8px;
+    row-gap: 1px;
+    align-self: center;
+    padding: 3px 10px 3px 3px;
+    border-radius: 22px;
+  }
+
+  .dsl-header--inner .dsl-avatar {
+    border-width: 1.5px;
+  }
+
+  .dsl-header--inner .dsl-profile__name {
+    max-width: 10ch;
+    font-size: 0.78rem;
+    line-height: 1.15;
+  }
+
+  .dsl-header--inner .dsl-controls {
+    justify-self: center;
+  }
+
+  .dsl-header--inner .dsl-role {
+    height: 16px;
+    padding: 0 8px;
+    font-size: 0.58rem;
+    letter-spacing: 0.03em;
+  }
+
+  .dsl-header--inner .dsl-brand__text small {
+    display: none;
+  }
+
+  .dsl-header--inner .dsl-controls a.dsl-account__login {
+    height: 16px;
+    padding: 0 8px;
+    font-size: 0.58rem;
+    letter-spacing: 0.03em;
+  }
+
+  .dsl-header--home .dsl-home-role,
+  .dsl-header--home .dsl-controls a.dsl-account__login {
+    min-width: 68px;
+    height: 34px;
+    padding: 0 12px;
+    border-radius: 10px;
+    font-size: 0.78rem;
+  }
+}
+
+/* ---------- Reduced motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .dsl-nav a,
+  .dsl-profile,
+  .dsl-logo-edit,
+  .dsl-modal .btn,
+  .dsl-role,
+  .dsl-menu__btn,
+  .dsl-header--home .dsl-home-role,
+  .dsl-header--home .dsl-controls a.dsl-account__login {
+    transition: none;
+  }
+}

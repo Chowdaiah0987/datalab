@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 400" preserveAspectRatio="none" fill="none">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#D6A43B" stop-opacity=".0"/><stop offset=".25" stop-color="#D6A43B" stop-opacity=".75"/><stop offset=".75" stop-color="#E7C46A" stop-opacity=".6"/><stop offset="1" stop-color="#D6A43B" stop-opacity="0"/></linearGradient>
+    <linearGradient id="b" x1="0" x2="1"><stop offset="0" stop-color="#BFD6F0" stop-opacity=".0"/><stop offset=".5" stop-color="#BFD6F0" stop-opacity=".55"/><stop offset="1" stop-color="#BFD6F0" stop-opacity=".0"/></linearGradient>
+  </defs>
+  <!-- pale-blue tide along the bottom -->
+  <path d="M0 330 C 300 290 560 380 900 350 S 1400 300 1600 340 V400 H0Z" fill="url(#b)" opacity=".45"/>
+  <!-- gold hairlines: top-left and bottom-right, like the reference -->
+  <path d="M0 58 C 160 30 330 66 520 8" stroke="url(#g)" stroke-width="1.4" vector-effect="non-scaling-stroke"/>
+  <path d="M0 78 C 190 52 340 88 470 30" stroke="#D6A43B" stroke-opacity=".28" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M780 392 C 1000 330 1180 372 1350 346 S 1520 330 1600 352" stroke="url(#g)" stroke-width="1.4" vector-effect="non-scaling-stroke"/>
+  <path d="M900 398 C 1100 350 1260 386 1420 362 S 1540 352 1600 366" stroke="#D6A43B" stroke-opacity=".28" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

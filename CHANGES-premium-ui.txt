@@ -1,0 +1,44 @@
+PREMIUM UI UPDATE
+=================
+New / changed files
+  premium.css       NEW  shared premium theme, loaded last on every page (tokens, header, buttons, forms, cards, hero panels)
+  login.html/.css   redesigned sign-in (split screen); all ids / login.js untouched
+  *.html            fonts swapped to Bricolage Grotesque + Hanken Grotesk, premium.css linked, theme-color updated
+  header.css        removed old Playfair @import
+
+Bugs fixed (files missing / misnamed in the zip)
+  home.html referenced home.js and home-card-menu.js, which did not exist  -> 404 + "Unexpected token '<'" in the console
+  card-menu.js actually contained the HOME card-menu code; it is now saved as home-card-menu.js
+  card-menu.js is now the real createCardMenu() used by Modules / Tools / Resources
+  removed the dead <script src="home.js"> from home.html (its jobs are done by home-counts.js, home-preview.js, header.js)
+
+Server, API, .env and all page scripts are unchanged.
+
+OPEN ACCESS (no sign-in for normal use)
+  Opening the site (/) goes straight to the Home page; every page can be viewed without logging in.
+  Visitors who are not signed in are view-only. The header shows "Admin login" for editing.
+  The server still blocks every add / edit / delete unless signed in as Admin.
+  Login page has a "Continue without signing in" link; Logout now returns to Home.
+  Changed: server.js (auth middleware + page serving), auth.js, login.html/.css, premium.css
+
+
+OVERVIEW-IMAGE ALIGNMENT UPDATE
+===============================
+experiment-details.js  main page lists sub-experiments (7A, 7B) as topic-style cards under "Topics (Sub-experiments)" next to Tools Used;
+                       child topics (7A.1...) are never shown there. Sub pages show "Topics (Child Topics of 7A)" with number badge,
+                       title, optional short description (from Aim) and arrow.
+experiment-lesson.js   Previous/Next move between siblings at the same hierarchy level; status shows Ready / Running / Success / Error.
+experiments-premium.css  topic cards; desktop lesson workspace is fixed-height: left lesson column scrolls on its own (min-height:0,
+                       overflow-y:auto), editor + output stay put on the right; stacked natural scrolling at <=1024px.
+script.js              listing cards show real topic count and tools.
+experiment-form.js     removed "Open as / Direct Topic" selector (topic and sub-experiment level). Behaviour now follows real children.
+server.js              openAs is derived from actual children on save (field kept in schema for old records; never required or read by the UI).
+tests/                 mock data gets Experiment 7 (7A/7B); e2e + runner tests updated for the new behaviour.
+
+COMPACT HERO + CARD OUTLINE UPDATE
+==================================
+compact-ui.css NEW  loaded last on every page (linked in all .html). Visual only.
+  - hero cards on Home / Experiments / Modules / Tools / Resources are ~40% shorter, smaller type
+  - text, Add Module button and artwork no longer overlap (mobile gets a pale veil over the art)
+  - all cards: darker blue-grey 1.5px outline + shadow, solid white; heroes get a gold 2px outline
+  - Add Module pop-up no longer trapped inside the hero card

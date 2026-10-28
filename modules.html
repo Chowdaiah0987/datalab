@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Modules – Data Science Digital Laboratory</title>
+  <meta name="description" content="Explore and manage data science learning modules and topics.">
+  <meta name="theme-color" content="#0a1a33">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Cormorant+Garamond:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="header.css?v=20261021-header">
+  <link rel="stylesheet" href="modules.css?v=20261011-redesign">
+  <link rel="stylesheet" href="premium.css?v=20261017-premium">
+  <link rel="stylesheet" href="classic.css?v=20261023-topichead">
+  <link rel="stylesheet" href="header-royal.css?v=20261027-royal">
+  <link rel="stylesheet" href="royal.css?v=20261027-royal">
+  <link rel="stylesheet" href="unified.css?v=20261027-unified">
+  <link rel="stylesheet" href="premium-final.css?v=20261027-light">
+  <link rel="stylesheet" href="home-polish.css?v=20261027-modhero">
+  <link rel="stylesheet" href="compact-ui.css?v=20261027-compact">
+  <link rel="stylesheet" href="bg-cards.css?v=20261028-bgcards">
+  <link rel="stylesheet" href="hero-unified.css?v=20261028-hero">
+  <link rel="stylesheet" href="category-colors.css?v=20261028-cat">
+<link rel="stylesheet" href="polish-final.css?v=20261028-menufix">
+<link rel="stylesheet" href="header-hero-compact.css?v=20261028-compact4">
+</head>
+
+<body data-cat="modules" class="modules-page">
+  <div class="mlayout">
+    <aside class="mlayout__side" id="moduleSidebar" aria-label="Modules and topics"></aside>
+
+    <main class="mlayout__main">
+      <header class="mhero">
+        <div class="mhero__text">
+          <p class="meyebrow">LEARNING PATHWAY</p>
+          <h1 id="modulePageTitle">Modules</h1>
+          <p class="mhero__sub">Explore your learning pathway and learning resources.</p>
+        </div>
+        <div class="mhero__side">
+          <p class="mhero__motto" aria-hidden="true">Learn<br>Explore<br>Apply</p>
+          <details class="module-create">
+            <summary class="mbtn mbtn--gold"><span aria-hidden="true">+</span> Add Module</summary>
+
+            <form id="moduleForm" class="module-form" novalidate>
+              <div class="module-form__head">
+                <h2 id="moduleFormTitle">Add Module</h2>
+                <button type="button" class="module-form__close" data-cancel-add aria-label="Close form">×</button>
+              </div>
+
+              <fieldset class="mfs">
+                <legend>Module information</legend>
+                <div class="mrow mrow--number">
+                  <label class="module-field">
+                    <span>Module number *</span>
+                    <input id="moduleNumber" type="text" inputmode="numeric" maxlength="10" required placeholder="e.g. 1">
+                  </label>
+                  <label class="module-field">
+                    <span>Module title *</span>
+                    <input id="moduleTitle" type="text" maxlength="100" required placeholder="e.g. Data Extraction">
+                  </label>
+                </div>
+                <label class="module-field">
+                  <span>Short description * <small>(shown on module cards)</small></span>
+                  <textarea id="moduleDescription" rows="2" maxlength="300" required placeholder="One or two sentences about this module"></textarea>
+                </label>
+                <label class="module-field">
+                  <span>Full description</span>
+                  <textarea id="moduleFullDescription" rows="4" maxlength="5000" placeholder="A longer overview shown on the module page"></textarea>
+                </label>
+                <label class="module-field">
+                  <span>Cover image upload</span>
+                  <input id="moduleCover" type="file" accept="image/*">
+                </label>
+                <label class="module-field">
+                  <span>…or cover image URL</span>
+                  <input id="moduleCoverUrl" type="url" placeholder="https://…/cover.jpg">
+                </label>
+                <img id="moduleCoverPreview" class="module-cover-preview" alt="Cover preview" hidden>
+                <label id="moduleRemoveCoverRow" class="module-current-file" hidden>
+                  <input id="moduleRemoveCover" type="checkbox">
+                  <span>Remove existing cover image</span>
+                </label>
+                <label class="module-field">
+                  <span>Learning outcomes <small>(one per line)</small></span>
+                  <textarea id="moduleOutcomes" rows="5" maxlength="6000" placeholder="Understand the importance of data extraction&#10;Explore common sources of data"></textarea>
+                </label>
+              </fieldset>
+
+              <fieldset class="mfs">
+                <legend>Topics</legend>
+                <p class="module-field__hint">Add as many topics as the module needs. Lesson content supports <code># headings</code>, <code>- lists</code>, <code>```code```</code> and <code>![alt](image-url)</code>.</p>
+                <div id="moduleTopics" class="module-topics"></div>
+                <button type="button" id="addModuleTopic" class="mbtn mbtn--ghost">+ Add Topic</button>
+              </fieldset>
+
+              <fieldset class="mfs">
+                <legend>Module-wide resources</legend>
+                <div id="moduleNotesMount"></div>
+                <div id="moduleVideoMount"></div>
+              </fieldset>
+
+              <fieldset class="mfs">
+                <legend>Important Questions</legend>
+                <label class="module-field">
+                  <span>Title <small>(optional)</small></span>
+                  <input id="iqTitle" type="text" maxlength="150" placeholder="Important Questions">
+                </label>
+                <label class="module-field">
+                  <span>Description <small>(optional)</small></span>
+                  <textarea id="iqDescription" rows="2" maxlength="1000" placeholder="Short note about these questions"></textarea>
+                </label>
+                <div id="iqPdfMount"></div>
+                <label class="module-field">
+                  <span>Questions as text <small>(optional)</small></span>
+                  <textarea id="iqText" rows="5" maxlength="20000" placeholder="Enter important questions here…"></textarea>
+                </label>
+              </fieldset>
+
+              <p id="moduleFormMessage" class="module-message" role="status" aria-live="polite"></p>
+
+              <div class="module-form__actions">
+                <button id="saveModule" type="submit" class="mbtn mbtn--primary">Save Module</button>
+                <button id="cancelModule" type="button" class="mbtn mbtn--ghost" data-cancel-add>Cancel</button>
+              </div>
+            </form>
+          </details>
+        </div>
+      </header>
+
+      <p id="moduleStatus" class="module-status" role="status" aria-live="polite">Loading modules...</p>
+      <section id="moduleList" class="module-list" aria-label="Modules"></section>
+    </main>
+  </div>
+
+  <script src="shared.js?v=20261005-d2-topics-2"></script>
+  <script src="header.js?v=20261027-royal"></script>
+  <script src="card-menu.js?v=20261010-module-actions"></script>
+  <script src="modules-common.js?v=20261011-redesign"></script>
+  <script src="modules.js?v=20261023-preview2x"></script>
+  <script src="quick-add.js?v=20261011-add"></script>
+</body>
+</html>

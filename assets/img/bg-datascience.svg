@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" fill="none" stroke-linecap="round" stroke-linejoin="round">
+<g stroke="#9fbbe0" stroke-width="1.3" opacity=".75">
+ <!-- network graph, top right -->
+ <path d="M1180 60 1290 110 1400 50 1500 140 1400 200 1290 190 1180 60M1290 110 1290 190M1400 50 1400 200M1500 140 1560 80M1290 190 1230 270 1330 300 1400 200M1230 270 1160 200 1180 60"/>
+ <!-- neural net, right middle -->
+ <path d="M1380 430 1470 400M1380 430 1470 470M1380 430 1470 540M1380 500 1470 400M1380 500 1470 470M1380 500 1470 540M1380 570 1470 400M1380 570 1470 470M1380 570 1470 540M1470 400 1560 470M1470 470 1560 470M1470 540 1560 470"/>
+ <!-- scatter + regression, bottom left -->
+ <path d="M60 940V760M60 940H300"/><path d="M80 910 280 790" stroke="#c9a85c" stroke-width="1.6"/>
+ <!-- histogram / normal curve, left middle -->
+ <path d="M40 520V440M70 520V400M100 520V360M130 520V330M160 520V350M190 520V390M220 520V440M250 520V490"/>
+ <path d="M30 515C90 500 100 330 145 325S210 500 270 515" stroke="#c9a85c" stroke-width="1.5"/>
+ <!-- flask, top left -->
+ <path d="M150 70H210M165 70V130L120 210A14 14 0 0 0 132 230H228A14 14 0 0 0 240 210L195 130V70M130 190H230"/>
+ <!-- code brackets, bottom right -->
+ <path d="M1360 820 1310 870 1360 920M1440 820 1490 870 1440 920M1415 810 1385 930"/>
+ <!-- line chart, bottom centre-right -->
+ <path d="M980 940V850M980 940H1240"/><path d="M990 920 1040 880 1090 900 1150 840 1230 810" stroke="#c9a85c" stroke-width="1.6"/>
+ <!-- sigma / dashed orbit top centre -->
+ <ellipse cx="700" cy="60" rx="140" ry="34" stroke-dasharray="4 8"/>
+</g>
+<g fill="#9fbbe0" opacity=".8">
+ <circle cx="1180" cy="60" r="5"/><circle cx="1290" cy="110" r="5"/><circle cx="1400" cy="50" r="5"/><circle cx="1500" cy="140" r="5"/><circle cx="1400" cy="200" r="5"/><circle cx="1290" cy="190" r="5"/><circle cx="1230" cy="270" r="5"/><circle cx="1330" cy="300" r="5"/><circle cx="1560" cy="80" r="4"/><circle cx="1160" cy="200" r="4"/>
+ <circle cx="1380" cy="430" r="6"/><circle cx="1380" cy="500" r="6"/><circle cx="1380" cy="570" r="6"/><circle cx="1470" cy="400" r="6"/><circle cx="1470" cy="470" r="6"/><circle cx="1470" cy="540" r="6"/><circle cx="1560" cy="470" r="6"/>
+ <circle cx="95" cy="895" r="4"/><circle cx="130" cy="860" r="4"/><circle cx="170" cy="860" r="4"/><circle cx="210" cy="830" r="4"/><circle cx="250" cy="815" r="4"/><circle cx="110" cy="905" r="4"/><circle cx="190" cy="850" r="4"/><circle cx="270" cy="800" r="4"/>
+</g>
+<g fill="#c9a85c" opacity=".55"><circle cx="1290" cy="110" r="2.4"/><circle cx="1470" cy="470" r="2.4"/><circle cx="230" cy="825" r="2.4"/><circle cx="1150" cy="840" r="2.4"/></g>
+</svg>

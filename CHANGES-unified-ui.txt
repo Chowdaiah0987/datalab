@@ -1,0 +1,18 @@
+UNIFIED DESIGN-SYSTEM PASS
+==========================
+New files
+  unified.css                         final shared layer, linked LAST on every page (after royal.css / home-royal.css)
+  assets/img/bg-datascience-edges.svg very pale data-science line drawing (globe, network, neural net, charts, books, laptop, database),
+                                      kept near the left/right edges; page opacity .26 (desktop), .2 (tablet), .14 (phone)
+
+What changed (CSS only; no markup, ids, scripts, routes, auth or API code touched)
+  - Spec colour / radius / shadow tokens defined once (:root in unified.css)
+  - Every page now uses the same container as the header: 1360px max, 40px gutter (24 tablet, 14 phone)
+  - Modules / Topics sidebar + content share the same outer edges
+  - Page heroes share padding, radius, gold hairline and one title scale
+  - All cards share border colour, radius (18px) and shadow
+  - Home: Student Profile card is compact (max 392px), window-style title bar, photo + label/value grid aligned on one shared label column
+  - Home: Explore card headings no longer collide with the number badge / menu button
+  - Add / Edit forms: one input height, border, radius, placeholder and gold focus ring; navy primary / white secondary buttons
+  - Global keyboard focus ring and prefers-reduced-motion support
+All 12 HTML pages link unified.css?v=20261027-unified.

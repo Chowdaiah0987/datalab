@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" fill="none" stroke-linecap="round" stroke-linejoin="round">
+<defs>
+  <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+    <stop offset="0" stop-color="#cfe2fb" stop-opacity=".95"/>
+    <stop offset="1" stop-color="#eaf3ff" stop-opacity="0"/>
+  </radialGradient>
+  <linearGradient id="screen" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#14305e"/><stop offset="1" stop-color="#0a1d40"/>
+  </linearGradient>
+  <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#e8c06a"/><stop offset="1" stop-color="#c8932a"/>
+  </linearGradient>
+  <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#f1f6fd"/>
+  </linearGradient>
+  <filter id="sh" x="-20%" y="-20%" width="140%" height="150%">
+    <feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#10264b" flood-opacity=".16"/>
+  </filter>
+</defs>
+
+<!-- soft glow + orbit rings -->
+<ellipse cx="390" cy="215" rx="330" ry="190" fill="url(#glow)"/>
+<ellipse cx="390" cy="225" rx="300" ry="150" stroke="#b7cdeb" stroke-width="1" stroke-dasharray="3 7"/>
+<ellipse cx="390" cy="225" rx="230" ry="108" stroke="#d6a43b" stroke-opacity=".5" stroke-width="1" stroke-dasharray="2 8"/>
+
+<!-- desk -->
+<path d="M70 372H700" stroke="#10264b" stroke-width="2.4"/>
+<path d="M110 372V404M660 372V404" stroke="#10264b" stroke-width="2.4"/>
+<rect x="70" y="372" width="630" height="9" rx="3" fill="#e9eef7" stroke="#10264b" stroke-width="1.6"/>
+
+<!-- ===== laptop (centre) ===== -->
+<g filter="url(#sh)">
+  <rect x="262" y="214" width="244" height="150" rx="10" fill="#10264b"/>
+  <rect x="272" y="224" width="224" height="130" rx="4" fill="url(#screen)"/>
+  <path d="M236 364H532L516 378H252Z" fill="#dfe8f5" stroke="#10264b" stroke-width="1.8"/>
+  <rect x="352" y="364" width="64" height="5" rx="2.5" fill="#b4c5de"/>
+</g>
+<!-- dashboard on screen -->
+<g>
+  <rect x="282" y="233" width="90" height="48" rx="4" fill="#ffffff" fill-opacity=".08"/>
+  <path d="M290 270 L306 254 L320 262 L338 244 L362 252" stroke="#e8c06a" stroke-width="2"/>
+  <circle cx="306" cy="254" r="2.6" fill="#e8c06a"/><circle cx="338" cy="244" r="2.6" fill="#e8c06a"/>
+  <rect x="380" y="233" width="108" height="48" rx="4" fill="#ffffff" fill-opacity=".08"/>
+  <rect x="390" y="258" width="10" height="16" fill="#6fa6ea"/><rect x="406" y="248" width="10" height="26" fill="#8fbcf2"/>
+  <rect x="422" y="254" width="10" height="20" fill="#6fa6ea"/><rect x="438" y="240" width="10" height="34" fill="#e8c06a"/>
+  <rect x="454" y="250" width="10" height="24" fill="#8fbcf2"/><rect x="470" y="244" width="10" height="30" fill="#6fa6ea"/>
+  <rect x="282" y="288" width="64" height="58" rx="4" fill="#ffffff" fill-opacity=".08"/>
+  <circle cx="314" cy="317" r="19" stroke="#6fa6ea" stroke-width="9" stroke-dasharray="70 120"/>
+  <circle cx="314" cy="317" r="19" stroke="#e8c06a" stroke-width="9" stroke-dasharray="26 120" stroke-dashoffset="-70"/>
+  <rect x="354" y="288" width="134" height="58" rx="4" fill="#ffffff" fill-opacity=".08"/>
+  <g fill="#9ec3f4"><circle cx="370" cy="330" r="2.6"/><circle cx="384" cy="322" r="2.6"/><circle cx="396" cy="326" r="2.6"/><circle cx="410" cy="312" r="2.6"/><circle cx="424" cy="316" r="2.6"/><circle cx="438" cy="304" r="2.6"/><circle cx="452" cy="308" r="2.6"/><circle cx="468" cy="296" r="2.6"/></g>
+  <path d="M364 334 L474 294" stroke="#e8c06a" stroke-width="1.6" stroke-dasharray="4 4"/>
+</g>
+
+<!-- ===== human (left of laptop) ===== -->
+<g>
+  <!-- torso -->
+  <path d="M96 372C96 322 128 300 172 300C216 300 248 322 248 372Z" fill="#2f65a5"/>
+  <path d="M96 372C96 322 128 300 172 300C216 300 248 322 248 372Z" stroke="#10264b" stroke-width="1.8"/>
+  <path d="M150 301L172 334L194 301" fill="#ffffff" stroke="#10264b" stroke-width="1.6"/>
+  <!-- neck + head -->
+  <rect x="160" y="272" width="24" height="32" rx="8" fill="#e9b88f" stroke="#10264b" stroke-width="1.6"/>
+  <ellipse cx="172" cy="244" rx="36" ry="40" fill="#f1c7a2" stroke="#10264b" stroke-width="1.8"/>
+  <!-- hair -->
+  <path d="M136 240C130 200 160 194 178 197C202 199 214 214 208 240C204 224 196 216 178 216C160 216 146 224 136 240Z" fill="#10264b"/>
+  <!-- glasses -->
+  <rect x="148" y="241" width="22" height="16" rx="6" stroke="#10264b" stroke-width="2"/>
+  <rect x="176" y="241" width="22" height="16" rx="6" stroke="#10264b" stroke-width="2"/>
+  <path d="M170 249H176" stroke="#10264b" stroke-width="2"/>
+  <path d="M160 272Q172 279 186 272" stroke="#10264b" stroke-width="1.6"/>
+</g>
+<!-- AI thought network above head -->
+<g stroke="#2f65a5" stroke-width="1.3" stroke-opacity=".8">
+  <path d="M118 140L156 112M118 140L150 160M156 112L200 128M150 160L200 128M156 112L150 160M200 128L246 104M200 128L238 156M246 104L238 156M118 140L96 182"/>
+</g>
+<g fill="#ffffff" stroke="#2f65a5" stroke-width="1.6">
+  <circle cx="118" cy="140" r="7"/><circle cx="156" cy="112" r="8"/><circle cx="150" cy="160" r="7"/>
+  <circle cx="200" cy="128" r="9" fill="url(#gold)" stroke="#b8861f"/><circle cx="246" cy="104" r="7"/><circle cx="238" cy="156" r="7"/><circle cx="96" cy="182" r="5"/>
+</g>
+<path d="M172 200L170 168" stroke="#d6a43b" stroke-width="1.4" stroke-dasharray="2 5"/>
+
+<!-- ===== floating cards ===== -->
+<!-- line-graph card (top centre) -->
+<g filter="url(#sh)">
+  <rect x="300" y="66" width="150" height="96" rx="12" fill="url(#card)" stroke="#c9d8ee"/>
+</g>
+<path d="M314 84H372" stroke="#10264b" stroke-width="3"/>
+<path d="M314 94H350" stroke="#b4c5de" stroke-width="2.4"/>
+<path d="M316 148L338 124L356 134L382 110L404 118L434 92" stroke="#2f65a5" stroke-width="2.6"/>
+<path d="M316 148L338 124L356 134L382 110L404 118L434 92V152H316Z" fill="#2f65a5" fill-opacity=".1" stroke="none"/>
+<circle cx="434" cy="92" r="4.5" fill="url(#gold)" stroke="#fff" stroke-width="1.4"/>
+
+<!-- pie card (top right) -->
+<g filter="url(#sh)">
+  <rect x="478" y="40" width="112" height="104" rx="12" fill="url(#card)" stroke="#c9d8ee"/>
+</g>
+<circle cx="534" cy="92" r="26" stroke="#2f65a5" stroke-width="16" stroke-dasharray="100 200" transform="rotate(-90 534 92)"/>
+<circle cx="534" cy="92" r="26" stroke="#d6a43b" stroke-width="16" stroke-dasharray="40 200" stroke-dashoffset="-100" transform="rotate(-90 534 92)"/>
+<circle cx="534" cy="92" r="26" stroke="#9ec3f4" stroke-width="16" stroke-dasharray="23 200" stroke-dashoffset="-140" transform="rotate(-90 534 92)"/>
+
+<!-- scatter card (right) -->
+<g filter="url(#sh)">
+  <rect x="566" y="176" width="124" height="96" rx="12" fill="url(#card)" stroke="#c9d8ee"/>
+</g>
+<path d="M580 256H676M580 256V188" stroke="#10264b" stroke-width="1.4"/>
+<g fill="#2f65a5"><circle cx="594" cy="244" r="3"/><circle cx="608" cy="236" r="3"/><circle cx="618" cy="240" r="3"/><circle cx="632" cy="222" r="3"/><circle cx="644" cy="226" r="3"/><circle cx="656" cy="208" r="3"/><circle cx="668" cy="202" r="3"/></g>
+<path d="M588 248L672 198" stroke="#d6a43b" stroke-width="2"/>
+
+<!-- ===== books + graduation cap (right) ===== -->
+<g filter="url(#sh)">
+  <rect x="584" y="338" width="108" height="34" rx="4" fill="#10264b"/>
+  <rect x="598" y="306" width="92" height="32" rx="4" fill="#2f65a5"/>
+  <rect x="580" y="276" width="96" height="30" rx="4" fill="#f6eacb" stroke="#c8932a" stroke-width="1.4"/>
+</g>
+<path d="M598 355H648M612 322H654M596 291H640" stroke="#e8c06a" stroke-width="2.2"/>
+<g transform="translate(628 262)">
+  <path d="M-40 0L0 -18L40 0L0 18Z" fill="#10264b"/>
+  <path d="M-22 10V26C-10 36 10 36 22 26V10L0 20Z" fill="#1b3a70"/>
+  <path d="M34 4V28" stroke="#d6a43b" stroke-width="2"/><circle cx="34" cy="31" r="3.4" fill="#d6a43b"/>
+</g>
+
+<!-- ===== magnifier on data (left, in front of desk) ===== -->
+<g transform="translate(300 380)">
+  <rect x="-74" y="-6" width="64" height="18" rx="3" fill="#fff" stroke="#9ab4d8" stroke-width="1.2"/>
+  <path d="M-74 3H-10M-52 -6V12M-30 -6V12" stroke="#c9d8ee" stroke-width="1"/>
+</g>
+<g transform="translate(116 340)">
+  <circle cx="0" cy="0" r="19" fill="#ffffff" fill-opacity=".55" stroke="#10264b" stroke-width="2.6"/>
+  <path d="M14 14L34 34" stroke="url(#gold)" stroke-width="6"/>
+  <path d="M-10 6L-3 -3L4 2L11 -8" stroke="#2f65a5" stroke-width="2"/>
+</g>
+
+<!-- sparkles -->
+<g stroke="#d6a43b" stroke-width="1.6">
+  <path d="M26 60V76M18 68H34"/><path d="M712 232V246M705 239H719"/><path d="M262 40V50M257 45H267"/>
+</g>
+<g fill="#9ec3f4"><circle cx="40" cy="300" r="3"/><circle cx="720" cy="120" r="3.4"/><circle cx="470" cy="190" r="2.6"/></g>
+</svg>

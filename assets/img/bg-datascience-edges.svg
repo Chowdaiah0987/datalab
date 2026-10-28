@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" fill="none" stroke-linecap="round" stroke-linejoin="round">
+<!-- Everything sits within ~300px of the left/right edges so the centre stays clean. -->
+<g stroke="#9fbbe0" stroke-width="1.2">
+ <!-- globe wireframe, top left -->
+ <circle cx="120" cy="150" r="96"/>
+ <ellipse cx="120" cy="150" rx="40" ry="96"/>
+ <ellipse cx="120" cy="150" rx="96" ry="34"/>
+ <path d="M120 54V246M24 150H216"/>
+ <!-- network graph, top right -->
+ <path d="M1210 70 1320 120 1430 60 1530 150 1430 210 1320 200 1210 70M1320 120 1320 200M1430 60 1430 210M1320 200 1260 280 1360 310 1430 210"/>
+ <!-- neural net, right middle -->
+ <path d="M1420 440 1500 410M1420 440 1500 480M1420 440 1500 550M1420 510 1500 410M1420 510 1500 480M1420 510 1500 550M1420 580 1500 410M1420 580 1500 480M1420 580 1500 550M1500 410 1575 480M1500 480 1575 480M1500 550 1575 480"/>
+ <!-- bar chart, left middle -->
+ <path d="M40 560V500M72 560V470M104 560V430M136 560V455M168 560V490"/>
+ <path d="M30 572H200"/>
+ <!-- stacked books, bottom left -->
+ <rect x="36" y="880" width="190" height="26" rx="4"/>
+ <rect x="52" y="852" width="170" height="26" rx="4"/>
+ <rect x="30" y="824" width="180" height="26" rx="4"/>
+ <path d="M60 893H110M76 865H124M48 837H100"/>
+ <!-- laptop, bottom right -->
+ <rect x="1350" y="800" width="190" height="112" rx="8"/>
+ <path d="M1330 924H1560L1546 940H1344Z"/>
+ <path d="M1372 888 1410 850 1446 866 1486 826 1520 836"/>
+ <!-- database cylinder, mid left -->
+ <ellipse cx="100" cy="700" rx="46" ry="14"/>
+ <path d="M54 700V760C54 776 146 776 146 760V700M54 730C54 746 146 746 146 730"/>
+ <!-- code brackets, mid right -->
+ <path d="M1380 700 1340 740 1380 780M1450 700 1490 740 1450 780M1426 692 1404 788"/>
+</g>
+<!-- sparing gold accents -->
+<g stroke="#d6a43b" stroke-width="1.4" opacity=".8">
+ <path d="M40 540 100 505 150 520 200 470"/>
+ <path d="M1372 888 1410 850 1446 866 1486 826 1520 836" stroke-width="1.2"/>
+ <path d="M24 150C60 130 90 170 120 150S180 130 216 150" stroke-width="1"/>
+</g>
+<g fill="#b9cfeb">
+ <circle cx="1210" cy="70" r="4"/><circle cx="1320" cy="120" r="4"/><circle cx="1430" cy="60" r="4"/><circle cx="1530" cy="150" r="4"/><circle cx="1430" cy="210" r="4"/><circle cx="1320" cy="200" r="4"/><circle cx="1260" cy="280" r="4"/><circle cx="1360" cy="310" r="4"/>
+ <circle cx="1420" cy="440" r="5"/><circle cx="1420" cy="510" r="5"/><circle cx="1420" cy="580" r="5"/><circle cx="1500" cy="410" r="5"/><circle cx="1500" cy="480" r="5"/><circle cx="1500" cy="550" r="5"/><circle cx="1575" cy="480" r="5"/>
+</g>
+</svg>

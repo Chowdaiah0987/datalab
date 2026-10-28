@@ -1,0 +1,165 @@
+/* =========================================================================
+   DS Lab — HOME POLISH (linked LAST on home.html). Visual only.
+   1) Page background: lighter / softer (white veil over bg-page.jpg)
+   2) Hero: removes the unused 3rd grid column, so text + ID card fill the hero
+   3) Larger ID card + larger hero text so the middle no longer looks empty
+   ========================================================================= */
+
+/* 1 — page background veil now lives in premium-final.css (applies to every page) */
+
+/* 2 — hero layout: text column + wide card column (quote column was empty) */
+body.home-page .home-main--dash .home-intro {
+  grid-template-columns: minmax(0, 1fr) minmax(480px, 640px) !important;
+  min-height: clamp(400px, 26vw, 440px);
+  padding: 34px 56px 34px 64px !important;
+  gap: 40px !important;
+}
+body.home-page .home-quote { display: none !important; }
+
+/* hero text: bigger, vertically centred with the card */
+body.home-page .home-intro__text { align-self: start; max-width: 760px; padding-top: 0; }
+body.home-page .home-intro__title { font-size: clamp(2.6rem, 4.2vw, 4.4rem) !important; }
+body.home-page .home-intro__subtitle { font-size: clamp(1.5rem, 2.2vw, 2.3rem) !important; margin-top: 10px; }
+body.home-page .home-intro__subtitle::after { max-width: 180px; }
+body.home-page .home-main--dash .home-intro .home-eyebrow { font-size: 1.05rem !important; margin-top: 20px; font-weight: 600; }
+body.home-page .home-main--dash .home-intro .home-lead { font-size: clamp(1.05rem, 1.1vw, 1.2rem) !important; line-height: 1.6; max-width: 700px; margin-top: 12px; }
+
+
+/* 3 — bigger ID card */
+body.home-page .home-main--dash .home-profile { max-width: 640px; justify-self: center; margin-bottom: 0; }
+body.home-page .home-profile .hero { padding: 18px 60px 4px 22px !important; }
+body.home-page .home-profile .hero__heading { font-size: 1.6rem !important; }
+body.home-page .home-profile .id-card__body {
+  grid-template-columns: 150px minmax(0, 1fr); gap: 26px; padding: 14px 32px 34px; align-items: center;
+}
+body.home-page .home-profile .id-card__photo { width: 150px; height: 188px; border-radius: 12px; }
+body.home-page .home-profile .id-card__details { grid-template-columns: max-content minmax(0, 1fr); gap: 0 18px; }
+body.home-page .home-profile .id-card__details dt,
+body.home-page .home-profile .id-card__details dd { padding: 9px 0; }
+body.home-page .home-profile .id-card__details dt { font-size: .95rem; }
+body.home-page .home-profile .id-card__details dd { font-size: 1.05rem; }
+body.home-page .home-profile .id-card__edit { top: 12px; right: 14px; width: 36px; height: 36px; }
+
+@media (max-width: 1100px) {
+  body.home-page .home-main--dash .home-intro { grid-template-columns: minmax(0, 1fr) !important; padding: 32px 24px !important; }
+  body.home-page .home-main--dash .home-profile { justify-self: stretch; max-width: none; }
+}
+@media (max-width: 560px) {
+  body.home-page .home-main--dash .home-intro { padding: 26px 16px 22px !important; }
+  body.home-page .home-profile .id-card__body { grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 10px; padding: 8px 14px 18px; }
+  body.home-page .home-profile .id-card__photo { width: 96px; height: 120px; }
+  body.home-page .home-profile .id-card__details { width: 100%; grid-template-columns: max-content minmax(0, 1fr); gap: 0 14px; }
+  body.home-page .home-profile .id-card__details dt { font-size: .8rem; }
+  body.home-page .home-profile .id-card__details dd { font-size: .92rem; }
+  body.home-page .home-profile .hero__heading { font-size: 1.15rem !important; }
+}
+
+/* keep paragraph readable if it brushes the artwork */
+body.home-page .home-main--dash .home-intro .home-lead { text-shadow: 0 0 6px #fff, 0 0 12px rgba(255, 255, 255, .9); }
+
+body.home-page .home-intro__title { white-space: nowrap; }
+@media (max-width: 560px) { body.home-page .home-intro__title { white-space: normal; } }
+
+/* =========================================================================
+   MODULES page hero card: supplied artwork as the card background
+   ========================================================================= */
+body.modules-page .mhero {
+  background-color: #fff !important;
+  background-image: url("assets/img/hero-modules-card.webp") !important;
+  background-repeat: no-repeat !important;
+  background-size: 100% 100% !important;
+  background-position: center !important;
+  aspect-ratio: 1694 / 543;
+  min-height: 190px;
+  border: 0 !important;
+  padding: 30px 44px !important;
+}
+body.modules-page .mhero__text { max-width: min(50%, 600px); margin-top: -10px; }
+body.modules-page .mhero h1 { color: var(--pf-navy, #10264B) !important; text-shadow: none !important; font-size: clamp(2.2rem, 3.6vw, 3.2rem); }
+body.modules-page .meyebrow { color: #a8761c !important; }
+body.modules-page .mhero__sub { color: #3d4f6d !important; font-size: 1.1rem; max-width: 52ch; }
+body.modules-page .mhero__motto { display: none; }
+@media (max-width: 760px) {
+  body.modules-page .mhero { aspect-ratio: auto; min-height: 210px; padding: 22px 18px !important; background-size: cover !important; background-position: 75% bottom !important; align-items: flex-start; }
+  body.modules-page .mhero__text { max-width: 100%; }
+}
+
+/* =========================================================================
+   EXPERIMENTS page hero card: supplied artwork as the card background
+   ========================================================================= */
+body.exp-page .exp-hero__inner {
+  background-color: #fff !important;
+  background-image: url("assets/img/hero-experiments-card.webp") !important;
+  background-repeat: no-repeat !important;
+  background-size: 100% 100% !important;
+  background-position: center !important;
+  aspect-ratio: 1701 / 542;
+  min-height: 200px !important;
+  border: 0 !important;
+  display: flex; align-items: center;
+  border-radius: 28px !important;
+  padding: 30px 48px !important;
+  box-shadow: 0 14px 36px rgba(16, 38, 75, .10) !important;
+}
+body.exp-page .exp-hero__inner::after { display: none !important; }
+body.exp-page .exp-hero__art { display: none !important; }
+body.exp-page .exp-hero__text { max-width: min(50%, 640px) !important; }
+body.exp-page .exp-hero__title { color: var(--pf-navy, #10264B) !important; text-shadow: none !important; font-size: clamp(2rem, 3.4vw, 3.1rem) !important; }
+body.exp-page .exp-hero__title span { color: #a8761c !important; }
+body.exp-page .exp-hero__sub { color: #3d4f6d !important; font-size: 1.08rem !important; }
+@media (max-width: 760px) {
+  body.exp-page .exp-hero__inner { aspect-ratio: auto; min-height: 220px !important; padding: 22px 18px !important; background-size: cover !important; background-position: 78% bottom !important; align-items: flex-start; }
+  body.exp-page .exp-hero__text { max-width: 100% !important; }
+}
+
+/* =========================================================================
+   TOOLS page hero card: supplied artwork as the card background
+   ========================================================================= */
+body:has(#toolList) .module-intro {
+  background-color: #fff !important;
+  background-image: url("assets/img/hero-tools-card.webp") !important;
+  background-repeat: no-repeat !important;
+  background-size: 100% 100% !important;
+  background-position: center !important;
+  aspect-ratio: 1700 / 552;
+  min-height: 200px;
+  border: 0 !important;
+  border-radius: 28px !important;
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 24px 40px 64px 22% !important;
+  box-shadow: 0 14px 36px rgba(16, 38, 75, .10) !important;
+}
+body:has(#toolList) .module-intro > * { max-width: min(42%, 560px) !important; position: relative; z-index: 1; }
+body:has(#toolList) .module-intro .home-eyebrow { color: #a8761c !important; font-weight: 700; letter-spacing: .18em; }
+body:has(#toolList) .module-intro h1 { color: var(--pf-navy, #10264B) !important; text-shadow: none !important; font-size: clamp(2.2rem, 3.8vw, 3.4rem) !important; margin: 6px 0 0; }
+body:has(#toolList) .module-intro .home-lead { color: #3d4f6d !important; font-size: 1.1rem !important; margin-top: 10px; }
+@media (max-width: 760px) {
+  body:has(#toolList) .module-intro { aspect-ratio: auto; min-height: 220px; padding: 22px 18px !important; background-size: cover !important; background-position: 78% bottom !important; justify-content: flex-start; }
+  body:has(#toolList) .module-intro > * { max-width: 100% !important; }
+}
+
+/* =========================================================================
+   RESOURCES page hero card: supplied artwork as the card background
+   ========================================================================= */
+body:has(#resourceList) .module-intro {
+  background-color: #fff !important;
+  background-image: url("assets/img/hero-resources-card.webp") !important;
+  background-repeat: no-repeat !important;
+  background-size: 100% 100% !important;
+  background-position: center !important;
+  aspect-ratio: 1705 / 552;
+  min-height: 200px;
+  border: 0 !important;
+  border-radius: 28px !important;
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 24px 40px 56px 26% !important;
+  box-shadow: 0 14px 36px rgba(16, 38, 75, .10) !important;
+}
+body:has(#resourceList) .module-intro > * { max-width: min(50%, 620px) !important; position: relative; z-index: 1; }
+body:has(#resourceList) .module-intro .home-eyebrow { color: #a8761c !important; font-weight: 700; letter-spacing: .18em; }
+body:has(#resourceList) .module-intro h1 { color: var(--pf-navy, #10264B) !important; text-shadow: none !important; font-size: clamp(2.2rem, 3.8vw, 3.4rem) !important; margin: 6px 0 0; }
+body:has(#resourceList) .module-intro .home-lead { color: #3d4f6d !important; font-size: 1.1rem !important; margin-top: 10px; }
+@media (max-width: 760px) {
+  body:has(#resourceList) .module-intro { aspect-ratio: auto; min-height: 220px; padding: 22px 18px !important; background-size: cover !important; background-position: 50% bottom !important; justify-content: flex-start; }
+  body:has(#resourceList) .module-intro > * { max-width: 100% !important; }
+}

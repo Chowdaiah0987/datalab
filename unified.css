@@ -1,0 +1,333 @@
+/* =========================================================================
+   DS Lab — UNIFIED DESIGN SYSTEM (final layer)
+   White · royal navy · selective gold. Loaded LAST on every page, after royal.css
+   (and home-royal.css on Home). Visual layer only: no markup, ids, scripts, routes,
+   auth or API behaviour are touched.
+
+   What this file does
+   1. Defines the shared design tokens (spec names) and page metrics.
+   2. Puts every page on the SAME container width / gutter as the header.
+   3. Gives every page hero the same padding, title scale and gold hairline.
+   4. Shows a very pale data-science drawing near the page edges only.
+   5. Compact, precisely aligned Student Profile card on Home.
+   6. One form-control language for every Add / Edit form.
+   ========================================================================= */
+
+/* ---------- 1. Tokens ---------- */
+:root {
+  --color-white: #FFFFFF;
+  --color-ivory: #FBFAF6;
+  --color-navy: #10264B;
+  --color-royal-blue: #082B65;
+  --color-blue: #2F65A5;
+  --color-light-blue: #EAF3FF;
+  --color-gold: #D6A43B;
+  --color-pale-gold: #F6EACB;
+  --color-text: #334155;
+  --color-muted: #64748B;
+  --color-border: #E5EAF1;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+
+  --shadow-card: 0 4px 16px rgba(16, 38, 75, 0.07);
+  --shadow-hover: 0 8px 24px rgba(16, 38, 75, 0.12);
+
+  /* page metrics shared by header + every page */
+  --page-max: 1360px;
+  --page-gutter: 40px;
+  --page-pad-top: 24px;
+  --section-gap: 24px;
+  --card-border: rgba(214, 164, 59, .34);
+  --card-border-hi: rgba(214, 164, 59, .6);
+}
+@media (max-width: 1024px) { :root { --page-gutter: 24px; --section-gap: 20px; } }
+@media (max-width: 560px)  { :root { --page-gutter: 14px; --page-pad-top: 16px; --section-gap: 16px; } }
+
+/* ---------- 2. Background: very pale data-science drawing, edges only ---------- */
+html::before {
+  background: url("assets/img/bg-datascience-edges.svg") center / cover no-repeat !important;
+  opacity: .26 !important;
+}
+@media (max-width: 900px) { html::before { opacity: .2 !important; } }
+@media (max-width: 560px) { html::before { opacity: .14 !important; } }
+@media print { html::before { display: none; } }
+
+/* ---------- 3. One container for every page (same edges as the header) ---------- */
+.home-main--dash,
+.library-main,
+.xp-page .xp-shell,
+.exp-form-page .ef-shell,
+.exp-page .exp-hero,
+.exp-page .exp-container,
+.mlayout {
+  width: min(var(--page-max), 100% - 2 * var(--page-gutter)) !important;
+  max-width: none !important;
+  margin-inline: auto !important;
+  padding-inline: 0 !important;
+  box-sizing: border-box;
+}
+.home-main--dash, .library-main { padding-top: var(--page-pad-top) !important; padding-bottom: 56px; gap: var(--section-gap); }
+.xp-page .xp-shell, .exp-form-page .ef-shell { padding-top: var(--page-pad-top) !important; padding-bottom: 56px !important; }
+.exp-page .exp-hero { margin-top: var(--page-pad-top) !important; }
+.exp-page .exp-container { padding-top: var(--section-gap) !important; padding-bottom: 56px !important; }
+
+/* Modules / Topics: sidebar + content share the same outer edges */
+.mlayout { grid-template-columns: 296px minmax(0, 1fr); column-gap: var(--section-gap); }
+.mlayout__side { padding: var(--page-pad-top) 0 var(--page-pad-top) 0 !important; }
+.mlayout__main { padding: var(--page-pad-top) 0 56px !important; }
+@media (max-width: 900px) {
+  .mlayout { display: block; }
+  .mlayout__side { padding: var(--page-pad-top) 0 0 !important; }
+  .mlayout__main { padding: var(--section-gap) 0 40px !important; }
+}
+
+/* ---------- 4. One hero language ---------- */
+.exp-page .exp-hero__inner, .mhero, .module-intro, .mtopichead, .mdhero {
+  padding: 36px 44px !important;
+  min-height: 190px;
+  box-sizing: border-box;
+  border-radius: var(--radius-lg) !important;
+  border: 1px solid var(--card-border) !important;
+}
+.exp-page .exp-hero__inner::before, .mhero::before, .module-intro::before, .mtopichead::before {
+  background: linear-gradient(90deg, transparent, var(--color-gold) 18%, var(--color-gold) 82%, transparent) !important;
+}
+.exp-hero__title, .mhero h1, .module-intro h1, .mtopichead h1, .mdhero h1 {
+  font-size: clamp(2rem, 1.5rem + 1.8vw, 2.9rem) !important;
+  line-height: 1.08 !important;
+  letter-spacing: .005em !important;
+  color: var(--color-navy) !important;
+}
+.exp-hero__title span { display: block; margin-top: 4px; font-size: .6em !important; color: #9a7a35 !important; }
+.exp-hero__sub, .mhero__sub, .module-intro .home-lead { font-size: 1.02rem !important; max-width: 56ch; line-height: 1.65; }
+@media (max-width: 760px) {
+  .exp-page .exp-hero__inner, .mhero, .module-intro, .mtopichead, .mdhero { padding: 26px 20px !important; min-height: 0; }
+}
+
+/* ---------- 5. Cards: identical border, radius, shadow everywhere ---------- */
+.home-card, .home-stat, .home-quick, .home-panel, .mcard, .msb, .exp-card, .library-card, .xp-card, .ef-panel, .module-form, .exp-toolbar, .exp-info, .mpanel {
+  border-color: var(--card-border) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-card);
+}
+.home-card:hover, .mcard:hover, .exp-card:hover, .library-card:hover, .home-stat:hover {
+  border-color: var(--card-border-hi) !important;
+  box-shadow: var(--shadow-hover);
+}
+.home-main--dash .home-section-title, .library-main h2.section-title { font-size: clamp(1.5rem, 1.2rem + 1vw, 1.9rem); }
+
+/* ---------- 6. Home: compact, precisely aligned Student Profile ---------- */
+body.home-page .home-main--dash .home-profile {
+  display: block; max-width: 392px; width: 100%; justify-self: end; position: relative;
+  padding: 0; border-radius: var(--radius-md);
+  border: 1px solid var(--card-border-hi);
+  box-shadow: 0 0 0 4px rgba(214, 164, 59, .08), var(--shadow-hover);
+  overflow: hidden;
+}
+/* window-style top bar: three small dots + title */
+body.home-page .home-profile .hero {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 46px 9px 14px; margin: 0;
+  border-bottom: 1px solid var(--color-border);
+  background: linear-gradient(180deg, #fff, var(--color-ivory));
+}
+body.home-page .home-profile .hero::before {
+  content: ""; flex: 0 0 auto; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--color-gold);
+  box-shadow: 13px 0 0 var(--color-navy), 26px 0 0 var(--color-blue);
+  margin-right: 26px;
+}
+body.home-page .home-profile .hero__heading {
+  margin: 0; font: 700 .95rem/1.2 var(--serif); letter-spacing: .01em; text-transform: none; color: var(--color-navy);
+}
+body.home-page .home-profile .id-card { position: static; grid-column: auto; grid-row: auto; justify-self: stretch; background: transparent; border: 0; box-shadow: none; padding: 0; margin: 0; width: 100%; border-radius: 0; }
+body.home-page .home-profile .id-card__body {
+  display: grid; grid-template-columns: 92px minmax(0, 1fr); column-gap: 14px; align-items: start;
+  padding: 12px 16px;
+}
+body.home-page .home-profile .id-card__photo {
+  width: 92px; height: 100%; min-height: 104px; align-self: stretch;
+  object-fit: cover; object-position: center top; border-radius: var(--radius-sm);
+  border: 1.5px solid var(--color-gold); box-shadow: none; background: var(--color-light-blue);
+}
+/* label / value grid: one shared label column so every value starts on the same x */
+body.home-page .home-profile .id-card__details {
+  display: grid; grid-template-columns: max-content minmax(0, 1fr); column-gap: 0; row-gap: 0;
+  align-items: center; margin: 0; font-size: .82rem;
+}
+body.home-page .home-profile .id-card__details > div { display: contents; }
+body.home-page .home-profile .id-card__details dt,
+body.home-page .home-profile .id-card__details dd {
+  margin: 0; padding: 5px 0; min-height: 28px; display: flex; align-items: center;
+  border-bottom: 1px solid var(--color-border); line-height: 1.3;
+}
+body.home-page .home-profile .id-card__details dt { color: var(--color-muted); font-size: .76rem; font-weight: 500; white-space: nowrap; padding-right: 14px; }
+body.home-page .home-profile .id-card__details dd { color: var(--color-navy); font-size: .83rem; font-weight: 700; white-space: normal; overflow-wrap: anywhere; }
+body.home-page .home-profile .id-card__details > div:last-child dt,
+body.home-page .home-profile .id-card__details > div:last-child dd { border-bottom: 0; }
+body.home-page .home-profile .id-card__details dd a { color: var(--color-navy); text-decoration: underline; text-decoration-color: var(--color-gold); text-underline-offset: 3px; }
+body.home-page .home-profile .id-card__edit { top: 5px; right: 8px; bottom: auto; width: 30px; height: 30px; font-size: .9rem; }
+@media (max-width: 1100px) {
+  body.home-page .home-main--dash .home-profile { justify-self: stretch; max-width: none; }
+}
+@media (max-width: 420px) {
+  body.home-page .home-profile .id-card__body { grid-template-columns: 64px minmax(0, 1fr); column-gap: 10px; }
+  body.home-page .home-profile .id-card__photo { width: 64px; min-height: 96px; }
+  body.home-page .home-profile .id-card__details dt { font-size: .72rem; }
+}
+
+/* ---------- 7. Home: Explore card covers (heading never collides with number badge / menu) ---------- */
+body.home-page .home-main--dash .home-card__cover { padding: 14px 52px 12px 14px; display: flex; flex-direction: column; justify-content: flex-end; }
+body.home-page .home-main--dash .home-card__cover-copy { padding-right: 0; text-align: left; }
+body.home-page .home-main--dash .home-card__cover-copy span { white-space: normal; letter-spacing: .06em; }
+body.home-page .home-main--dash .home-card__icon { top: 12px; left: 14px; }
+body.home-page .home-main--dash .home-card__number { top: 12px; left: 54px; }
+
+/* ---------- 8. Forms: one control language (Add / Edit Module, Topic, Subtopic, Experiment, Tool, Resource) ---------- */
+.module-form label, .ef-field > label, .ef-field > span, .ef-shell label {
+  color: var(--color-navy); font-weight: 600;
+}
+.module-form input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.module-form select,
+.ef-shell input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.ef-shell select {
+  min-height: 44px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: #fff; color: var(--color-text);
+}
+.module-form textarea, .ef-shell textarea { border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: #fff; color: var(--color-text); }
+.module-form input::placeholder, .module-form textarea::placeholder, .ef-shell input::placeholder, .ef-shell textarea::placeholder { color: #94a3b8; }
+.module-form :is(input, textarea, select):focus, .ef-shell :is(input, textarea, select):focus {
+  border-color: var(--color-gold) !important; box-shadow: 0 0 0 3px rgba(214, 164, 59, .2) !important; outline: none;
+}
+.module-form__actions .btn--primary, .module-form__actions .mbtn:not(.mbtn--ghost), .ef-shell button[type="submit"] {
+  background: var(--color-navy) !important; border-color: var(--color-navy) !important; color: #fff !important;
+}
+.module-form__actions .btn:not(.btn--primary), .module-form__actions .mbtn--ghost {
+  background: #fff !important; border: 1px solid var(--color-border) !important; color: var(--color-navy) !important;
+}
+:focus-visible { outline: 2px solid var(--color-gold) !important; outline-offset: 2px; }
+
+/* ---------- 9. Empty states ---------- */
+.empty, .module-empty, .library-empty {
+  background: #fff !important; border: 1px dashed var(--card-border-hi) !important; border-radius: var(--radius-lg) !important; color: var(--color-muted);
+}
+
+/* ---------- 10. Accessibility ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+
+/* Home: keep the shared card border token in sync (home-royal.css scopes its own copy) */
+body.home-page { --card-border: rgba(214, 164, 59, .34); }
+.xp-hero h1, .exp-info__title { font-size: clamp(2rem, 1.5rem + 1.8vw, 2.9rem); }
+
+/* Modules hero: keep the sub-heading clear of the line drawing and the Add Module button */
+.mhero .mhero__sub { max-width: 36ch; }
+@media (max-width: 560px) { .mhero { --hero-art: none; } }
+
+
+/* =========================================================================
+   Home — Student Profile card, matched to the reference ID card
+   (window bar with three dots, gold-framed photo, label/value grid, books + cap)
+   ========================================================================= */
+body.home-page .home-main--dash .home-profile {
+  overflow: visible; max-width: 400px;
+  background: linear-gradient(180deg, #ffffff 0%, var(--color-light-blue) 100%);
+  border: 1px solid var(--color-gold); border-radius: var(--radius-md);
+  box-shadow: 0 0 0 5px rgba(214, 164, 59, .10), 0 14px 30px -14px rgba(16, 38, 75, .35);
+  margin-bottom: 22px;
+}
+body.home-page .home-profile .hero { background: transparent; border-bottom: 0; padding: 12px 46px 4px 16px; border-radius: var(--radius-md) var(--radius-md) 0 0; }
+body.home-page .home-profile .hero::before { width: 9px; height: 9px; margin-right: 28px; box-shadow: 15px 0 0 var(--color-navy), 30px 0 0 var(--color-blue); }
+body.home-page .home-profile .hero__heading { font: 700 1.08rem/1.2 var(--serif); color: var(--color-navy); }
+body.home-page .home-profile .id-card__body { padding: 8px 16px 16px; grid-template-columns: 88px minmax(0, 1fr); column-gap: 16px; }
+body.home-page .home-profile .id-card__photo { width: 88px; border: 2px solid var(--color-gold); border-radius: 6px; background: #fff; }
+body.home-page .home-profile .id-card__details dt,
+body.home-page .home-profile .id-card__details dd { border-bottom: 1px solid rgba(214, 164, 59, .28); }
+body.home-page .home-profile .id-card__details dd { font-weight: 600; }
+body.home-page .home-profile .id-card__details dd a { font-weight: 700; text-decoration-color: var(--color-navy); }
+body.home-page .home-profile .id-card__edit { background: rgba(255,255,255,.9); }
+/* decorative books + graduation cap, bottom-right corner, outside the text area */
+body.home-page .home-profile::after {
+  content: ""; position: absolute; right: -26px; bottom: -30px; width: 112px; height: 90px; pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='120' viewBox='0 0 150 120' fill='none'%3E%3Cellipse cx='78' cy='108' rx='66' ry='8' fill='%23d6a43b' fill-opacity='.35'/%3E%3Crect x='20' y='84' width='112' height='16' rx='3' fill='%2310264b'/%3E%3Crect x='20' y='84' width='112' height='3' fill='%23d6a43b'/%3E%3Crect x='34' y='68' width='98' height='16' rx='3' fill='%232f65a5'/%3E%3Crect x='34' y='68' width='98' height='3' fill='%23d6a43b'/%3E%3Crect x='28' y='52' width='92' height='16' rx='3' fill='%2310264b'/%3E%3Crect x='28' y='52' width='92' height='3' fill='%23d6a43b'/%3E%3Cpath d='M74 18 118 34 74 50 30 34Z' fill='%2310264b'/%3E%3Cpath d='M52 42v12c0 6 44 6 44 0V42L74 50Z' fill='%23082b65'/%3E%3Cpath d='M74 34 112 38v18' stroke='%23d6a43b' stroke-width='2'/%3E%3Ccircle cx='112' cy='58' r='3' fill='%23d6a43b'/%3E%3C/svg%3E") right bottom / contain no-repeat;
+}
+@media (max-width: 1100px) { body.home-page .home-main--dash .home-profile { max-width: none; } }
+@media (max-width: 560px) { body.home-page .home-profile::after { right: -8px; bottom: -22px; width: 84px; height: 68px; } }
+
+/* ID card refinements: rows stretch so hairlines align, link never wraps, text clears the corner artwork */
+body.home-page .home-main--dash .home-profile { max-width: 420px; }
+body.home-page .home-profile .id-card__details { align-items: stretch; }
+body.home-page .home-profile .id-card__details dd a { white-space: nowrap; }
+body.home-page .home-profile .id-card__body { padding-bottom: 30px; }
+body.home-page .home-profile::after { right: -34px; bottom: -40px; }
+@media (max-width: 560px) { body.home-page .home-profile::after { right: -10px; bottom: -30px; } body.home-page .home-profile .id-card__details dd a { white-space: normal; } }
+
+/* ID card on phones: photo on top, details use the full width */
+@media (max-width: 480px) {
+  body.home-page .home-profile .id-card__body { grid-template-columns: minmax(0, 1fr); row-gap: 12px; padding-bottom: 34px; }
+  body.home-page .home-profile .id-card__photo { width: 76px; height: 96px; min-height: 0; align-self: start; }
+  body.home-page .home-profile .id-card__details dd { overflow-wrap: break-word; word-break: normal; }
+}
+
+/* ID card photo: passport size (35:45), top-aligned, never stretched to the row height */
+body.home-page .home-profile .id-card__body { grid-template-columns: 76px minmax(0, 1fr); align-items: start; }
+body.home-page .home-profile .id-card__photo {
+  width: 76px; height: auto; min-height: 0; max-height: none; aspect-ratio: 35 / 45;
+  align-self: start; object-fit: cover; object-position: center top; border-width: 1.5px;
+}
+@media (max-width: 480px) {
+  body.home-page .home-profile .id-card__body { grid-template-columns: minmax(0, 1fr); }
+  body.home-page .home-profile .id-card__photo { width: 70px; height: auto; aspect-ratio: 35 / 45; }
+}
+
+/* ID card: no divider lines between rows */
+body.home-page .home-profile .id-card__details dt,
+body.home-page .home-profile .id-card__details dd,
+body.home-page .home-profile .id-card__details > div:last-child dt,
+body.home-page .home-profile .id-card__details > div:last-child dd { border-bottom: 0 !important; }
+
+/* ID card: photo vertically centred beside the details */
+body.home-page .home-profile .id-card__body { align-items: center; }
+body.home-page .home-profile .id-card__photo { align-self: center; }
+@media (max-width: 480px) {
+  body.home-page .home-profile .id-card__body { align-items: start; }
+  body.home-page .home-profile .id-card__photo { align-self: start; }
+}
+
+/* ID card: photo + all details together in ONE inner box under the "Student Profile" title bar */
+body.home-page .home-profile .id-card__body {
+  margin: 4px 16px 28px;
+  padding: 16px 18px !important;
+  background: #fff;
+  border: 1px solid rgba(214, 164, 59, .55);
+  border-radius: var(--radius-md);
+  box-shadow: 0 6px 16px -12px rgba(16, 38, 75, .35);
+  column-gap: 18px;
+}
+@media (max-width: 480px) {
+  body.home-page .home-profile .id-card__body { margin: 4px 12px 30px; padding: 14px !important; }
+}
+
+/* boxed ID card: a little more room so names / links stay on one line */
+body.home-page .home-main--dash .home-profile { max-width: 460px; }
+body.home-page .home-profile .id-card__body { margin-bottom: 36px; padding: 14px 16px !important; column-gap: 14px; }
+body.home-page .home-profile .id-card__details dt { padding-right: 10px; }
+@media (max-width: 1100px) { body.home-page .home-main--dash .home-profile { max-width: none; } }
+@media (max-width: 480px) { body.home-page .home-profile .id-card__body { margin-bottom: 34px; padding: 14px !important; } }
+
+/* Home → Explore cards: [symbol] [number] [Learn & Grow] on ONE line, title centred in the middle */
+body.home-page .home-main--dash .home-card__cover {
+  position: relative; display: flex; align-items: center; justify-content: center;
+  padding: 50px 16px 14px;
+}
+body.home-page .home-main--dash .home-card__icon { top: 12px; left: 12px; width: 30px; height: 30px; }
+body.home-page .home-main--dash .home-card__number { top: 12px; left: 48px; width: 30px; height: 30px; }
+body.home-page .home-main--dash .home-card__cover-copy { position: static; display: block; padding: 0; text-align: center; width: 100%; }
+body.home-page .home-main--dash .home-card__cover-copy span {
+  position: absolute; top: 12px; left: 86px; right: 50px; min-height: 30px;
+  display: flex; align-items: center; justify-content: flex-start; text-align: left;
+  font-size: .72rem; line-height: 1.15; letter-spacing: .03em; white-space: normal;
+}
+body.home-page .home-main--dash .home-card__cover-copy strong { display: block; text-align: center; margin: 0; }

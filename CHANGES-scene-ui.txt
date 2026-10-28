@@ -1,0 +1,21 @@
+SCENE + PREMIUM PASS (whish_ds)
+===============================
+New files
+  premium-final.css                final visual layer, linked LAST on all 12 pages (after unified.css)
+  assets/img/bg-scene.svg          full-page data-science background: laptop, books + cap, AI brain network,
+                                   human bust, bar/line/scatter/pie charts, database, code brackets
+  assets/img/hero-scene.svg        colour hero illustration: person at a laptop dashboard, AI network,
+                                   graph cards, magnifier, stacked books with graduation cap
+
+What changed (CSS only; no markup, ids, scripts, routes, auth or API code touched)
+  - Page background is now the visible scene (soft colour fills, gold accents), kept to the side edges
+  - Home / Experiments / Modules / Tools / Resources heroes show the colour illustration on the right
+  - Home hero: scene sits behind the Student Profile card with a white fade so the headline stays crisp
+  - Serif headings, gold diamond + hairline on section titles, frosted header
+  - Cards lift with a gold edge on hover; primary buttons get a navy gradient with a gold underline on hover
+  - Gentle entrance animation (off for prefers-reduced-motion); artwork scales down on tablet / phone
+To revert: remove the premium-final.css <link> line from the HTML pages.
+
+Follow-up (final audit)
+  - Resources page: centered empty state with a document icon and "No resources have been added yet." (CSS-only, appears only when the list has no cards)
+  - Audited all 12 pages at 390 / 768 / 1440 px: no horizontal overflow, no failed assets

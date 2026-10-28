@@ -1,0 +1,233 @@
+/* =========================================================================
+   DS Lab — BANNER BACKGROUND + CLEAR CARDS   (linked LAST on every page)
+   Visual only: no markup, ids, scripts, routes, auth or API behaviour touched.
+
+   1. Page background : assets/img/bg-page.jpg  = Pastel_Global_Learning_Technology_Banner
+                        (fixed behind every page, only a very light veil so it is clearly visible)
+   2. Cards           : crisp white "glass" panels with a white frame, so the artwork never
+                        shows through or fights with the text
+   3. Text            : darker, slightly larger, bolder titles / descriptions / labels
+   ========================================================================= */
+
+:root {
+  --bc-ink:    #071a3d;   /* titles                      */
+  --bc-text:   #263b61;   /* body / descriptions         */
+  --bc-muted:  #44577d;   /* small meta text (AA on white) */
+  --bc-gold:   #D6A43B;
+  --bc-gold-t: #7a5710;   /* gold TEXT (dark enough to read) */
+  --bc-edge:   #8ea5cc;
+  --bc-frame:  rgba(255, 255, 255, .70);
+  --bc-shadow: 0 10px 26px -10px rgba(16, 38, 75, .38), 0 2px 6px rgba(16, 38, 75, .10);
+  --bc-shadow-hover: 0 18px 34px -12px rgba(16, 38, 75, .46), 0 3px 8px rgba(16, 38, 75, .14);
+}
+
+/* ---------- 1. PAGE BACKGROUND: the supplied banner, fixed, lightly veiled ---------- */
+html::before {
+  background:
+    linear-gradient(rgba(255, 255, 255, .10), rgba(255, 255, 255, .10)),
+    #f3f8ff url("assets/img/bg-page.jpg") center bottom / cover no-repeat !important;
+  opacity: 1 !important;
+}
+@media (max-width: 900px) {
+  html::before {
+    background:
+      linear-gradient(rgba(255, 255, 255, .14), rgba(255, 255, 255, .14)),
+      #f3f8ff url("assets/img/bg-page.jpg") 22% bottom / cover no-repeat !important;
+  }
+}
+
+/* Headings that sit straight on the picture become small frosted labels */
+.home-section-title {
+  display: flex !important;
+  width: fit-content !important;
+  max-width: 100%;
+  align-items: center;
+  padding: 8px 20px 8px 16px !important;
+  background: rgba(255, 255, 255, .92);
+  border: 1.5px solid var(--bc-edge);
+  border-radius: 999px;
+  box-shadow: var(--bc-shadow);
+  color: var(--bc-ink) !important;
+  text-shadow: none !important;
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+}
+.home-section-title::after { display: none !important; }
+.xp-crumbs ol {
+  display: inline-flex; flex-wrap: wrap;
+  padding: 7px 16px !important;
+  background: rgba(255, 255, 255, .92);
+  border: 1.5px solid var(--bc-edge);
+  border-radius: 999px;
+  box-shadow: var(--bc-shadow);
+  text-shadow: none !important;
+}
+.xp-crumbs a, .xp-crumbs [aria-current] { text-shadow: none !important; color: var(--bc-ink); font-weight: 600; }
+.xp-lesson-title h1, .xp-page .xp-shell > h1 {
+  color: var(--bc-ink);
+  text-shadow: 0 0 4px #fff, 0 0 10px #fff, 0 0 18px #fff, 0 0 26px rgba(255, 255, 255, .9);
+}
+
+/* ---------- 2. CARDS: white glass panel + white frame + soft depth ---------- */
+.home-stats,
+.home-main--dash .home-card,
+.home-card,
+.exp-card,
+.mcard,
+.library-card,
+.xp-sub-card,
+.xp-topic-row,
+.home-mini,
+.home-tool,
+.mtopic,
+.exp-container .empty,
+.exp-info,
+.home-panel,
+.msb,
+.mlayout__side .msb {
+  background-color: rgba(255, 255, 255, .975) !important;
+  border: 1.5px solid var(--bc-edge) !important;
+  box-shadow: 0 0 0 4px var(--bc-frame), var(--bc-shadow) !important;
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.exp-card:hover, .mcard:hover, .library-card:hover, .home-main--dash .home-card:hover,
+.home-mini:hover, .home-tool:hover, .mtopic:hover, .xp-sub-card:hover, .xp-topic-row:hover {
+  transform: translateY(-3px);
+  border-color: var(--bc-gold) !important;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, .85), var(--bc-shadow-hover) !important;
+}
+/* inner mini cards sit inside a panel: lighter frame so it does not double up */
+.home-panel .home-mini, .home-panel .home-tool { box-shadow: 0 6px 14px -8px rgba(16, 38, 75, .35) !important; }
+.home-stat { border-right-color: rgba(142, 165, 204, .7) !important; }
+
+/* gold accent line on top of the listing cards (drawn on a pseudo-element that is not used elsewhere) */
+.exp-card, .mcard, .library-card { position: relative; }
+.exp-card:hover::after, .mcard:hover::after, .library-card:hover::after { content: none; }
+
+/* ---------- 3. TEXT inside cards: darker, larger, bolder ---------- */
+/* titles */
+.exp-card__title, .exp-card__title a,
+.mcard__title, .mcard__title a,
+.library-card__body h2, .home-card__body h2,
+.home-mini strong, .home-tool strong, .home-panel__head h3,
+.msb__title, .xp-sub-card h3, .xp-topic-row h3, .mtopic h3 {
+  color: var(--bc-ink) !important;
+  font-weight: 700 !important;
+  letter-spacing: -.005em;
+}
+.home-mini strong, .home-tool strong { font-size: 1.1rem !important; line-height: 1.25; }
+.home-panel__head h3 { font-size: 1.3rem !important; }
+
+/* descriptions */
+.exp-card__desc, .mcard__desc,
+.library-card__body p, .home-card__body p,
+.home-tool small, .home-mini small,
+.xp-sub-card p, .xp-topic-row p, .mtopic p {
+  color: var(--bc-text) !important;
+  font-size: 1rem !important;
+  line-height: 1.6 !important;
+  font-weight: 500;
+}
+.home-card__body .home-card__count { color: var(--bc-ink) !important; font-weight: 700; font-size: 1.02rem !important; }
+.home-tool small { font-size: .88rem !important; line-height: 1.45 !important; }
+.home-mini small { font-size: .9rem !important; font-weight: 600; color: var(--bc-muted) !important; }
+
+/* meta lines */
+.exp-card__number, .exp-card__meta, .exp-card__meta-item, .msb__count {
+  color: var(--bc-muted) !important;
+  font-size: .92rem !important;
+  font-weight: 600;
+}
+.exp-card__number { color: var(--bc-ink) !important; font-size: 1rem !important; font-weight: 700; }
+
+/* gold labels / pills: dark gold text on a warm tint */
+.home-card__cover-copy span, .home-tool__cat, .library-card__meta, .home-mini__badge,
+.library-card__cover span {
+  color: var(--bc-gold-t) !important;
+  font-weight: 700 !important;
+  letter-spacing: .05em;
+}
+.mcard__pill, .home-mini__badge {
+  background: #fbefcf !important;
+  color: var(--bc-gold-t) !important;
+  border: 1px solid #e6c56f;
+  font-weight: 700 !important;
+  font-size: .8rem !important;
+}
+.home-card__cover-copy span { font-size: .8rem !important; }
+.home-card__cover-copy strong { font-size: 1.7rem !important; }
+
+/* greyed "unavailable" actions were nearly invisible */
+.mcard__action.is-unavailable, .mcard__action.is-unavailable svg, .mcard__action.is-unavailable span {
+  color: #5f6f8f !important;
+  opacity: 1 !important;
+  font-weight: 600;
+}
+.mcard__action { font-size: .95rem !important; }
+
+/* stats strip */
+.home-stat__num { color: var(--bc-ink) !important; font-weight: 800; }
+.home-stat__label { color: var(--bc-ink) !important; font-size: 1rem !important; font-weight: 700; line-height: 1.25; }
+
+/* ghost line-art behind the home card titles was fighting the text */
+.home-card__art, .home-card__watermark { opacity: .22 !important; }
+.home-card:not(.library-card) > .home-card__cover {
+  background-image: linear-gradient(180deg, #eef5ff 0%, #dbe8fb 100%) !important;
+}
+
+/* buttons: a little more presence */
+.btn--primary, .mbtn--primary, .exp-card__readmore, .mcard__more, .home-card__link, .library-card__link {
+  font-weight: 700 !important;
+  box-shadow: 0 6px 14px -6px rgba(8, 43, 101, .55);
+}
+.library-card__link { color: #0b2a66 !important; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--bc-gold); }
+
+/* search / inputs */
+.exp-page input[type="search"], .exp-page .exp-search, .library-main input[type="search"],
+.library-main input[type="text"], .msb__search input {
+  background: rgba(255, 255, 255, .98) !important;
+  color: var(--bc-ink) !important;
+  font-weight: 500;
+  border: 1.5px solid var(--bc-edge) !important;
+  box-shadow: 0 6px 16px -10px rgba(16, 38, 75, .5);
+}
+input::placeholder { color: #55678b !important; opacity: 1 !important; }
+
+/* ---------- hero blocks: clearer text ---------- */
+body.home-page .home-intro__title, .exp-hero__title, .mhero h1, .module-intro h1 { color: var(--bc-ink) !important; }
+body.home-page .home-main--dash .home-intro .home-eyebrow,
+.meyebrow, .module-intro .home-eyebrow { color: #24437f !important; font-weight: 700 !important; }
+body.home-page .home-main--dash .home-intro .home-lead,
+.exp-hero__sub, .mhero__sub, .module-intro .home-lead {
+  color: var(--bc-text) !important;
+  font-weight: 500;
+}
+
+/* ID card details */
+body.home-page .home-profile .id-card__details dt { color: var(--bc-muted) !important; font-weight: 600; }
+body.home-page .home-profile .id-card__details dd { color: var(--bc-ink) !important; font-weight: 700; }
+
+/* ---------- mobile ---------- */
+@media (max-width: 760px) {
+  .exp-card__desc, .mcard__desc, .library-card__body p, .home-card__body p { font-size: .98rem !important; }
+  .home-section-title { font-size: 1.35rem !important; padding: 6px 16px 6px 12px !important; }
+  .home-stat__label { font-size: .95rem !important; }
+  .exp-card:hover, .mcard:hover, .library-card:hover, .home-card:hover { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .exp-card, .mcard, .library-card, .home-card, .home-mini, .home-tool { transition: none !important; }
+  .exp-card:hover, .mcard:hover, .library-card:hover, .home-card:hover { transform: none; }
+}
+@media print { .home-section-title, .xp-crumbs ol { box-shadow: none; } }
+
+/* ---------- spacing fixes after the larger text ---------- */
+.home-card__body p:not(.home-card__count) { margin-bottom: 16px !important; }
+.home-card__link { margin-top: 4px; }
+.home-mini__badge { display: inline-block; max-width: 100%; box-sizing: border-box; padding: 2px 8px; border-radius: 8px; white-space: normal; }
+
+/* library cards (tools / resources): keep their illustrated header, make the small gold category line readable */
+.library-card__body p.library-card__meta {
+  color: var(--bc-gold-t) !important; font-size: .82rem !important; font-weight: 700 !important;
+  letter-spacing: .06em; text-transform: uppercase; margin-bottom: 10px !important;
+}
+.library-card__cover { background-color: #eaf2ff; }
